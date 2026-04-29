@@ -1,20 +1,17 @@
 "use client"
-
-import Link from "next/link"
-import { useState } from "react"
-// import { FaGoogle, FaGithub } from "react-icons/fa"
-// import { Separator } from "@/components/ui/separator"
-// import { Button } from "@/components/ui/button"
+import { useRef, useState } from "react"
 import OAuthButtons from "@/customComponents/authComponenets/OAuthButtons"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { Separator } from "@/components/ui/separator"
 import SignupField from "@/customComponents/authComponenets/signupField"
+import PageLoader from "@/customComponents/loaders/pageLoader"
+import Link from "next/link"
+import { requestSigninOTP } from "@/utils/OTP/requestSigninOTP"
+import { v4 as uuidv4 } from "uuid"
+import OtpVerification from "@/customComponents/authComponenets/OTP"
 import { toast } from "sonner"
-import PageLoader from "@/loaders/pageLoader"
 
 export default function SignUpFormCompact() {
-  const router = useRouter()
+  let otp_id = useRef("")
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -22,12 +19,13 @@ export default function SignUpFormCompact() {
     confirmPassword: "",
   })
 
-  const [errors, setErrors] = useState({})
-  const [Loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState({
     password: false,
     confirmPassword: false,
   })
+  const [errors, setErrors] = useState({})
+  const [Loading, setLoading] = useState(false)
+  const [showOTP, setshowOTP] = useState(false)
 
   const fields = [
     { name: "fullName", label: "Full Name", type: "text", placeholder: "Abubakar" },
@@ -67,89 +65,91 @@ export default function SignUpFormCompact() {
     return Object.keys(newErrors).length === 0
   }
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form?.email || !form?.password) return
     if (!validate()) return
 
-    setLoading(true)
-
-    const res = await signIn("credentials", {
-      redirect: false,
-      name: form.fullName,
-      email: form.email,
-      password: form.password,
-      isSignUp: true,
-    })
-
-    setLoading(false)
-
-    if (res?.error) {
-      if (res.error === "CredentialsSignin") toast.error("Invalid email or password")
-      else toast.error("Invalid credentials")
-      return
+    try {
+      setLoading(true)
+      otp_id.current = uuidv4()
+      await requestSigninOTP(form?.email, otp_id.current)
+      setshowOTP(true)
+      setLoading(false)
+    } catch (error) {
+      setLoading(false)
+      setshowOTP(false)
+      toast.error(error.message || "Something went wrong")
     }
-
-    if (res.ok) router.push("/")
   }
 
   return (
     <>
       {Loading && <PageLoader />}
-      <div className="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-display px-4">
-        <div className="w-full max-w-md bg-white dark:bg-background-dark/50">
-          {/* Header */}
-          <div className="flex flex-col items-center mb-6">
-            <div className="bg-primary text-primary-foreground p-4 rounded-xl mb-4 text-2xl">🏏</div>
-            <h1 className="text-[32px] font-bold leading-tight text-primary">Cricket Scorer</h1>
-            <p className="text-sm leading-normal text-primary/60">Precision in every ball</p>
-          </div>
-
-          {/* Form */}
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-            {fields.map((field) => (
-              <SignupField
-                key={field.name}
-                name={field.name}
-                label={field.label}
-                type={field.type}
-                placeholder={field.placeholder}
-                value={form[field.name]}
-                error={errors[field.name]}
-                onChange={handleChange(field.name)}
-                onFocus={handleFocus(field.name)}
-                toggle={field.toggle}
-                showPassword={showPassword}
-                setShowPassword={setShowPassword}
-              />
-            ))}
-
-            {/* Submit */}
-            <button
-              type="submit"
-              className="mt-4 w-full h-12 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-all"
-            >
-              Create Account
-            </button>
-
-            <div className="w-full flex items-center gap-2">
-              <Separator className="flex-1" />
-              <span className="text-xs leading-normal text-primary/60">OR</span>
-              <Separator className="flex-1" />
+      {showOTP ? (
+        <OtpVerification
+          form={form}
+          otp_id={otp_id.current}
+          setshowOTP={setshowOTP}
+          resendOTP={requestSigninOTP}
+        />
+      ) : (
+        <div className="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-display p-6">
+          <div className="w-full max-w-md bg-white dark:bg-background-dark/50">
+            {/* Header */}
+            <div className="flex flex-col items-center mb-6">
+              <div className="bg-primary text-primary-foreground p-4 rounded-xl mb-4 text-2xl">🏏</div>
+              <h1 className="text-[32px] font-bold leading-tight text-primary">Cricket Scorer</h1>
+              <p className="text-sm leading-normal text-primary/60">Precision in every ball</p>
             </div>
 
-            <OAuthButtons setLoading={setLoading} />
-          </form>
+            {/* Form */}
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+              {fields.map((field) => (
+                <SignupField
+                  key={field.name}
+                  name={field.name}
+                  label={field.label}
+                  type={field.type}
+                  placeholder={field.placeholder}
+                  value={form[field.name]}
+                  error={errors[field.name]}
+                  onChange={handleChange(field.name)}
+                  onFocus={handleFocus(field.name)}
+                  toggle={field.toggle}
+                  showPassword={showPassword}
+                  setShowPassword={setShowPassword}
+                />
+              ))}
 
-          {/* Footer */}
-          <p className="mt-6 text-center text-sm text-primary/60 dark:text-white/60">
-            Already have an account?{" "}
-            <Link href="/auth/signin" className="text-primary font-bold hover:underline">
-              Log In
-            </Link>
-          </p>
+              {/* Submit */}
+              <button
+                type="submit"
+                className="mt-4 w-full h-12 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-all"
+              >
+                Create Account
+              </button>
+
+              <div className="w-full flex items-center gap-2">
+                <Separator className="flex-1" />
+                <span className="text-xs leading-normal text-primary/60">OR</span>
+                <Separator className="flex-1" />
+              </div>
+
+              <OAuthButtons setLoading={setLoading} />
+            </form>
+
+            {/* Footer */}
+            <p className="mt-6 text-center text-sm text-primary/60 dark:text-white/60">
+              Already have an account?{" "}
+              <Link href="/auth/signin" className="text-primary font-bold hover:underline">
+                Log In
+              </Link>
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </>
   )
 }

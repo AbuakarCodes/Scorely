@@ -17,8 +17,8 @@ export default function SignupField({
       <label className="text-sm font-semibold text-primary/80 dark:text-white/80">{label}</label>
       <div className="relative">
         <input
-          autoComplete={true}
-          required={true}
+          autoComplete="true"
+          required="true"
           type={type}
           placeholder={placeholder}
           value={value}

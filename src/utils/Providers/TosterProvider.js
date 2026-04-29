@@ -11,5 +11,4 @@ export default function ToasterProvider() {
       closeButton
       duration={4000}
     />
-  )
-}
+  )}

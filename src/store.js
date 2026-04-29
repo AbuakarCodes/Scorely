@@ -1,9 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit"
-
-const dummyReducer = (state = {}) => state
+import settingsSclice from "./utils/reduxSclices/settingsSclice"
 
 export const store = configureStore({
   reducer: {
-    abc: dummyReducer,
+    settings: settingsSclice,
   },
 })

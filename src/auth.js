@@ -3,7 +3,7 @@ import GoogleProvider from "next-auth/providers/google"
 import GitHubProvider from "next-auth/providers/github"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { connectDB } from "./lib/db"
-import User from "@/models/users/user.js"
+import User from "../src/Server/models/user.js"
 import bcrypt from "bcrypt"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -25,66 +25,97 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" }
       },
 
-
       async authorize(credentials) {
         await connectDB()
         const user = await User.findOne({ email: credentials.email })
 
         if (credentials.isSignUp) {
-          if (user) return
+          if (user) return null
 
           const hashedPassword = await bcrypt.hash(credentials.password, 10)
           const newUser = await User.create({
             name: credentials.name,
             email: credentials.email,
             password: hashedPassword,
-            image: null
+            avatar: null
           })
+
           return newUser
         }
 
-        // login flow
-        if (!user) return
+        if (!user) return null
 
         const valid = await bcrypt.compare(credentials.password, user.password)
-        if (!valid) return
+        if (!valid) return null
 
         return user
       }
-
-
     })
   ],
 
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider != "credentials") {
-        await connectDB()
+      await connectDB()
+
+      if (account?.provider !== "credentials") {
         const existingUser = await User.findOne({ email: user.email })
+
         if (!existingUser) {
-          try {
-            await User.create({
-              name: user.name,
-              email: user.email,
-              image: user.image
-            })
-          } catch (error) {
-            console.log("Failed to create user:", err?.message || "Error in OAuth callback while creating user")
-            return false
-          }
+          await User.create({
+            name: user.name,
+            email: user.email,
+            avatar: user.image || null
+          })
         }
       }
+
       return true
     },
 
-    async session({ session, token }) {
+    async jwt({ token, user }) {
+      if (user) {
+        const dbUser = await User.findOne({ email: user.email })
+
+        if (dbUser) {
+          token._id = dbUser._id.toString()
+          token.name = dbUser.name
+          token.email = dbUser.email
+          token.avatar = dbUser.avatar
+        }
+      } else {
+        await connectDB()
+        const existingUser = await User.findById(token._id)
+
+        if (!existingUser) {
+          token._id = null
+          token.invalid = true
+        }
+      }
+
+      return token
+    },
+
+    async session({ token, session }) {
+      if (!token?._id || token.invalid) return null
+
+      await connectDB()
+      const dbUser = await User.findById(token._id)
+
+      if (!dbUser) return null
+
+      session.user.id = dbUser._id.toString()
+      session.user.name = dbUser.name
+      session.user.email = dbUser.email
+      session.user.image = dbUser.avatar
+
+      
+
       return session
     }
   },
 
-  pages:{
+  pages: {
     signIn: "/auth/signin",
-    signUp: "/auth/signup",
+    signUp: "/auth/signup"
   }
-
 })

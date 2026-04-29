@@ -5,13 +5,13 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { signIn } from "next-auth/react"
+import { getSession, signIn } from "next-auth/react"
 import Link from "next/link"
 import OAuthButtons from "@/customComponents/authComponenets/OAuthButtons"
 import { useRouter } from "next/navigation"
 import SigninField from "@/customComponents/authComponenets/signinField"
 import { toast } from "sonner"
-import PageLoader from "@/loaders/pageLoader"
+import PageLoader from "@/customComponents/loaders/pageLoader" 
 
 export default function SignInFormCompact() {
   const [formData, setFormData] = useState({ email: "", password: "" })
@@ -82,7 +82,11 @@ export default function SignInFormCompact() {
         return
       }
 
-      if (res.ok) router.push("/")
+      if (res.ok) {
+        await getSession()
+        router.replace("/")
+        router.refresh()
+      }
     } catch (err) {
       alert("Network or server error")
     } finally {

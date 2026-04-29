@@ -17,8 +17,8 @@ export default function SigninField({
       <label className="text-sm font-semibold text-primary/80 dark:text-white/80">{label}</label>
       <div className="relative">
         <input
-          autoComplete={true}
-          required={true}
+          autoComplete="true"
+          required="true"
           type={toggle ? (showPassword[toggle] ? "text" : "password") : type}
           name={name}
           placeholder={placeholder}

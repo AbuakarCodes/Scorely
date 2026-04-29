@@ -1,7 +1,6 @@
 import { FaGoogle, FaGithub } from "react-icons/fa"
 import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Separator } from "radix-ui"
 
 const providers = [
   {
@@ -18,7 +17,7 @@ const providers = [
 
 export default function OAuthButtons({ setLoading }) {
   const handel_oAuth = (e) => {
-    const providerId = e.target.id
+    const providerId = e.currentTarget.id
     setLoading(true)
     signIn(providerId, { callbackUrl: "/" })
     // Since this is a synchronous function, setting the state to false here

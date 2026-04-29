@@ -173,7 +173,7 @@ export default function Home() {
         </section>
 
         {/* Stats */}
-        <section className="mt-8 px-4 mb-8">
+        {/* <section className="mt-8 px-4 mb-8">
 
           <h3 className="text-lg font-bold mb-4">
             Stats at a glance
@@ -201,7 +201,7 @@ export default function Home() {
 
           </div>
 
-        </section>
+        </section> */}
 
       </main>
 
