@@ -53,7 +53,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
 
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 24 * 60 * 60,
+    updateAge: 0 
+  },
+
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Normalize legacy/mis-cased signin redirects in production.
+      if (url === "/Signin" || url === "/signin") {
+        return `${baseUrl}/auth/signin`
+      }
+      if (url === "/Signout" || url === "/signout") {
+        return `${baseUrl}/Signout`
+      }
+
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      if (new URL(url).origin === baseUrl) return url
+      return baseUrl
+    },
+
     async signIn({ user, account }) {
       await connectDB()
 
@@ -74,6 +94,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     async jwt({ token, user }) {
       if (user) {
+         await connectDB()
         const dbUser = await User.findOne({ email: user.email })
 
         if (dbUser) {
@@ -96,19 +117,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     async session({ token, session }) {
-      if (!token?._id || token.invalid) return null
+      if (!token?._id || token.invalid) {
+        return { ...session, user: null, expires: new Date(0).toISOString() }
+      }
 
       await connectDB()
       const dbUser = await User.findById(token._id)
 
-      if (!dbUser) return null
+      if (!dbUser) {
+        return { ...session, user: null, expires: new Date(0).toISOString() }
+      }
 
       session.user.id = dbUser._id.toString()
       session.user.name = dbUser.name
       session.user.email = dbUser.email
       session.user.image = dbUser.avatar
 
-      
+
 
       return session
     }

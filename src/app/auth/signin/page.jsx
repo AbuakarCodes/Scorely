@@ -76,6 +76,9 @@ export default function SignInFormCompact() {
         password: formData.password,
       })
 
+      console.log({res})
+      console.log(res.error)
+
       if (res?.error) {
         if (res.error === "CredentialsSignin") toast.error("Invalid email or password")
         else toast.error("Invalid credentials")

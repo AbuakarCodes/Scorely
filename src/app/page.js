@@ -21,7 +21,8 @@ console.log(session)
     return <PageLoader />
   }
 
-  if (status === "unauthenticated") {
+  if (status === "unauthenticated") { 
+    
     return null
   }
 
