@@ -5,12 +5,15 @@ import { User, Hash, Trophy, Camera, ArrowLeft } from "lucide-react"
 import Page from "@/app/page"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import ImageUpload from "@/customComponents/BasicComponents/ImageUpload"
-import { addPlayer_APIcall } from "./addPlayer_APIcall"
+import { RegesterPlayer_APIcall } from "./RegesterPlayer_APIcall" 
 import { useSession } from "next-auth/react"
+import { toast } from "sonner"
+import { updateAvatar } from "@/utils/Basic/updateAvatar_Api"
 
-export default function AddPlayerForm() {
+export default function RegesterPlayerForm() {
   const avatarURL = useRef(null)
   const { data: session, status } = useSession()
+
   const [form, setForm] = useState({
     name: "",
     jersey: "",
@@ -45,32 +48,37 @@ export default function AddPlayerForm() {
     e.preventDefault()
     if (!validate()) return
 
+    if (status === "unauthenticated") {
+      toast.error("Please login to add a player")
+      return null
+    }
+
     try {
-      
       setLoder(true)
-      const response = await addPlayer_APIcall({
+      const res = await RegesterPlayer_APIcall({
         name: form.name,
         jersey: form.jersey,
         role: form.role,
         userId: session?.user?.id || null,
         avatarURL: avatarURL?.current || null,
-        teamId: null
+        teamId: null,
       })
-      if (!response.avatarURL) {
-        // another api call with userid, _id and avatar link  
-      }
-      console.log(response)
       setLoder(false)
+
+      if (!res?.data?.avatar) {
+        const imageResponse = await updateAvatar(res.data?._id, avatarURL?.current, "player")
+      }
     } catch (error) {
-      
-    }finally{
+      toast.error("Failed to create player")
+      console.log(error?.message || "Failed to create player")
+    } finally {
       setLoder(false)
     }
   }
 
   return (
     <>
-      {Loder && <PageLoader></PageLoader>}
+      {Loder || (status === "loading" && <PageLoader></PageLoader>)}
       <div className="min-h-screen bg-background-light flex justify-center items-center">
         <div className="w-full max-w-md bg-white pb-3.5 shadow-xl flex flex-col">
           {/* Header */}

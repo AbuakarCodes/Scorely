@@ -35,8 +35,8 @@ export async function POST(req) {
       playerData.teamId = teamId
     }
 
-    const player = await Player.create(playerData)
-
+    const player = await Player.create(playerData) 
+  
     return Response.json(
       new SuccessResponse("Player created successfully", player),
       { status: 201 }

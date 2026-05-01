@@ -15,20 +15,15 @@ export default function ImageUpload({ avatarURL, h = 28, w = 28, user_icon = 40,
 
   const handleChange = async (e) => {
     const file = e.target.files[0]
-    if (!file) return 
+    if (!file) return
 
-     // preview
+    // preview
     setPreview(URL.createObjectURL(file))
 
     // cloudinary upload
     const cloudinary_URL = await uploadImageToCloudinary(file)
-    console.log({cloudinary_URL})
 
     avatarURL.current = cloudinary_URL
-    console.log(avatarURL.current)
-
-
-
   }
 
   return (
@@ -36,7 +31,10 @@ export default function ImageUpload({ avatarURL, h = 28, w = 28, user_icon = 40,
       <input type="file" accept="image/*" ref={fileRef} onChange={handleChange} hidden />
 
       <div className="relative cursor-pointer" onClick={handleClick}>
-        <div className={`w-${w} h-${h} rounded-full bg-primary/10 overflow-hidden flex items-center justify-center`}>
+        <div
+          style={{ width: `${w * 4}px`, height: `${h * 4}px` }}
+          className="rounded-full bg-primary/10 overflow-hidden flex items-center justify-center"
+        >
           {preview ? (
             <img src={preview} className="w-full h-full object-cover" />
           ) : (

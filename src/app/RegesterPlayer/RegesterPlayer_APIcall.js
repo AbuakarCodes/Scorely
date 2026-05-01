@@ -2,7 +2,7 @@
 
 import axios from "axios"
 
-export const addPlayer_APIcall = async ({
+export const RegesterPlayer_APIcall = async ({
   name,
   jersey,
   role,
@@ -10,15 +10,6 @@ export const addPlayer_APIcall = async ({
   avatarURL ,
   teamId = null,
 }) => {
-
-
-console.log( name,
-  jersey,
-  role,
-  userId,
-  avatarURL ,
-  teamId = null,)
-
 
 
 
