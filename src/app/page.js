@@ -16,7 +16,7 @@ export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
-  console.log(session)
+ 
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/auth/signin")
@@ -100,39 +100,7 @@ export default function Home() {
           </Card>
         </section>
 
-        {/* Resume Match */}
-        <section className="px-4 py-2">
 
-          <Card className="p-4 flex items-center gap-4 border border-primary/10">
-
-            <div className="relative">
-              <div className="size-12 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-primary">
-                <span className="material-symbols-outlined">timer</span>
-              </div>
-
-              <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-              </span>
-            </div>
-
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-red-500 uppercase">
-                  Live Now
-                </span>
-                <span className="text-slate-400 text-[10px]">•</span>
-                <p className="text-xs text-slate-500">Overs</p>
-              </div>
-            </div>
-
-            <Button variant="secondary">
-              Resume
-            </Button>
-
-          </Card>
-
-        </section>
 
         {/* Players */}
         <AddPlayers></AddPlayers>

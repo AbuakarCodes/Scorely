@@ -4,9 +4,9 @@ import { useRef, useState } from "react"
 import { User, Camera } from "lucide-react"
 import { uploadImageToCloudinary } from "@/utils/Basic/cloudinaryUplode_client"
 
-export default function ImageUpload({ avatarURL, h = 28, w = 28, user_icon = 40, camera_icon = 16 }) {
+export default function ImageUpload({preview,setPreview, avatarURL, h = 28, w = 28, user_icon = 40, camera_icon = 16 }) {
   const fileRef = useRef(null)
-  const [preview, setPreview] = useState(null)
+
   const [uploadedUrl, setUploadedUrl] = useState("")
 
   const handleClick = () => {

@@ -32,7 +32,7 @@ export const RegesterPlayer_APIcall = async ({
       payload.teamId = teamId
     }
 
-    const { data } = await axios.post("/api/addPlayers", payload)
+    const { data } = await axios.post("/api/Players/addPlayers", payload)
 
     return data
   } catch (error) {

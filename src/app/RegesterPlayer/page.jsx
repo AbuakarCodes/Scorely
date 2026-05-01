@@ -5,14 +5,18 @@ import { User, Hash, Trophy, Camera, ArrowLeft } from "lucide-react"
 import Page from "@/app/page"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import ImageUpload from "@/customComponents/BasicComponents/ImageUpload"
-import { RegesterPlayer_APIcall } from "./RegesterPlayer_APIcall" 
+import { RegesterPlayer_APIcall } from "./RegesterPlayer_APIcall"
 import { useSession } from "next-auth/react"
 import { toast } from "sonner"
 import { updateAvatar } from "@/utils/Basic/updateAvatar_Api"
+import { useDispatch } from "react-redux"
+import { insertPlayer } from "@/utils/reduxSclices/playerSlice"
+import Link from "next/link"
 
 export default function RegesterPlayerForm() {
   const avatarURL = useRef(null)
   const { data: session, status } = useSession()
+  const dispatch = useDispatch()
 
   const [form, setForm] = useState({
     name: "",
@@ -22,6 +26,7 @@ export default function RegesterPlayerForm() {
 
   const [errors, setErrors] = useState({})
   const [Loder, setLoder] = useState(false)
+  const [preview, setPreview] = useState(null)
 
   const validate = () => {
     const newErrors = {}
@@ -53,8 +58,9 @@ export default function RegesterPlayerForm() {
       return null
     }
 
+    setLoder(true)
+
     try {
-      setLoder(true)
       const res = await RegesterPlayer_APIcall({
         name: form.name,
         jersey: form.jersey,
@@ -63,11 +69,17 @@ export default function RegesterPlayerForm() {
         avatarURL: avatarURL?.current || null,
         teamId: null,
       })
-      setLoder(false)
 
-      if (!res?.data?.avatar) {
-        const imageResponse = await updateAvatar(res.data?._id, avatarURL?.current, "player")
-      }
+      dispatch(insertPlayer(res?.data || {}))
+
+      setPreview(null)
+      setForm({
+        name: "",
+        jersey: "",
+        role: "",
+      })
+
+      console.log(res.data)
     } catch (error) {
       toast.error("Failed to create player")
       console.log(error?.message || "Failed to create player")
@@ -83,14 +95,14 @@ export default function RegesterPlayerForm() {
         <div className="w-full max-w-md bg-white pb-3.5 shadow-xl flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
-            <ArrowLeft className="text-primary cursor-pointer" />
+          <Link href="/">  <ArrowLeft className="text-primary cursor-pointer" /></Link>
             <h2 className="font-bold text-lg text-primary">Add New Player</h2>
             <div />
           </div>
 
           {/* Profile Upload */}
 
-          <ImageUpload avatarURL={avatarURL}></ImageUpload>
+          <ImageUpload preview={preview} setPreview={setPreview} avatarURL={avatarURL}></ImageUpload>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-6 space-y-5">
@@ -102,7 +114,7 @@ export default function RegesterPlayerForm() {
                 <input
                   type="text"
                   className="w-full h-12 pl-10 pr-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="Babar Azam"
+                  placeholder="e.g. Abubakar"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
@@ -118,7 +130,7 @@ export default function RegesterPlayerForm() {
                 <input
                   type="number"
                   className="w-full h-12 pl-10 pr-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="18"
+                  placeholder="e.g. 18"
                   value={form.jersey}
                   onChange={(e) => setForm({ ...form, jersey: e.target.value })}
                 />

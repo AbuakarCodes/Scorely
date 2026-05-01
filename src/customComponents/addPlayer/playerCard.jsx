@@ -10,13 +10,13 @@ export function PlayerCard({
   team,
   rank,
   inSquad,
-  variant = "compact", // "compact" | "detailed"
+  variant = "compact",
   onAction,
 }) {
   // COMPACT (grid / add page)
   if (variant === "compact") {
     return (
-      <div className="min-w-[160px] aspect-square flex flex-col items-center justify-center rounded-xl border border-muted bg-background p-4 text-center hover:shadow-md transition">
+      <div className="min-w-[160px]  border-2 border-dashed border-black/10 aspect-square flex flex-col items-center justify-center  rounded-lg   bg-background p-4 text-center hover:shadow-md transition">
         <div className="w-16 h-16 rounded-full overflow-hidden mb-3 ring-2 ring-primary/10">
           <img src={image} alt={name} width={64} height={64} className="object-cover w-full h-full" />
         </div>
@@ -27,7 +27,7 @@ export function PlayerCard({
 
         <Button
           size="sm"
-          className="w-full text-xs"
+          className="w-full text-xs text-white"
           onClick={(e) => {
             e.stopPropagation()
             e.preventDefault()
