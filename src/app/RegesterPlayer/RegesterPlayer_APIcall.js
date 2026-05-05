@@ -4,7 +4,6 @@ import axios from "axios"
 
 export const RegesterPlayer_APIcall = async ({
   name,
-  jersey,
   role,
   userId,
   avatarURL ,
@@ -15,14 +14,13 @@ export const RegesterPlayer_APIcall = async ({
 
   try {
     // basic validation (frontend-level)
-    if (!name || !jersey || !role || !userId) {
+    if (!name || !role || !userId) {
       throw new Error("Missing required fields")
     }
 
     const payload = {
       userId,
       name: name.trim(),
-      jerseyNumber: Number(jersey),
       role,
       avatar: avatarURL || null,
     }

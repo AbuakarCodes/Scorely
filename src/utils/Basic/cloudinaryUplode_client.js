@@ -12,6 +12,5 @@ export const uploadImageToCloudinary = async (file) => {
     "https://api.cloudinary.com/v1_1/dtrrzyutr/image/upload",
     formData
   )
-console.log("FORM FN DONE")
   return data.secure_url
 }

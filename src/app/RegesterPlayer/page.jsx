@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { User, Hash, Trophy, Camera, ArrowLeft } from "lucide-react"
+import { User, Trophy, Camera, ArrowLeft } from "lucide-react"
 import Page from "@/app/page"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import ImageUpload from "@/customComponents/BasicComponents/ImageUpload"
@@ -20,7 +20,6 @@ export default function RegesterPlayerForm() {
 
   const [form, setForm] = useState({
     name: "",
-    jersey: "",
     role: "",
   })
 
@@ -33,12 +32,6 @@ export default function RegesterPlayerForm() {
 
     if (!form.name.trim()) {
       newErrors.name = "Name is required"
-    }
-
-    if (!form.jersey) {
-      newErrors.jersey = "Jersey number is required"
-    } else if (form.jersey < 0) {
-      newErrors.jersey = "Must be a valid number"
     }
 
     if (!form.role) {
@@ -63,7 +56,6 @@ export default function RegesterPlayerForm() {
     try {
       const res = await RegesterPlayer_APIcall({
         name: form.name,
-        jersey: form.jersey,
         role: form.role,
         userId: session?.user?.id || null,
         avatarURL: avatarURL?.current || null,
@@ -75,11 +67,10 @@ export default function RegesterPlayerForm() {
       setPreview(null)
       setForm({
         name: "",
-        jersey: "",
         role: "",
       })
 
-      console.log(res.data)
+
     } catch (error) {
       toast.error("Failed to create player")
       console.log(error?.message || "Failed to create player")
@@ -95,14 +86,15 @@ export default function RegesterPlayerForm() {
         <div className="w-full max-w-md bg-white pb-3.5 shadow-xl flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
-          <Link href="/">  <ArrowLeft className="text-primary cursor-pointer" /></Link>
+            <Link href="/">  
+              <ArrowLeft className="text-primary cursor-pointer" />
+            </Link>
             <h2 className="font-bold text-lg text-primary">Add New Player</h2>
             <div />
           </div>
 
           {/* Profile Upload */}
-
-          <ImageUpload preview={preview} setPreview={setPreview} avatarURL={avatarURL}></ImageUpload>
+          <ImageUpload preview={preview} setPreview={setPreview} avatarURL={avatarURL} />
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-6 space-y-5">
@@ -120,22 +112,6 @@ export default function RegesterPlayerForm() {
                 />
               </div>
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-            </div>
-
-            {/* Jersey */}
-            <div>
-              <label className="text-sm font-semibold">Jersey Number</label>
-              <div className="relative mt-1">
-                <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
-                <input
-                  type="number"
-                  className="w-full h-12 pl-10 pr-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="e.g. 18"
-                  value={form.jersey}
-                  onChange={(e) => setForm({ ...form, jersey: e.target.value })}
-                />
-              </div>
-              {errors.jersey && <p className="text-red-500 text-xs mt-1">{errors.jersey}</p>}
             </div>
 
             {/* Role */}

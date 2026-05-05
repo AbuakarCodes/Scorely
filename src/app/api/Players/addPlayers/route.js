@@ -21,9 +21,10 @@ export async function POST(req) {
 
     const body = await req.json()
 
-    const { userId, name, jerseyNumber, role, teamId, avatar } = body
+    const { userId, name, role, teamId, avatar } = body
+    console.log( { userId, name, role, teamId, avatar } )
 
-    if (!userId || !name || !jerseyNumber || !role) {
+    if (!userId || !name || !role) {
       return Response.json(
         new ErrorResponse("Missing required fields"),
         { status: 400 }
@@ -33,7 +34,6 @@ export async function POST(req) {
     const playerData = {
       userId,
       name,
-      jerseyNumber,
       role,
       avatar: avatar || "",
       isActive: false,
@@ -50,7 +50,7 @@ export async function POST(req) {
       { status: 201 }
     )
   } catch (error) {
-    console.error(error)
+    console.log(error?.message || "Server error while creating player")
 
     return Response.json(
       new ErrorResponse("Server error while creating player"),

@@ -17,8 +17,11 @@ const playerSchema = new mongoose.Schema(
 
     jerseyNumber: {
       type: Number,
-      required: true,
+      required: function () {
+        return !!this.teamId
+      }
     },
+
 
     role: {
       type: String,

@@ -3,6 +3,7 @@ import { PlayerCard } from "@/customComponents/addPlayer/playerCard"
 import Link from "next/link"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchPlayers } from "@/utils/reduxSclices/playerSlice"
+import { PlayerCardSkeleton } from "../loaders/PlayerCardSkeleton"
 
 export function AddPlayers() {
   const dispatch = useDispatch()
@@ -37,23 +38,32 @@ export function AddPlayers() {
           </Link>
 
           <div className=" w-full flex items-center-center overflow-x-auto no-scrollbar gap-x-1">
-            {players.map((player) => (
-              <Link
-                key={player._id}
-                href={`/players/${player._id}`} // dynamic route
-                className="flex overflow-x-auto gap-x-1 shrink-0 border  "
-              >
-                <PlayerCard
-                  variant="compact"
-                  name={player.name}
-                  role={player.role}
-                  image={player.avatar || "https://res.cloudinary.com/dtrrzyutr/image/upload/fl_preserve_transparency/v1777660543/playres_default_profile_o205zq.jpg?_s=public-apps"}
-                  onAction={() => {
-                    console.log("add", player._id)
-                  }}
-                />
-              </Link>
-            ))}
+            {loading
+              ? Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex overflow-x-auto gap-x-1 shrink-0">
+                    <PlayerCardSkeleton variant="compact" />
+                  </div>
+                ))
+              : players.map((player) => (
+                  <Link
+                    key={player._id}
+                    href={`/players/${player._id}`}
+                    className="flex overflow-x-auto gap-x-1 shrink-0 border"
+                  >
+                    <PlayerCard
+                      variant="compact"
+                      name={player.name}
+                      role={player.role}
+                      image={
+                        player.avatar ||
+                        "https://res.cloudinary.com/dtrrzyutr/image/upload/fl_preserve_transparency/v1777660543/playres_default_profile_o205zq.jpg?_s=public-apps"
+                      }
+                      onAction={() => {
+                        console.log("add", player._id)
+                      }}
+                    />
+                  </Link>
+                ))}
           </div>
         </div>
       </section>
