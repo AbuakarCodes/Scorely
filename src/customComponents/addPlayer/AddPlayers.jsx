@@ -4,6 +4,8 @@ import Link from "next/link"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchPlayers } from "@/utils/reduxSclices/playerSlice"
 import { PlayerCardSkeleton } from "../loaders/PlayerCardSkeleton"
+import { Plus, User } from "lucide-react"
+import { AddCard } from "../BasicComponents/addCardButton"
 
 export function AddPlayers() {
   const dispatch = useDispatch()
@@ -26,16 +28,7 @@ export function AddPlayers() {
         </div>
 
         <div className="px-4 flex gap-x-4 ">
-          <Link
-            href="/RegesterPlayer"
-            className="min-w-[160px]  flex flex-col items-center justify-center aspect-square border-2 border-dashed border-primary/20 rounded-xl bg-primary/5 hover:bg-primary/10 cursor-pointer"
-          >
-            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
-              <span className="material-symbols-outlined">group_add</span>
-            </div>
-
-            <p className="text-sm font-medium text-primary">Add Player</p>
-          </Link>
+          <AddCard href="/RegesterPlayer" text="Add Player" />
 
           <div className=" w-full flex items-center-center overflow-x-auto no-scrollbar gap-x-1">
             {loading

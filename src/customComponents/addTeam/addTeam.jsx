@@ -7,6 +7,8 @@ import { fetchTeams } from "@/utils/reduxSclices/teamSlice"
 import { TeamCard } from "./teamCard"
 import { PlayerCardSkeleton } from "../loaders/PlayerCardSkeleton"
 import { defaultImage } from "@/utils/Basic/constant"
+import { Plus } from "lucide-react"
+import { AddCard } from "../BasicComponents/addCardButton"
 
 export function AddTeams() {
   const dispatch = useDispatch()
@@ -14,7 +16,7 @@ export function AddTeams() {
 
   useEffect(() => {
     if (teams.length === 0) dispatch(fetchTeams())
-  }, [dispatch, teams.length])
+  }, [])
 
   return (
     <section className="mt-6">
@@ -28,16 +30,7 @@ export function AddTeams() {
 
       <div className="px-4 flex gap-x-4">
         {/* Add Team Card */}
-        <Link
-          href="/RegisterTeam"
-          className="min-w-[160px] flex flex-col items-center justify-center aspect-square border-2 border-dashed border-primary/20 rounded-xl bg-primary/5 hover:bg-primary/10 cursor-pointer"
-        >
-          <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
-            <span className="material-symbols-outlined">groups</span>
-          </div>
-
-          <p className="text-sm font-medium text-primary">Add Team</p>
-        </Link>
+        <AddCard href="/RegisterTeam" text={"Add Team"} />
 
         {/* Teams List */}
         <div className="w-full flex overflow-x-auto no-scrollbar gap-x-2">
