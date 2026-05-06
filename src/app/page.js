@@ -2,13 +2,12 @@
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import PageLoader from "@/customComponents/loaders/pageLoader"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation";
 import { useEffect } from "react"
-import { PlayerCard } from "../customComponents/addPlayer/playerCard"
 import { AddPlayers } from "@/customComponents/addPlayer/AddPlayers"
+import { AddTeams } from "@/customComponents/addTeam/addTeam"
 
 
 export default function Home() {
@@ -101,6 +100,9 @@ export default function Home() {
 
           {/* Players */}
           <AddPlayers></AddPlayers>
+          <AddTeams></AddTeams>
+
+
 
           {/* Empty History */}
           <section className="mt-8 px-4">

@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { fetchPlayers } from "@/utils/reduxSclices/playerSlice"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import { PlayerCardSkeleton } from "@/customComponents/loaders/PlayerCardSkeleton"
+import { defaultImage } from "@/utils/Basic/constant"
 
 export default function PlayersBackground() {
   const dispatch = useDispatch()
@@ -20,12 +21,14 @@ export default function PlayersBackground() {
   // Fetch players
   useEffect(() => {
     if (players.length === 0) dispatch(fetchPlayers())
-  }, [])
+  }, [players])
 
   // Sync redux → local
   useEffect(() => {
     setLocalPlayers(players)
   }, [players])
+
+  // console.log(players)
 
   // Filter + Search handler
   const applyFilters = (filter, search = searchTermInput) => {
@@ -38,7 +41,7 @@ export default function PlayersBackground() {
       filtered = filtered.filter((p) => p.role === f)
     } else if (f === "in squad") {
       filtered = filtered.filter((p) => p.teamId)
-    } else if (f === "free") {
+    } else if (f === "un caped") {
       filtered = filtered.filter((p) => !p.teamId)
     }
 
@@ -64,8 +67,6 @@ export default function PlayersBackground() {
 
   return (
     <>
-    
-
       <div className="min-h-screen bg-surface text-black">
         <Header
           searchTermInput={searchTermInput}
@@ -85,11 +86,8 @@ export default function PlayersBackground() {
                   variant="detailed"
                   name={player.name}
                   role={player.role}
-                  image={
-                    player.avatar ||
-                    "https://res.cloudinary.com/dtrrzyutr/image/upload/fl_preserve_transparency/v1777660543/playres_default_profile_o205zq.jpg?_s=public-apps"
-                  }
-                  team={player.teamId || "Un Caped"}
+                  image={player.avatar || defaultImage}
+                  team={player?.currentTeam || "Un Caped"}
                   rank={null}
                   inSquad={Boolean(player.teamId)}
                   onAction={() => console.log("view", player._id)}

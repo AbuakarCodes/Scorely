@@ -5,27 +5,18 @@ import "react-loading-skeleton/dist/skeleton.css"
 
 export function PlayerCardSkeleton({ variant = "compact" }) {
 
-  // ======================
-  // COMPACT SKELETON
-  // ======================
   if (variant === "compact") {
     return (
-      <div className="min-w-[160px] aspect-square border-2 border-dashed border-black/10 rounded-lg bg-background p-4 flex flex-col items-center justify-center space-y-3">
+      <div className="min-w-[160px] aspect-square border-2 border-dashed border-black/10 rounded-lg bg-background p-4 flex flex-col items-center justify-center space-y-1">
 
         <Skeleton circle height={54} width={54} />
-
         <Skeleton height={14} width={90} />
-
         <Skeleton height={12} width={70} />
-
         <Skeleton height={32} width={120} borderRadius={6} />
       </div>
     )
   }
 
-  // ======================
-  // DETAILED SKELETON
-  // ======================
   return (
     <div className="bg-background rounded-xl shadow-sm relative overflow-hidden">
 

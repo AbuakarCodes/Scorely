@@ -64,6 +64,7 @@ export default function RegesterPlayerForm() {
 
       dispatch(insertPlayer(res?.data || {}))
 
+      toast.success(" player has created")
       setPreview(null)
       setForm({
         name: "",

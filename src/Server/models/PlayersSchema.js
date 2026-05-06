@@ -1,5 +1,4 @@
 import mongoose from "mongoose"
-import { StagedRenderingController } from "next/dist/server/app-render/staged-rendering"
 
 const playerSchema = new mongoose.Schema(
   {
@@ -34,6 +33,12 @@ const playerSchema = new mongoose.Schema(
       default: null,
     },
 
+    teamHistory: {
+      type: Array
+    },
+    currentTeam: {
+      type: String
+    },
 
     avatar: {
       type: String,

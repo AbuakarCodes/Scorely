@@ -3,27 +3,22 @@
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 
-export function PlayerCard({
-  name,
-  role,
-  image,
-  team,
-  rank,
-  inSquad,
-  variant = "compact",
-  onAction,
-}) {
+export function PlayerCard({ name, role, image, team, rank, inSquad, variant = "compact", onAction }) {
   // COMPACT (grid / add page)
   if (variant === "compact") {
     return (
-      <div className="min-w-[160px]  border-2 border-dashed border-black/10 aspect-square flex flex-col items-center justify-center  rounded-lg   bg-background p-4 text-center hover:shadow-md transition">
+      <div className="w-[160px]  border-2 border-dashed border-black/10 aspect-square flex flex-col items-center justify-center  rounded-lg   bg-background p-4 text-center hover:shadow-md transition">
         <div className="w-16 h-16 rounded-full overflow-hidden mb-3 ring-2 ring-primary/10">
           <img src={image} alt={name} width={64} height={64} className="object-cover w-full h-full" />
         </div>
 
-        <h3 className="text-sm font-semibold">{name}</h3>
+        <div className="w-full overflow-x-scroll no-scrollbar">
+          <h3 className="text-sm font-semibold ">{name}</h3>
+        </div>
 
-        <p className="text-xs text-muted-foreground uppercase mb-3">{role}</p>
+        <div className="w-full overflow-x-scroll no-scrollbar">
+          <p className="text-xs text-muted-foreground uppercase mb-3">{role}</p>
+        </div>
 
         <Button
           size="sm"

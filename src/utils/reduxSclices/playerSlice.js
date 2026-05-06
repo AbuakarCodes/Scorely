@@ -31,8 +31,17 @@ const playerSlice = createSlice({
   reducers: {
 
     insertPlayer: (state, action) => {
-      if (!action.payload || typeof action.payload !== "object") return;
-      state.players.push(action.payload);
+      if (!action.payload) return;
+
+      if (Array.isArray(action.payload)) {
+        action.payload.forEach((player) => {
+          if (player && typeof player === "object") {
+            state.players.push(player);
+          }
+        });
+      } else if (typeof action.payload === "object") {
+        state.players.push(action.payload);
+      }
     },
   },
 

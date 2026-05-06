@@ -22,7 +22,6 @@ export async function POST(req) {
     const body = await req.json()
 
     const { userId, name, role, teamId, avatar } = body
-    console.log( { userId, name, role, teamId, avatar } )
 
     if (!userId || !name || !role) {
       return Response.json(
