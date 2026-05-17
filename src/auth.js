@@ -7,6 +7,7 @@ import User from "../src/Server/models/user.js"
 import bcrypt from "bcrypt"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   providers: [
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID,
