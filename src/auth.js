@@ -56,7 +56,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
     maxAge: 60 * 24 * 60 * 60,
-    updateAge: 0 
+    updateAge: 0
   },
 
   callbacks: {
@@ -94,7 +94,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     async jwt({ token, user }) {
       if (user) {
-         await connectDB()
+        await connectDB()
         const dbUser = await User.findOne({ email: user.email })
 
         if (dbUser) {

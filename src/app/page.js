@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react"
 import { AddPlayers } from "@/customComponents/addPlayer/AddPlayers"
 import { AddTeams } from "@/customComponents/addTeam/addTeam"
+import PageLoader from "@/customComponents/loaders/pageLoader"
 
 
 export default function Home() {
@@ -24,7 +25,7 @@ export default function Home() {
 
   return (
     <>
-      {/* {status === "loading" && <PageLoader />} */}
+      {status === "loading" && <PageLoader />} 
       <div className="bg-background-light dark:bg-background-dark min-h-screen flex flex-col text-slate-900 dark:text-slate-100">
 
         {/* Header */}
@@ -150,9 +151,9 @@ export default function Home() {
 
           <div className="relative -top-8">
             <Button className="size-14 rounded-full bg-primary text-white shadow-lg shadow-primary/40">
-              <span className="material-symbols-outlined text-3xl">
+              <Link href={"/selectTeamToStartMatch"} className="material-symbols-outlined text-3xl">
                 add
-              </span>
+              </Link>
             </Button>
           </div>
 
