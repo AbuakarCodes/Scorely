@@ -16,7 +16,7 @@ export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
-
+  console.log(session)
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/auth/signin")
@@ -25,7 +25,7 @@ export default function Home() {
 
   return (
     <>
-      {status === "loading" && <PageLoader />} 
+      {status === "loading" && <PageLoader />}
       <div className="bg-background-light dark:bg-background-dark min-h-screen flex flex-col text-slate-900 dark:text-slate-100">
 
         {/* Header */}
