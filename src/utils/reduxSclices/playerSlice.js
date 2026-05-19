@@ -11,6 +11,7 @@ export const fetchPlayers = createAsyncThunk(
       const res = await axios.get("/api/Players/getPlayers");
       return res?.data?.data || []
     } catch (err) {
+      console.log(err.message)
       return rejectWithValue(
         err.response?.data?.message || err?.message || "Failed to fetch cards"
       );

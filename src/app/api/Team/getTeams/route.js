@@ -11,17 +11,18 @@ export async function GET(req) {
 
     const token = await getToken({
       req,
-      secret: process.env.AUTH_SECRET,
+      secret: process.env.NEXTAUTH_SECRET,
     })
 
-    if (!token?._id) {
+
+    if (!token) {
       return NextResponse.json(
         new ErrorResponse("Unauthorized"),
         { status: 401 }
       )
     }
 
-    const userId = token._id
+    const userId = token.id
 
     // 1. Fetch data
     const teams = await Team.find({ userId }).lean()

@@ -9,6 +9,7 @@ export const fetchTeams = createAsyncThunk(
             const res = await axios.get("/api/Team/getTeams")
             return res?.data?.data || []
         } catch (err) {
+            console.log(err.message)
             return rejectWithValue(
                 err.response?.data?.message ||
                 err?.message ||
