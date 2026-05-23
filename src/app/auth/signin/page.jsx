@@ -11,7 +11,7 @@ import OAuthButtons from "@/customComponents/authComponenets/OAuthButtons"
 import { useRouter } from "next/navigation"
 import SigninField from "@/customComponents/authComponenets/signinField"
 import { toast } from "sonner"
-import PageLoader from "@/customComponents/loaders/pageLoader" 
+import PageLoader from "@/customComponents/loaders/pageLoader"
 
 export default function SignInFormCompact() {
   const [formData, setFormData] = useState({ email: "", password: "" })
@@ -76,19 +76,10 @@ export default function SignInFormCompact() {
         password: formData.password,
       })
 
-      console.log({res})
-      console.log(res.error)
-
       if (res?.error) {
         if (res.error === "CredentialsSignin") toast.error("Invalid email or password")
         else toast.error("Invalid credentials")
         return
-      }
-
-      if (res.ok) {
-        await getSession()
-        router.replace("/")
-        router.refresh()
       }
     } catch (err) {
       alert("Network or server error")

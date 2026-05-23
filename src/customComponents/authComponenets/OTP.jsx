@@ -19,7 +19,6 @@ export default function OtpVerification({ form, otp_id, setshowOTP, resendOTP })
   const [isVerifying, setIsVerifying] = useState(false)
   const inputRefs = useRef([])
 
-
   // Countdown timer
   useEffect(() => {
     if (timer <= 0) {
@@ -92,26 +91,28 @@ export default function OtpVerification({ form, otp_id, setshowOTP, resendOTP })
     }
   }
 
-
-    async function credentials_nextAuth() {
-    const res = await signIn("credentials", {
-      redirect: false,
+  async function credentials_nextAuth() {
+    const data = {
       name: form.fullName,
       email: form.email,
       password: form.password,
-      isSignUp: true,
-    })
-
-    if (res?.error) {
-      if (res.error === "CredentialsSignin") toast.error("Invalid email or password")
-      else toast.error("Invalid credentials")
-      return
     }
 
-    if (res.ok) {
-      await getSession()
-      router.replace("/")
-      router.refresh()
+    try {
+      // creating user in database
+      const user = await registerUser_APIcall(data)
+      // creating a session for usser
+      const res = await signIn("credentials", { ...data, redirect: false })
+
+      if (res?.error) {
+        if (res.error === "CredentialsSignin") toast.error("Invalid email or password")
+        else toast.error("Failed to login, Try again")
+        return
+      }
+
+      if (res.ok) router.push("/")
+    } catch (error) {
+      toast.success("Sign-up Failed ")
     }
   }
 
@@ -145,59 +146,73 @@ export default function OtpVerification({ form, otp_id, setshowOTP, resendOTP })
     }
   }
 
-
   const formatTime = (s) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`
 
+  // Utility Functions +++++++++++++++++++++++++++++++++++++++++++++++
+  async function registerUser_APIcall({ name, email, password }) {
+    try {
+      const response = await axios.post("/api/users/signUP", {
+        name,
+        email,
+        password,
+      })
+
+      return response.data
+    } catch (error) {
+      throw error.response?.data?.message || "Something went wrong"
+    }
+  }
+
   return (
     <>
-    {isVerifying && <PageLoader/>}
-    <div className="relative flex h-screen w-full flex-col overflow-x-hidden bg-background">
-      {/* Header */}
-      <header className="flex items-center p-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Go back"
-          onClick={() => setshowOTP(false)}
-          className="rounded-full hover:bg-primary/10 text-foreground"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-      </header>
+      {isVerifying && <PageLoader />}
+      <div className="relative flex h-screen w-full flex-col overflow-x-hidden bg-background">
+        {/* Header */}
+        <header className="flex items-center p-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Go back"
+            onClick={() => setshowOTP(false)}
+            className="rounded-full hover:bg-primary/10 text-foreground"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+        </header>
 
-      {/* Main */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 max-w-md mx-auto w-full">
-        {/* Icon */}
-        <div className="mb-8 flex items-center justify-center">
-          <div className="w-24 h-24 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center">
-            <ShieldCheck className="w-12 h-12 text-primary" />
+        {/* Main */}
+        <main className="flex-1 flex flex-col items-center justify-center px-6 max-w-md mx-auto w-full">
+          {/* Icon */}
+          <div className="mb-8 flex items-center justify-center">
+            <div className="w-24 h-24 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center">
+              <ShieldCheck className="w-12 h-12 text-primary" />
+            </div>
           </div>
-        </div>
 
-        {/* Heading */}
-        <div className="text-center space-y-2 mb-10">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Enter Code</h1>
-          <p className="text-muted-foreground text-base">
-            We&apos;ve sent a 6-digit security code to your registered email address.
-          </p>
-        </div>
+          {/* Heading */}
+          <div className="text-center space-y-2 mb-10">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Enter Code</h1>
+            <p className="text-muted-foreground text-base">
+              We&apos;ve sent a 6-digit security code to your registered email address.
+            </p>
+          </div>
 
-        <div className="w-full space-y-8">
-          {/* OTP Inputs */}
-          <div className="flex justify-center">
-            <fieldset className="relative flex gap-2 sm:gap-4" onPaste={handlePaste}>
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  ref={(el) => (inputRefs.current[index] = el)}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="
+          <div className="w-full space-y-8">
+            {/* OTP Inputs */}
+            <div className="flex justify-center">
+              <fieldset className="relative flex gap-2 sm:gap-4" onPaste={handlePaste}>
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => (inputRefs.current[index] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    className="
                     flex h-14 w-11 sm:w-12 text-center text-xl font-semibold
                     bg-white dark:bg-slate-800
                     text-foreground
@@ -205,83 +220,83 @@ export default function OtpVerification({ form, otp_id, setshowOTP, resendOTP })
                     focus:border-primary focus:ring-0 focus:outline-none
                     transition-all rounded-sm
                   "
-                  aria-label={`OTP digit ${index + 1}`}
-                />
-              ))}
-            </fieldset>
-          </div>
-
-          <div className="flex flex-col items-center space-y-6">
-            {/* Timer */}
-            <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 dark:bg-primary/10 rounded-full">
-              <Clock className="w-4 h-4 text-primary" />
-              <p className="text-primary font-medium text-sm">
-                {isExpired ? "OTP expired" : `OTP valid for ${formatTime(timer)}`}
-              </p>
+                    aria-label={`OTP digit ${index + 1}`}
+                  />
+                ))}
+              </fieldset>
             </div>
 
-            {/* Verify Button */}
-            <Button
-              className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98] h-auto"
-              onClick={handleVerify}
-              disabled={isVerifying}
-            >
-              {isVerifying ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                  </svg>
-                  Verifying...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4" />
-                  Verify &amp; Proceed
-                </span>
-              )}
-            </Button>
+            <div className="flex flex-col items-center space-y-6">
+              {/* Timer */}
+              <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 dark:bg-primary/10 rounded-full">
+                <Clock className="w-4 h-4 text-primary" />
+                <p className="text-primary font-medium text-sm">
+                  {isExpired ? "OTP expired" : `OTP valid for ${formatTime(timer)}`}
+                </p>
+              </div>
 
-            {/* Resend */}
-            <div className="flex flex-col items-center gap-1">
-              <p className="text-muted-foreground text-sm">Didn&apos;t receive the code?</p>
-              {isExpired ? (
-                <Button
-                  variant="ghost"
-                  onClick={handleResend}
-                  className="text-primary font-semibold hover:underline decoration-2 underline-offset-4 p-0 h-auto gap-1"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  Resend OTP
-                </Button>
-              ) : (
-                <span className="text-muted-foreground/50 text-sm font-medium cursor-not-allowed select-none">
-                  Resend available after expiry
-                </span>
-              )}
+              {/* Verify Button */}
+              <Button
+                className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98] h-auto"
+                onClick={handleVerify}
+                disabled={isVerifying}
+              >
+                {isVerifying ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                    Verifying...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Verify &amp; Proceed
+                  </span>
+                )}
+              </Button>
+
+              {/* Resend */}
+              <div className="flex flex-col items-center gap-1">
+                <p className="text-muted-foreground text-sm">Didn&apos;t receive the code?</p>
+                {isExpired ? (
+                  <Button
+                    variant="ghost"
+                    onClick={handleResend}
+                    className="text-primary font-semibold hover:underline decoration-2 underline-offset-4 p-0 h-auto gap-1"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    Resend OTP
+                  </Button>
+                ) : (
+                  <span className="text-muted-foreground/50 text-sm font-medium cursor-not-allowed select-none">
+                    Resend available after expiry
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
 
-      {/* Footer */}
-      <footer className="p-8 text-center">
-        <div className="flex items-center justify-center gap-2 text-muted-foreground text-xs uppercase tracking-widest">
-          <ShieldCheck className="w-3 h-3" />
-          <span>Secure Cricket Authentication</span>
-        </div>
-      </footer>
+        {/* Footer */}
+        <footer className="p-8 text-center">
+          <div className="flex items-center justify-center gap-2 text-muted-foreground text-xs uppercase tracking-widest">
+            <ShieldCheck className="w-3 h-3" />
+            <span>Secure Cricket Authentication</span>
+          </div>
+        </footer>
 
-      {/* Bottom gradient bar */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-    </div>
+        {/* Bottom gradient bar */}
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+      </div>
     </>
   )
 }
