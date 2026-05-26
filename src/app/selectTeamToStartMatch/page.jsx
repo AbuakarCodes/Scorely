@@ -9,26 +9,28 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { fetchTeams } from "@/utils/reduxSclices/teamSlice"
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"
+
+import { fetchTeamPlayers } from "@/utils/reduxSclices/matchSlice"
+import PageLoader from "@/customComponents/loaders/pageLoader"
 
 export default function SelectTeamsPage() {
   const dispatch = useDispatch()
-  const router = useRouter();
+  const router = useRouter()
   const { teams, loading, error } = useSelector((state) => state.teams)
-  
+  const { playersError, playersLoading } = useSelector((state) => state.match.Loading)
+
+  console.log({ playersError, playersLoading })
+
   useEffect(() => {
     if (teams.length === 0) dispatch(fetchTeams())
   }, [teams.length])
-
-
 
   const [search, setSearch] = useState("")
   const [selectedTeams, setSelectedTeams] = useState([])
 
   const filteredTeams = useMemo(() => {
-    return teams.filter((team) =>
-      team.name?.toLowerCase().includes(search.toLowerCase())
-    )
+    return teams.filter((team) => team.name?.toLowerCase().includes(search.toLowerCase()))
   }, [teams, search])
 
   const toggleTeam = (teamId) => {
@@ -43,7 +45,7 @@ export default function SelectTeamsPage() {
     // only keep 2 teams
     // if selecting 3rd team remove oldest selected team
     if (selectedTeams.length >= 2) {
-      setSelectedTeams([selectedTeams[1], teamId])
+      setSelectedTeams([selectedTeams[0], teamId])
       return
     }
 
@@ -58,159 +60,148 @@ export default function SelectTeamsPage() {
     return "Ready to Proceed"
   }
 
-  const handleProceed = () => {
+  const handleProceed = async () => {
     if (selectedTeams.length !== 2) return
 
-    const selectedTeamsData = teams.filter((team) =>
-      selectedTeams.includes(team._id)
+    const selectedTeamsData = teams.filter((team) => selectedTeams.includes(team._id))
+
+    await dispatch(
+      fetchTeamPlayers({
+        teamAId: selectedTeamsData[0]._id,
+        teamBId: selectedTeamsData[1]._id,
+      }),
     )
-
-      router.push("/matchSetup");
-
-    console.log(selectedTeamsData)
-
-    // router.push(...)
-    // dispatch(...)
+    router.push("/matchSetup")
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-md items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="size-5" />
-            </Button>
+    <>
+      {playersLoading && <PageLoader />}
 
-            <h1 className="text-xl font-bold">Select Teams</h1>
-          </div>
-        </div>
-      </header>
+      <div className="min-h-screen bg-background pb-32">
+        {/* Header */}
+        <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
+          <div className="mx-auto flex h-16 max-w-md items-center justify-between px-4">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="size-5" />
+              </Button>
 
-      <main className="mx-auto max-w-md px-4 pt-5">
-        {/* Status */}
-        <Card className="mb-6 border-none bg-primary text-primary-foreground shadow-md">
-          <div className="flex items-center justify-between p-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider opacity-80">
-                Selection Status
-              </p>
-
-              <p className="mt-1 text-lg font-bold">{getStatusText()}</p>
-            </div>
-
-            <div className="flex gap-2">
-              {[1, 2].map((item) => (
-                <div
-                  key={item}
-                  className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold",
-                    item <= selectedCount
-                      ? "border-white/40 bg-white/20 text-white"
-                      : "border-white/20 bg-white/10 text-white/50"
-                  )}
-                >
-                  {item}
-                </div>
-              ))}
+              <h1 className="text-xl font-bold">Select Teams</h1>
             </div>
           </div>
-        </Card>
+        </header>
 
-        {/* Search */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <main className="mx-auto max-w-md px-4 pt-5 bg-yellow-50 h-10">
+          {/* Status */}
+          <Card className="mb-6 border-none bg-primary  shadow-md  text-white">
+            <div className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider opacity-80">Selection Status</p>
 
-          <Input
-            placeholder="Search teams..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-12 pl-10"
-          />
-        </div>
+                <p className="mt-1 text-lg font-bold">{getStatusText()}</p>
+              </div>
 
-        {/* Teams */}
-        <div className="space-y-3">
-          {filteredTeams.length > 0 ? (
-            filteredTeams.map((team) => {
-              const isSelected = selectedTeams.includes(team._id)
-
-              return (
-                <Card
-                  key={team._id}
-                  onClick={() => toggleTeam(team._id)}
-                  className={cn(
-                    "cursor-pointer p-4 transition-all active:scale-[0.98]",
-                    isSelected
-                      ? "border-2 border-primary"
-                      : "hover:border-primary/30"
-                  )}
-                >
-                  <div className="flex items-center gap-4">
-                    {/* Team Logo */}
-                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
-                      {team.logo ? (
-                        <img
-                          src={team.logo}
-                          alt={team.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-lg font-bold">
-                          {team.name?.charAt(0)}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Team Info */}
-                    <div className="flex-1 overflow-hidden">
-                      <h3 className="truncate font-bold">{team.name}</h3>
-
-                      <p className="text-sm text-muted-foreground">
-                        {team.players?.length || 0} Players
-                      </p>
-                    </div>
-
-                    {/* Checkbox */}
-                    <div
-                      className={cn(
-                        "flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all",
-                        isSelected
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-muted-foreground/30"
-                      )}
-                    >
-                      {isSelected && <Check className="size-4" />}
-                    </div>
+              <div className="flex gap-2">
+                {[1, 2].map((item) => (
+                  <div
+                    key={item}
+                    className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold",
+                      item <= selectedCount
+                        ? "border-white/40 bg-chart-4 text-white "
+                        : "border-white/20 bg-white/10 text-white/50",
+                    )}
+                  >
+                    {item}
                   </div>
-                </Card>
-              )
-            })
-          ) : (
-            <Card className="p-10 text-center">
-              <p className="text-sm text-muted-foreground">
-                No teams found
-              </p>
-            </Card>
-          )}
-        </div>
-      </main>
+                ))}
+              </div>
+            </div>
+          </Card>
 
-      {/* Proceed Button */}
-      <div className="fixed bottom-6 left-0 right-0 z-40 px-4">
-        <div className="mx-auto max-w-md">
-          <Button
-            onClick={handleProceed}
-            disabled={selectedTeams.length !== 2}
-            className="h-14 w-full text-whi rounded-2xl text-base font-bold"
-          >
-            Proceed to Match Setup
+          {/* Search */}
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
-            <ArrowRight className="ml-2 size-5" />
-          </Button>
+            <Input
+              placeholder="Search teams..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-12 pl-10 "
+            />
+          </div>
+
+          {/* Teams */}
+
+          <div className="space-y-3">
+            {filteredTeams.length > 0 ? (
+              filteredTeams.map((team) => {
+                const isSelected = selectedTeams.includes(team._id)
+
+                return (
+                  <Card
+                    key={team._id}
+                    onClick={() => toggleTeam(team._id)}
+                    className={cn(
+                      "cursor-pointer p-4 transition-all active:scale-[0.98]",
+                      isSelected ? "border-2 border-chart-4" : "hover:border-primary/30",
+                    )}
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Team Logo */}
+                      <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
+                        {team.logo ? (
+                          <img src={team.logo} alt={team.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-lg font-bold">
+                            {team.name?.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Team Info */}
+                      <div className="flex-1 overflow-hidden">
+                        <h3 className="truncate font-bold">{team.name}</h3>
+
+                        <p className="text-sm text-muted-foreground">{team.players?.length || 0} Players</p>
+                      </div>
+
+                      {/* Checkbox */}
+                      <div
+                        className={cn(
+                          "flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all",
+                          isSelected ? "border-primary bg-primary text-white" : "border-muted-foreground/30",
+                        )}
+                      >
+                        {isSelected && <Check className="size-4" />}
+                      </div>
+                    </div>
+                  </Card>
+                )
+              })
+            ) : (
+              <Card className="p-10 text-center">
+                <p className="text-sm text-muted-foreground">No teams found</p>
+              </Card>
+            )}
+          </div>
+        </main>
+
+        {/* Proceed Button */}
+        <div className="fixed bottom-6 left-0 right-0 z-40 px-4">
+          <div className="mx-auto max-w-md">
+            <Button
+              onClick={handleProceed}
+              disabled={selectedTeams.length !== 2}
+              className="h-14 w-full text-whi rounded-2xl text-base font-bold"
+            >
+              Proceed to Match Setup
+              <ArrowRight className="ml-2 size-5" />
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

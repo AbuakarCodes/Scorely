@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { ArrowLeft, RotateCcw, Star, RefreshCcw } from "lucide-react"
+import { useSelector } from "react-redux"
 
 /*
 |--------------------------------------------------------------------------
@@ -58,67 +59,75 @@ import { ArrowLeft, RotateCcw, Star, RefreshCcw } from "lucide-react"
 |--------------------------------------------------------------------------
 */
 
-const initialMatch = {
-  match: {
-    teamA: "Australia",
-    teamB: "England",
-    innings: 1,
-    target: 185,
-  },
-
-  score: {
-    runs: 142,
-    wickets: 3,
-    overs: 15,
-    balls: 4,
-    crr: 9.06,
-    rrr: 10.12,
-  },
-
-  batsmen: [
-    {
-      id: 1,
-      name: "Steve Smith",
-      runs: 45,
-      balls: 32,
-      fours: 4,
-      sixes: 1,
-      strikeRate: 140.6,
-      striker: true,
-    },
-    {
-      id: 2,
-      name: "Alex Carey",
-      runs: 12,
-      balls: 8,
-      fours: 1,
-      sixes: 0,
-      strikeRate: 150,
-      striker: false,
-    },
-  ],
-
-  bowler: {
-    id: 1,
-    name: "Mark Wood",
-    overs: 3.4,
-    maidens: 0,
-    runs: 32,
-    wickets: 1,
-    economy: 8.73,
-  },
-
-  recentBalls: [],
-
-  partnership: {
-    runs: 28,
-    balls: 14,
-  },
-
-  lastWicket: "M. Marsh 22 (15)",
-}
-
 export default function LiveScoringPage() {
+
+  // const  = useSelector((state) => state.match.teams)
+  const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
+  
+
+
+  const initialMatch = {
+    match: {
+      teamA: teamA.name,
+      teamB: teamB.name,
+      innings: 1,
+      target: 185,
+    },
+  
+    score: {
+      runs: 142,
+      wickets: 3,
+      overs: 15,
+      balls: 4,
+      crr: 9.06,
+      rrr: 10.12,
+    },
+  
+    batsmen: [
+      {
+        id: 1,
+        name: "Steve Smith",
+        runs: 45,
+        balls: 32,
+        fours: 4,
+        sixes: 1,
+        strikeRate: 140.6,
+        striker: true,
+      },
+      {
+        id: 2,
+        name: "Alex Carey",
+        runs: 12,
+        balls: 8,
+        fours: 1,
+        sixes: 0,
+        strikeRate: 150,
+        striker: false,
+      },
+    ],
+  
+    bowler: {
+      id: 1,
+      name: "Mark Wood",
+      overs: 3.4,
+      maidens: 0,
+      runs: 32,
+      wickets: 1,
+      economy: 8.73,
+    },
+  
+    recentBalls: [],
+  
+    partnership: {
+      runs: 28,
+      balls: 14,
+    },
+  
+    lastWicket: "M. Marsh 22 (15)",
+  }
+
+
+
   // --------------------------------------------------------------------------
   // LOCAL UI STATE
   // --------------------------------------------------------------------------
@@ -254,7 +263,6 @@ export default function LiveScoringPage() {
     }, 0)
   }, [matchState.recentBalls])
 
-  
   return (
     <div className="min-h-screen bg-slate-50 pb-52">
       {/* HEADER */}

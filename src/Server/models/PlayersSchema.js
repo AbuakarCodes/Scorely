@@ -33,6 +33,11 @@ const playerSchema = new mongoose.Schema(
       default: null,
     },
 
+    inPlaying_XI: {
+      type: Boolean,
+      default: false,
+    },
+
     teamHistory: {
       type: Array
     },

@@ -1,34 +1,107 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const ballSchema = new mongoose.Schema({
-  match_id: { type: mongoose.Schema.Types.ObjectId, ref: "Match" },
-  innings: Number,
-  over: Number,
-  ball_in_over: Number,
+const BallSchema = new mongoose.Schema(
+  {
+    // -----------------------------
+    // IDENTIFIERS
+    // -----------------------------
+    matchId: {
+      type: String,
+      required: true,
+      index: true,
+    },
 
-  striker_id: { type: mongoose.Schema.Types.ObjectId, ref: "Player" },
-  non_striker_id: { type: mongoose.Schema.Types.ObjectId, ref: "Player" },
-  bowler_id: { type: mongoose.Schema.Types.ObjectId, ref: "Player" },
+    inningsNumber: {
+      type: Number,
+      required: true,
+    },
 
-  runs_batsman: Number,
-  runs_extras: Number,
-  extra_type: {
-    type: String,
-    enum: ["wide", "no_ball", "bye", "leg_bye", null],
-    default: null
-  },
+    over: {
+      type: Number,
+      required: true,
+    },
 
-  wicket_type: {
-    type: String,
-    enum: ["bowled", "caught", "lbw", "run_out", "stumped", null],
-    default: null
-  },
+    ballInOver: {
+      type: Number,
+      required: true,
+    },
 
-  player_out_id: { type: mongoose.Schema.Types.ObjectId, ref: "Player", default: null }
-});
+    // -----------------------------
+    // PLAYERS
+    // -----------------------------
+    strikerId: {
+      type: String,
+      required: true,
+    },
 
-ballSchema.index({ match_id: 1 });
-ballSchema.index({ striker_id: 1 });
-ballSchema.index({ bowler_id: 1 });
+    nonStrikerId: {
+      type: String,
+    },
 
-module.exports = mongoose.model("Ball", ballSchema);
+    bowlerId: {
+      type: String,
+      required: true,
+    },
+
+    battingTeamId: {
+      type: String,
+      required: true,
+    },
+
+    bowlingTeamId: {
+      type: String,
+      required: true,
+    },
+
+    // -----------------------------
+    // SCORING CORE
+    // -----------------------------
+    runs: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+
+    extraType: {
+      type: String,
+      enum: [
+        null,
+        "wide",
+        "noball",
+        "bye",
+        "legbye",
+      ],
+      default: null,
+    },
+
+    extraRuns: {
+      type: Number,
+      default: 0,
+    },
+
+
+    wicketType: {
+      type: String,
+      enum: [
+        null,
+        "bowled",
+        "caught",
+        "runout",
+        "lbw",
+        "stumped",
+        "hitwicket",
+      ],
+      default: null,
+    },
+
+
+  }, { timestamps: true },
+
+
+);
+
+BallSchema.index({ matchId: 1, inningsNumber: 1 });
+BallSchema.index({ strikerId: 1 });
+BallSchema.index({ bowlerId: 1 });
+
+export default mongoose.model("Ball", BallSchema);
