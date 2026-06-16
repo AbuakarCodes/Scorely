@@ -11,19 +11,32 @@ import { AddTeams } from "@/customComponents/addTeam/addTeam"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import { useDispatch, useSelector } from "react-redux"
 import { startMatch } from "@/utils/reduxSclices/matchSlice"
-
+import { X, History, Plus, ChevronRight } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function Home() {
 
   const { data: session, status } = useSession()
-  const [showPrevMatchPopup, setShowPrevMatchPopup] = useState(false)
+  const [popup, setPopup] = useState({ visiable: null, startPrevMatch: null, matchDetails: {} })
+  const { balls } = useSelector((state) => state.match.innings)
+  const teams = useSelector((state) => state.match.match?.teams);
+  const overs = useSelector((state) => state?.match?.innings?.score?.over || 0)
+
   const router = useRouter()
   const dispatch = useDispatch()
-  const { balls } = useSelector((state) => state.match.innings)
 
   useEffect(() => {
-    // dispatch(startMatch(1))
-  }, [])
+    if (popup?.startPrevMatch === true) {
+      router.push("/test")
+    } else if (popup?.startPrevMatch === false) {
+      router.push("/selectTeamToStartMatch")
+    }
+  }, [popup])
 
 
   useEffect(() => {
@@ -34,14 +47,18 @@ export default function Home() {
     const has_matchIn_LS = !!localStorage.getItem("match")
     if (has_matchIn_LS && balls.length > 0) {
 
-      const result = confirm("start previous match ?")
-      if (result) {
-        router.push("/test")
-      } else {
-        // delete the prev matach data and start adding newone
-        router.push("/selectTeamToStartMatch")
+      setPopup((prev) => ({
+        ...prev, visiable: true, matchDetails: matchDetails_setter(teams, overs)
+      }));
 
-      }
+
+
+      // const result = confirm("start previous match ?")
+      // if (result) {
+      // } else {
+      //   // delete the prev matach data and start adding newone
+
+      // }
 
       // showpopup
       // start prevmatch or new one
@@ -57,6 +74,10 @@ export default function Home() {
   return (
     <>
       {status === "loading" && <PageLoader />}
+      {popup?.visiable && <StartScoringModal
+        popup={popup}
+        setPopup={setPopup}
+      />}
       <div className="bg-background-light dark:bg-background-dark min-h-screen flex flex-col text-slate-900 dark:text-slate-100">
 
         {/* Header */}
@@ -197,4 +218,124 @@ export default function Home() {
       </div>
     </>
   )
+}
+
+
+
+function StartScoringModal({
+  popup,
+  setPopup,
+}) {
+  const handleClose = () => {
+    setPopup({
+      visiable: false,
+      startPrevMatch: null,
+      matchDetails: {},
+    });
+
+  };
+
+  const handleResumeMatch = () => {
+    setPopup((prev) => ({
+      ...prev,
+      startPrevMatch: true,
+    }));
+  };
+
+  const handleStartNewMatch = () => {
+    setPopup((prev) => ({
+      ...prev,
+      startPrevMatch: false,
+    }));
+  };
+
+  return (
+    <Dialog
+      open={popup.visiable}
+      onOpenChange={(open) => {
+        // Clicking outside the popup or pressing Escape triggers this handler
+        if (!open) handleClose();
+      }}
+    >
+      <DialogContent showCloseButton={false} className="sm:max-w-md p-0 overflow-hidden rounded-2xl">
+        <button
+          onClick={handleClose}
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-muted hover:bg-muted/80"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="p-6">
+          <DialogHeader className="mb-6">
+            <DialogTitle className="text-xl font-bold">
+              Start Scoring
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Resume Previous Match */}
+            <button
+              onClick={handleResumeMatch}
+              className="group flex w-full items-center rounded-xl border bg-muted/40 p-4 text-left transition-all hover:bg-muted"
+            >
+              <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-background shadow-sm">
+                <History className="h-5 w-5 text-primary" />
+              </div>
+
+              <div className="flex-1">
+                <p className="font-semibold">
+                  Resume Previous Match
+                </p>
+
+                {popup.matchDetails && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    <div> {popup?.matchDetails?.teamAName} <span className="text-red-500">VS</span> {popup?.matchDetails?.teamBName} </div>
+                    <div>{popup?.matchDetails?.overs}</div>
+                  </p>
+                )}
+              </div>
+
+              <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
+            </button>
+
+            {/* Start New Match */}
+            <button
+              onClick={handleStartNewMatch}
+              className="group text-white flex w-full items-center rounded-xl bg-primary p-4 text-left  transition-all hover:opacity-90"
+            >
+              <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+                <Plus className="h-5 w-5 " />
+              </div>
+
+              <div className="flex-1">
+                <p className="font-bold">Start New Match</p>
+                <p className="mt-1 text-sm opacity-80">
+                  Configure fresh scorecard
+                </p>
+              </div>
+
+              <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </button>
+          </div>
+        </div>
+
+        <div className="h-1 bg-primary" />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+// Utility Functions
+function matchDetails_setter(teams, overs) {
+  if (!teams || typeof teams !== "object") return false;
+  if (!teams.teamA?.name || !teams.teamB?.name) return false;
+
+  if (typeof overs !== "number" || isNaN(overs)) return false;
+
+  return {
+    teamAName: teams.teamA.name,
+    teamBName: teams.teamB.name,
+    overs
+  };
 }

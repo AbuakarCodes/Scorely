@@ -8,9 +8,7 @@ import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlaye
 export default function LiveScoringPage() {
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
 
-//   const teams = useSelector((state) => state.match.match?.teams);
 
-// console.log(teams);
 
   const { batsmen, bowler, innings } = useSelector((state) => state.match)
 

@@ -74,7 +74,7 @@ const initialState = loadMatchState() || {
         score: {
             runs: 0,
             wickets: 0,
-            over: 0,
+            over: 22.44,
             balls: 0,
             CRR: 0,
             RRR: 0
