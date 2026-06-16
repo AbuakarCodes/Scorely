@@ -2,6 +2,7 @@ import axios from "axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 
+
 export const fetchTeamPlayers_off = createAsyncThunk(
     "match/fetchTeamPlayers",
     async (teamId, { rejectWithValue }) => {
@@ -24,7 +25,6 @@ export const fetchTeamPlayers = createAsyncThunk(
                 teamAId,
                 teamBId,
             });
-            console.log(data.data)
             return data?.data;
         } catch (err) {
             console.log(err.message)
@@ -37,8 +37,9 @@ export const fetchTeamPlayers = createAsyncThunk(
 
 
 // INITIAL STATE
-const initialState = {
-    match: loadMatchState() || {
+const initialState = loadMatchState() || {
+    match: {
+
         id: "",
         status: "live",
 
@@ -62,33 +63,99 @@ const initialState = {
     },
 
     innings: {
+        isFirstInings: null,
+
         battingTeamId: "",
         bowlingTeamId: "",
 
-        strikerId: null,
-        nonStrikerId: null,
-        currentBowlerId: null,
-
-        yetToBat: [],
+        dismissedPlayers: [],
         yetToBall: [],
 
         score: {
             runs: 0,
             wickets: 0,
-            overs: 0,
+            over: 0,
             balls: 0,
+            CRR: 0,
+            RRR: 0
         },
 
-        balls: [],
+        balls: [22],
 
         pendingNewBatsman: false,
         pendingBowlerChange: false,
     },
 
+    // batsmen: {
+    //     batsmenA: {
+    //         batsmenA_Id: "",
+    //         isStriker:null,
+    //         batsmenAName: "",
+    //         batsmenA_Runs: 0,
+    //         batsmenA_facedBalls: 0,
+    //         batsmenA_fours: 0,
+    //         batsmenA_sixes: 0,
+    //         batsmenA_strikRate: 0
+    //     },
+
+    //     batsmenB: {
+    //         batsmenB_Id: "",
+    //         isStriker:null,
+    //         batsmenB_Name: "",
+    //         batsmenB_Runs: 0,
+    //         batsmenB_facedBalls: 0,
+    //         batsmenB_fours: 0,
+    //         batsmenB_sixes: 0,
+    //         batsmenB_strikRate: 0
+    //     }
+    // },
+
+    batsmen: {
+        batsmenA: {
+            id: "BAT001",
+            name: "Abdullah Khan",
+            runs: 45,
+            balls: 32,
+            fours: 6,
+            sixes: 2,
+            strikeRate: 140.62,
+            isStriker: false,
+        },
+
+        batsmenB: {
+            id: "BAT002",
+            name: "Ali",
+            runs: 28,
+            balls: 25,
+            fours: 3,
+            sixes: 1,
+            strikeRate: 112.0,
+            isStriker: true,
+        },
+    },
+
+    bowler: {
+        bowler_Id: "",
+        bowler_Name: "",
+        bowler_over: 0,
+        bowler_ballInOver: 0,
+        bowler_Runs: 0,
+        bowler_Econ: 0,
+        bowler_Wickets: 0,
+
+    },
+
     Loading: {
         playersLoading: false,
         playersError: null,
+    },
+
+    flags: {
+        shouldPersistmatch: false,
+        show_prevMatch_popup: false
+
     }
+
 };
 
 
@@ -118,14 +185,33 @@ const matchSlice = createSlice({
             const innings = state.innings;
 
             const ball = {
-                id: crypto.randomUUID(),
-                strikerId: innings.strikerId,
-                bowlerId: innings.currentBowlerId,
-                runs,
-                wicket,
-                over: innings.score.overs,
-                ballInOver: innings.score.balls,
-                timestamp: Date.now(),
+                matchId: state.match.id,
+
+                inningsNumber: state.innings.isFirstInings ? 1 : 2,
+
+                over: state.innings.score.overs,
+                ballInOver: state.innings.score.balls,
+
+                isLegalDelivery:
+                    action.payload.extraType !== "wide" &&
+                    action.payload.extraType !== "noball",
+
+                strikerId: state.innings.strikerId,
+                nonStrikerId: state.innings.nonStrikerId,
+
+                bowlerId: state.innings.currentBowlerId,
+
+                battingTeamId: state.innings.battingTeamId,
+                bowlingTeamId: state.innings.bowlingTeamId,
+
+                runs: action.payload.runs || 0,
+
+                extraType: action.payload.extraType || null,
+
+                extraRuns: action.payload.extraRuns || 0,
+
+                isWicket: action.payload.wicket || false,
+
             };
 
             innings.balls.push(ball);
@@ -171,9 +257,8 @@ const matchSlice = createSlice({
             const playerId = action.payload;
 
             state.innings.strikerId = playerId;
-            state.innings.pendingNewBatsman = false;
+            // state.innings.pendingNewBatsman = false;
         },
-
 
         // CHANGE BOWLER
         changeBowler: (state, action) => {
@@ -183,6 +268,7 @@ const matchSlice = createSlice({
             state.innings.pendingBowlerChange = false;
         },
 
+
         tossWinner_fn: (state, action) => {
             const tossWinnerTeamID = action.payload
             state.match.tossWinner = tossWinnerTeamID
@@ -191,7 +277,50 @@ const matchSlice = createSlice({
         tossDecision_fn: (state, action) => {
             const tossWinnerTeamDecision = action.payload
             state.match.tossDecision = tossWinnerTeamDecision
+            if (tossWinnerTeamDecision === "bat") {
+                state.match.innings.battingTeamId = state.match.tossWinner
+                console.log("Changing bat state ")
+            } else if (tossWinnerTeamDecision === "bowl") {
+                state.match.innings.bowlingTeamId = state.match.tossWinner
+                console.log("Changing bowl state ")
+
+            }
+
+
+        },
+
+        startMatch(state, isStartPrevMatch) {
+            state.flags.shouldPersistmatch = true;
+
+            const hasMatchData_LS = !!localStorage.getItem("match")
+            console.log({ hasMatchData_LS })
+
+            // if (hasMatchData_LS) {
+            //     // show popup wnats to start a prev match 
+            //     if (isStartPrevMatch) {
+            //         if (state.innings.balls.length === 0) router.push("/") // reroute to toss route
+            //         else // reroute to match and check all the data
+            //     } else {
+            //         // reroute the user to select team (set local storage with initial state )
+            //     }
+            // } else {
+            //     // reroute the user to select team 
+            // }
+            // return {
+            //     showPopup: "Local storage data"
+            // }
+
+        },
+
+        toggle_prevMatch_Popup(state, action) {
+            if (typeof action.payload !== "boolean") {
+                console.error("Expected boolean")
+                return
+            }
+            state.flags.show_prevMatch_popup = action.payload
         }
+
+
     },
 
 
@@ -210,6 +339,7 @@ const matchSlice = createSlice({
             // success
             .addCase(fetchTeamPlayers.fulfilled, (state, action) => {
                 const { teamA, teamB } = action.payload;
+                console.log({ teamA, teamB })
                 state.Loading.playersLoading = false;
                 state.match.teams.teamA = {
                     id: teamA._id,
@@ -232,7 +362,9 @@ export const {
     selectNewBatsman,
     changeBowler,
     tossWinner_fn,
-    tossDecision_fn
+    tossDecision_fn,
+    startMatch,
+    toggle_prevMatch_Popup
 } = matchSlice.actions;
 
 export default matchSlice.reducer;

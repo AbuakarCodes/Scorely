@@ -1,4 +1,4 @@
-import Team from "@/Server/models/TeamSchema"; 
+import Team from "@/Server/models/TeamSchema";
 import Player from "@/Server/models/PlayersSchema";
 import { connectDB } from "@/lib/db";
 import { ErrorResponse, SuccessResponse } from "@/Server/Response/response";
@@ -42,8 +42,8 @@ export async function POST(req) {
         }
 
         // 2. fetch players separately (THIS is your requirement)
-        const teamAPlayers = await Player.find({ teamId: teamAId });
-        const teamBPlayers = await Player.find({ teamId: teamBId });
+        const teamAPlayers = enrichPlayers(await Player.find({ teamId: teamAId }))
+        const teamBPlayers = enrichPlayers(await Player.find({ teamId: teamAId }))
 
         // 3. map teams
         const teamA = teams.find(t => t._id.toString() === teamAId);
@@ -71,4 +71,20 @@ export async function POST(req) {
             { status: 500 }
         );
     }
+}
+
+
+
+function enrichPlayers(players) {
+    if (!Array.isArray(players)) {
+        return []
+    }
+    // Mongoose returns document objects; toObject() converts t
+    // hem to plain JS objects and removes internal
+    //  fields like $__ and _doc
+    return players.map(player => ({
+        ...player.toObject(),
+        batting: ""
+    }));
+
 }

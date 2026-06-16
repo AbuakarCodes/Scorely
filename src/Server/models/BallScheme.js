@@ -26,6 +26,11 @@ const BallSchema = new mongoose.Schema(
       required: true,
     },
 
+    isLegalDelivery: {
+      type: Boolean,
+      required: true,
+    },
+
     // -----------------------------
     // PLAYERS
     // -----------------------------
@@ -80,18 +85,8 @@ const BallSchema = new mongoose.Schema(
     },
 
 
-    wicketType: {
-      type: String,
-      enum: [
-        null,
-        "bowled",
-        "caught",
-        "runout",
-        "lbw",
-        "stumped",
-        "hitwicket",
-      ],
-      default: null,
+    isWicket: {
+      type: Boolean
     },
 
 

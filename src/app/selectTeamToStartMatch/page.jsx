@@ -20,8 +20,6 @@ export default function SelectTeamsPage() {
   const { teams, loading, error } = useSelector((state) => state.teams)
   const { playersError, playersLoading } = useSelector((state) => state.match.Loading)
 
-  console.log({ playersError, playersLoading })
-
   useEffect(() => {
     if (teams.length === 0) dispatch(fetchTeams())
   }, [teams.length])
@@ -83,9 +81,14 @@ export default function SelectTeamsPage() {
         <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
           <div className="mx-auto flex h-16 max-w-md items-center justify-between px-4">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="size-5" />
-              </Button>
+               <Button
+               className={"text-black "}
+                  onClick={() => {
+                    router.back()
+                  }}
+                >
+                  <ArrowLeft className="size-5" />
+                </Button>
 
               <h1 className="text-xl font-bold">Select Teams</h1>
             </div>
@@ -135,7 +138,13 @@ export default function SelectTeamsPage() {
           {/* Teams */}
 
           <div className="space-y-3">
-            {filteredTeams.length > 0 ? (
+            {loading ? (
+              "teams Loading"
+            ) : filteredTeams.length === 0 ? (
+              <Card className="p-10 text-center">
+                <p className="text-sm text-muted-foreground">No teams found</p>
+              </Card>
+            ) : (
               filteredTeams.map((team) => {
                 const isSelected = selectedTeams.includes(team._id)
 
@@ -180,10 +189,6 @@ export default function SelectTeamsPage() {
                   </Card>
                 )
               })
-            ) : (
-              <Card className="p-10 text-center">
-                <p className="text-sm text-muted-foreground">No teams found</p>
-              </Card>
             )}
           </div>
         </main>

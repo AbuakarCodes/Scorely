@@ -5,23 +5,54 @@ import { Card } from "@/components/ui/card"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation";
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { AddPlayers } from "@/customComponents/addPlayer/AddPlayers"
 import { AddTeams } from "@/customComponents/addTeam/addTeam"
 import PageLoader from "@/customComponents/loaders/pageLoader"
+import { useDispatch, useSelector } from "react-redux"
+import { startMatch } from "@/utils/reduxSclices/matchSlice"
 
 
 export default function Home() {
 
   const { data: session, status } = useSession()
+  const [showPrevMatchPopup, setShowPrevMatchPopup] = useState(false)
   const router = useRouter()
+  const dispatch = useDispatch()
+  const { balls } = useSelector((state) => state.match.innings)
 
-  console.log(session)
+  useEffect(() => {
+    // dispatch(startMatch(1))
+  }, [])
+
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/auth/signin")
   }, [status, router])
 
+  function sratMatch_handler(e) {
+    const has_matchIn_LS = !!localStorage.getItem("match")
+    if (has_matchIn_LS && balls.length > 0) {
+
+      const result = confirm("start previous match ?")
+      if (result) {
+        router.push("/test")
+      } else {
+        // delete the prev matach data and start adding newone
+        router.push("/selectTeamToStartMatch")
+
+      }
+
+      // showpopup
+      // start prevmatch or new one
+    } else {
+      dispatch(startMatch(1))
+      router.push("/selectTeamToStartMatch")
+    }
+
+    // dispatch(startMatch(1))
+    //  router.push("/selectTeamToStartMatch")
+  }
 
   return (
     <>
@@ -73,7 +104,7 @@ export default function Home() {
 
                 <div className="bg-white/20 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <span className="material-symbols-outlined text-3xl">
-                    sports_cricket
+                    🏏
                   </span>
                 </div>
 
@@ -85,12 +116,6 @@ export default function Home() {
                   Start a new match, record every ball, and track live statistics.
                 </p>
 
-                <Button className="w-full bg-white text-primary hover:bg-emerald-50 flex gap-2">
-                  <span className="material-symbols-outlined">
-                    add_circle
-                  </span>
-                  Start New Match
-                </Button>
 
               </div>
 
@@ -150,9 +175,9 @@ export default function Home() {
           </a>
 
           <div className="relative -top-8">
-            <Button className="size-14 rounded-full bg-primary text-white shadow-lg shadow-primary/40">
+            <Button onClick={sratMatch_handler} className="size-14 rounded-full bg-primary text-white shadow-lg shadow-primary/40">
+              add
               <Link href={"/selectTeamToStartMatch"} className="material-symbols-outlined text-3xl">
-                add
               </Link>
             </Button>
           </div>
