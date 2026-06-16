@@ -266,8 +266,12 @@ const matchSlice = createSlice({
         resetMatch(state) {
             localStorage.removeItem("match");
             return defaultState;
-        }
+        },
 
+        setInings(state, action) {
+            if (!action.payload || typeof action.payload != "boolean") return
+            state.innings.isFirstInings = action.payload
+        }
 
 
 
@@ -313,7 +317,8 @@ export const {
     tossWinner_fn,
     tossDecision_fn,
     initiate_LS_presistance,
-    resetMatch
+    resetMatch,
+    setInings
 } = matchSlice.actions;
 
 export default matchSlice.reducer;

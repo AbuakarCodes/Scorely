@@ -1,4 +1,3 @@
-
 const PERSIST_ACTIONS = new Set([
    "match/setTeams",
    "match/setOvers",
@@ -8,21 +7,19 @@ const PERSIST_ACTIONS = new Set([
 export const persistMatchMiddleware =
    store => next => action => {
 
+      next(action);
+
       const state = store.getState();
 
-      if (!state.match.flags.shouldPersistmatch) {
-         next(action)
+      if (action.type === "match/resetMatch") {
+         localStorage.removeItem("match");
+         return;
       }
 
-      if (action.type === "match/resetMatch") {
-         next(action)
-      }
-      
+      if (!state.match.flags.shouldPersistmatch) return;
+
       localStorage.setItem(
          "match",
          JSON.stringify(state.match)
       );
-
-
-      next(action)
    };

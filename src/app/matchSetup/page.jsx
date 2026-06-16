@@ -18,13 +18,8 @@ export default function MatchSetupPage() {
   const dispatch = useDispatch()
   const router = useRouter()
 
-  const { teams: reduxTeams, tossWinner, tossDecision } = useSelector((state) => state.match.match)
-  const teams = [reduxTeams.teamA, reduxTeams.teamB]
-
-  const a = useSelector((state) => state.match.match)
-  useEffect(() => {
-    console.log({ D: a.tossDecision, W: a.tossWinner.id })
-  }, [a.tossDecision, a.tossWinner])
+  const { teams: reduxTeams, tossWinner, tossDecision } = useSelector((state) => state?.match?.match)
+  const teams = [reduxTeams?.teamA, reduxTeams?.teamB]
 
   function tossWinner_handler(e, id, name) {
     if (!id || !name) return
@@ -48,7 +43,7 @@ export default function MatchSetupPage() {
     <>
       <div className="min-h-screen bg-background flex justify-center">
         <div className="relative w-full max-w-2xl border-x bg-background">
-          <Header></Header>
+          <Header router={router}/>
           <main className="space-y-6 pb-32">
             <Teams teams={teams} />
             <section className="space-y-6 px-4">
@@ -189,7 +184,7 @@ function StartMatchSection({ router }) {
   )
 }
 
-function Header() {
+function Header({router}) {
   return (
     <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
       <div className="flex items-center justify-between p-4">

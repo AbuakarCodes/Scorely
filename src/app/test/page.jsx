@@ -115,12 +115,8 @@ export default function LiveScoringPage() {
     lastWicket: "M. Marsh 22 (15)",
   }
 
-  console.log(  {battingTeamId,
-    bowlingTeamId})
-
   const [showPopup, setshowPopup] = useState(false)
 
-  console.log(pendingNewBatsman)
 
   useEffect(() => {
     if (pendingNewBatsman) {
