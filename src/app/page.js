@@ -11,7 +11,7 @@ import { AddTeams } from "@/customComponents/addTeam/addTeam"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import { useDispatch, useSelector } from "react-redux"
 import { initiate_LS_presistance } from "@/utils/reduxSclices/matchSlice"
-import { X, History, Plus, ChevronRight } from "lucide-react";
+import { X, History, Plus, ChevronRight, Settings } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -294,7 +294,7 @@ function Header() {
           className="w-full h-full object-cover" />
       </div>
 
-      <div>
+    <div class="md:block hidden">
         <p className="text-xs text-primary font-medium uppercase tracking-wider">
           Good Morning
         </p>
@@ -305,12 +305,10 @@ function Header() {
     </div>
 
     <div className="flex gap-2">
-      <button className="p-2 rounded-full hover:bg-primary/5 text-primary">
-        <span className="material-symbols-outlined">notifications</span>
-      </button>
+     
 
       <button className="p-2 rounded-full hover:bg-primary/5 text-primary">
-        <Link href="/settings" className="material-symbols-outlined">settings</Link>
+        <Link href="/settings" className="material-symbols-outlined"><Settings/></Link>
       </button>
     </div>
 
