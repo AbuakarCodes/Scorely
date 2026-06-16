@@ -36,8 +36,7 @@ export const fetchTeamPlayers = createAsyncThunk(
 );
 
 
-// INITIAL STATE
-const initialState = loadMatchState() || {
+const defaultState = {
     match: {
 
         id: "",
@@ -80,7 +79,7 @@ const initialState = loadMatchState() || {
             RRR: 0
         },
 
-        balls: [22],
+        balls: [],
 
         pendingNewBatsman: false,
         pendingBowlerChange: false,
@@ -157,6 +156,9 @@ const initialState = loadMatchState() || {
     }
 
 };
+// INITIAL STATE
+const initialState = loadMatchState() || defaultState
+
 
 
 
@@ -289,36 +291,15 @@ const matchSlice = createSlice({
 
         },
 
-        startMatch(state, isStartPrevMatch) {
+        initiate_LS_presistance(state) {
             state.flags.shouldPersistmatch = true;
-
-            const hasMatchData_LS = !!localStorage.getItem("match")
-            console.log({ hasMatchData_LS })
-
-            // if (hasMatchData_LS) {
-            //     // show popup wnats to start a prev match 
-            //     if (isStartPrevMatch) {
-            //         if (state.innings.balls.length === 0) router.push("/") // reroute to toss route
-            //         else // reroute to match and check all the data
-            //     } else {
-            //         // reroute the user to select team (set local storage with initial state )
-            //     }
-            // } else {
-            //     // reroute the user to select team 
-            // }
-            // return {
-            //     showPopup: "Local storage data"
-            // }
-
         },
-
-        toggle_prevMatch_Popup(state, action) {
-            if (typeof action.payload !== "boolean") {
-                console.error("Expected boolean")
-                return
-            }
-            state.flags.show_prevMatch_popup = action.payload
+        resetMatch(state) {
+            localStorage.removeItem("match");
+            return defaultState;
         }
+
+
 
 
     },
@@ -339,7 +320,6 @@ const matchSlice = createSlice({
             // success
             .addCase(fetchTeamPlayers.fulfilled, (state, action) => {
                 const { teamA, teamB } = action.payload;
-                console.log({ teamA, teamB })
                 state.Loading.playersLoading = false;
                 state.match.teams.teamA = {
                     id: teamA._id,
@@ -363,8 +343,8 @@ export const {
     changeBowler,
     tossWinner_fn,
     tossDecision_fn,
-    startMatch,
-    toggle_prevMatch_Popup
+    initiate_LS_presistance,
+    resetMatch
 } = matchSlice.actions;
 
 export default matchSlice.reducer;

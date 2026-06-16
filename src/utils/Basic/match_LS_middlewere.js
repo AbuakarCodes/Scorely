@@ -1,21 +1,28 @@
 
+const PERSIST_ACTIONS = new Set([
+   "match/setTeams",
+   "match/setOvers",
+   "match/updateScore",
+]);
+
 export const persistMatchMiddleware =
-store => next => action => {
+   store => next => action => {
 
-   const result = next(action);
+      const state = store.getState();
 
-   const state = store.getState();
+      if (!state.match.flags.shouldPersistmatch) {
+         next(action)
+      }
 
-   console.log({state: state.match})
+      if (action.type === "match/resetMatch") {
+         next(action)
+      }
+      
+      localStorage.setItem(
+         "match",
+         JSON.stringify(state.match)
+      );
 
-   if (!state.match.flags.shouldPersistmatch) {
-      return result;
-   }
 
-   localStorage.setItem(
-      "match",
-      JSON.stringify(state.match)
-   );
-
-   return result;
-};
+      next(action)
+   };

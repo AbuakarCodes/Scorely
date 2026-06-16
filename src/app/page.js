@@ -10,7 +10,7 @@ import { AddPlayers } from "@/customComponents/addPlayer/AddPlayers"
 import { AddTeams } from "@/customComponents/addTeam/addTeam"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import { useDispatch, useSelector } from "react-redux"
-import { startMatch } from "@/utils/reduxSclices/matchSlice"
+import { initiate_LS_presistance } from "@/utils/reduxSclices/matchSlice"
 import { X, History, Plus, ChevronRight } from "lucide-react";
 import {
   Dialog,
@@ -18,6 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+import { resetMatch } from "@/utils/reduxSclices/matchSlice"
 
 export default function Home() {
 
@@ -34,6 +36,9 @@ export default function Home() {
     if (popup?.startPrevMatch === true) {
       router.push("/test")
     } else if (popup?.startPrevMatch === false) {
+      // removing prevmatch state
+      dispatch(resetMatch())
+      dispatch(initiate_LS_presistance())
       router.push("/selectTeamToStartMatch")
     }
   }, [popup])
@@ -45,30 +50,20 @@ export default function Home() {
 
   function sratMatch_handler(e) {
     const has_matchIn_LS = !!localStorage.getItem("match")
-    if (has_matchIn_LS && balls.length > 0) {
 
+    if (has_matchIn_LS && balls.length == 0) dispatch(resetMatch())
+
+
+    if (has_matchIn_LS && balls.length > 0) {
       setPopup((prev) => ({
         ...prev, visiable: true, matchDetails: matchDetails_setter(teams, overs)
       }));
-
-
-
-      // const result = confirm("start previous match ?")
-      // if (result) {
-      // } else {
-      //   // delete the prev matach data and start adding newone
-
-      // }
-
-      // showpopup
-      // start prevmatch or new one
     } else {
-      dispatch(startMatch(1))
+      dispatch(initiate_LS_presistance())
       router.push("/selectTeamToStartMatch")
     }
 
-    // dispatch(startMatch(1))
-    //  router.push("/selectTeamToStartMatch")
+
   }
 
   return (
