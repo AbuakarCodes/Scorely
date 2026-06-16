@@ -42,7 +42,7 @@ const defaultState = {
         id: "",
         status: "live",
 
-        tossWinner: "",
+        tossWinner: { id: "", name: "" },
         tossDecision: "bat",
         matchWinner: "",
 
@@ -84,30 +84,6 @@ const defaultState = {
         pendingNewBatsman: false,
         pendingBowlerChange: false,
     },
-
-    // batsmen: {
-    //     batsmenA: {
-    //         batsmenA_Id: "",
-    //         isStriker:null,
-    //         batsmenAName: "",
-    //         batsmenA_Runs: 0,
-    //         batsmenA_facedBalls: 0,
-    //         batsmenA_fours: 0,
-    //         batsmenA_sixes: 0,
-    //         batsmenA_strikRate: 0
-    //     },
-
-    //     batsmenB: {
-    //         batsmenB_Id: "",
-    //         isStriker:null,
-    //         batsmenB_Name: "",
-    //         batsmenB_Runs: 0,
-    //         batsmenB_facedBalls: 0,
-    //         batsmenB_fours: 0,
-    //         batsmenB_sixes: 0,
-    //         batsmenB_strikRate: 0
-    //     }
-    // },
 
     batsmen: {
         batsmenA: {
@@ -272,23 +248,16 @@ const matchSlice = createSlice({
 
 
         tossWinner_fn: (state, action) => {
-            const tossWinnerTeamID = action.payload
-            state.match.tossWinner = tossWinnerTeamID
+            const id = action?.payload?.id
+            const name = action?.payload?.name
+            state.match.tossWinner.id = id
+            state.match.tossWinner.name = name
         },
 
         tossDecision_fn: (state, action) => {
-            const tossWinnerTeamDecision = action.payload
-            state.match.tossDecision = tossWinnerTeamDecision
-            if (tossWinnerTeamDecision === "bat") {
-                state.match.innings.battingTeamId = state.match.tossWinner
-                console.log("Changing bat state ")
-            } else if (tossWinnerTeamDecision === "bowl") {
-                state.match.innings.bowlingTeamId = state.match.tossWinner
-                console.log("Changing bowl state ")
-
-            }
-
-
+            const decision = action.payload
+            if (!["bat", "bowl"].includes(decision)) return
+            state.match.tossDecision = decision
         },
 
         initiate_LS_presistance(state) {

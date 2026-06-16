@@ -21,44 +21,37 @@ export default function MatchSetupPage() {
   const { teams: reduxTeams, tossWinner, tossDecision } = useSelector((state) => state.match.match)
   const teams = [reduxTeams.teamA, reduxTeams.teamB]
 
-  function tossWinner_handler(e, teamID) {
-    dispatch(tossWinner_fn(teamID))
+  const a = useSelector((state) => state.match.match)
+  useEffect(() => {
+    console.log({ D: a.tossDecision, W: a.tossWinner.id })
+  }, [a.tossDecision, a.tossWinner])
+
+  function tossWinner_handler(e, id, name) {
+    if (!id || !name) return
+    dispatch(tossWinner_fn({ id, name }))
   }
 
   function tossDecision_handler(e) {
-    if (!["bat", "bowl"].includes(e.target.name)) return
-    dispatch(tossDecision_fn(e.target.name))
+    if (!["bat", "bowl"].includes(e.target?.name)) return
+    dispatch(tossDecision_fn(e.target?.name))
   }
 
   useEffect(() => {
-    if (teams[0]?.id && tossWinner === "") {
-      dispatch(tossWinner_fn(teams[0]?.id))
+
+    if (teams[0]?.id && tossWinner.id == "") {
+      const id = teams[0]?.id
+      const name = teams[0]?.name
+        dispatch(tossWinner_fn({ id, name }))
     }
   }, [])
 
+  
   return (
     <>
       <div className="min-h-screen bg-background flex justify-center">
         <div className="relative w-full max-w-2xl border-x bg-background">
           {/* Header */}
-          <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
-            <div className="flex items-center justify-between p-4">
-              <Button size="icon" variant="ghost" className="rounded-full">
-                <Button
-                
-                  onClick={() => {
-                    router.back()
-                  }}
-                >
-                  <ArrowLeft className="size-5" />
-                </Button>
-              </Button>
-
-              <h1 className="text-lg font-bold">Match Setup</h1>
-
-              <div className="w-9" />
-            </div>
-          </header>
+          <Header></Header>
 
           <main className="space-y-6 pb-32">
             {/* Teams */}
@@ -96,12 +89,12 @@ export default function MatchSetupPage() {
 
                 <div className="flex gap-3">
                   {teams.map((team, idx) => {
-                    const active = tossWinner === team.id
+                    const active = tossWinner.id === team.id
 
                     return (
                       <button
                         key={team.id}
-                        onClick={(e) => tossWinner_handler(e, team.id)}
+                        onClick={(e) => tossWinner_handler(e, team?.id, team?.name)}
                         className={`flex flex-1 items-center justify-center gap-2 rounded-xl border-2 px-4 py-4 transition-all ${
                           active
                             ? "border-primary bg-primary/10 text-primary"
@@ -184,3 +177,24 @@ export default function MatchSetupPage() {
     // <></>
   )
 }
+
+function Header() {
+  return <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
+    <div className="flex items-center justify-between p-4">
+      <Button size="icon" variant="ghost" className="rounded-full">
+        <Button
+          onClick={() => {
+            router.back()
+          } }
+        >
+          <ArrowLeft className="size-5" />
+        </Button>
+      </Button>
+
+      <h1 className="text-lg font-bold">Match Setup</h1>
+
+      <div className="w-9" />
+    </div>
+  </header>
+}
+

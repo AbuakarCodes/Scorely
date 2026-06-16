@@ -204,6 +204,6 @@
   scrollbar-width: none; /* Firefox */
 }
 
-.button {
+button {
   cursor: pointer;
 }
