@@ -63,12 +63,13 @@ export default function SelectTeamsPage() {
 
     const selectedTeamsData = teams.filter((team) => selectedTeams.includes(team._id))
 
-    await dispatch(
+  const a =  await dispatch(
       fetchTeamPlayers({
         teamAId: selectedTeamsData[0]._id,
         teamBId: selectedTeamsData[1]._id,
       }),
     )
+    console.log("A",a)
     router.push("/matchSetup")
   }
 

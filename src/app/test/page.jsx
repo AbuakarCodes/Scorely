@@ -8,9 +8,8 @@ import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlaye
 export default function LiveScoringPage() {
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
 
-
-
   const { batsmen, bowler, innings } = useSelector((state) => state.match)
+  const { tossDecision, tossWinner } = useSelector((state) => state.match.match)
 
   const { bowler_Id, bowler_Name, bowler_over, bowler_ballInOver, bowler_Runs, bowler_Econ, bowler_Wickets } =
     bowler
@@ -117,7 +116,6 @@ export default function LiveScoringPage() {
 
   const [showPopup, setshowPopup] = useState(false)
 
-
   useEffect(() => {
     if (pendingNewBatsman) {
       setshowPopup(true)
@@ -128,10 +126,8 @@ export default function LiveScoringPage() {
 
   const [selectedExtra, setSelectedExtra] = useState(null)
 
-
   const [matchState, setMatchState] = useState(initialMatch)
 
-  
   // ADD BALL HANDLER
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
@@ -152,7 +148,7 @@ export default function LiveScoringPage() {
 
       bowlerId: matchState.bowler.id,
 
-      battingTeamId:battingTeamId,
+      battingTeamId: battingTeamId,
 
       bowlingTeamId: bowlingTeamId,
 
@@ -228,6 +224,18 @@ export default function LiveScoringPage() {
       return isNaN(parsed) ? acc : acc + parsed
     }, 0)
   }, [matchState.recentBalls])
+
+  function PlayerSelection(params) {
+    if (tossDecision == "bat") {
+      const battingteam = [teamA, teamB].map((t) => {
+        if (t.id === tossWinner.id) return t
+      })
+      console.log(battingteam)
+    }
+  }
+
+  // [] batting side players
+  PlayerSelection()
 
   return (
     <>
@@ -385,24 +393,6 @@ export default function LiveScoringPage() {
               <span className="w-16 text-right font-bold text-primary">{matchState.bowler.economy}</span>
             </div>
           </section>
-
-          {/* EXTRA INFO */}
-
-          {/* <section className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl border bg-white p-4 shadow-sm">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Partnership</p>
-
-              <p className="mt-1 text-sm font-bold text-primary">
-                {matchState.partnership.runs} ({matchState.partnership.balls} balls)
-              </p>
-            </div>
-
-            <div className="rounded-xl border bg-white p-4 shadow-sm">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Last Wicket</p>
-
-              <p className="mt-1 text-sm font-bold">{matchState.lastWicket}</p>
-            </div>
-          </section> */}
         </main>
 
         {/* SCORING PANEL */}
@@ -475,7 +465,6 @@ export default function LiveScoringPage() {
             ))}
           </div>
 
-          {/* 
           {selectedExtra && (
             <div className="mt-3 flex items-center justify-between rounded-xl bg-primary/10 px-4 py-3">
               <p className="text-sm font-medium text-primary">Extra Selected: {selectedExtra}</p>
@@ -488,7 +477,7 @@ export default function LiveScoringPage() {
                 Clear
               </button>
             </div>
-          )} */}
+          )}
         </div>
       </div>
     </>

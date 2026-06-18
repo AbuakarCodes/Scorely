@@ -25,15 +25,19 @@ export const fetchTeamPlayers = createAsyncThunk(
                 teamAId,
                 teamBId,
             });
-            return data?.data;
+            // return inject_isDismissedInPlayers(data?.data);
+            return data?.data
         } catch (err) {
-            console.log(err.message)
+            console.error(err.message)
             return rejectWithValue(
                 err.response?.data?.message || "Failed to fetch teams"
             );
         }
     }
 );
+
+
+
 
 
 const defaultState = {
@@ -290,20 +294,34 @@ const matchSlice = createSlice({
                 state.Loading.playersError = null;
             })
 
+            // failed state
+            .addCase(fetchTeamPlayers.rejected, (state, action) => {
+                state.Loading.playersLoading = false;
+                state.Loading.playersError = action.payload || action.error.message;
+            })
+
             // success
             .addCase(fetchTeamPlayers.fulfilled, (state, action) => {
                 const { teamA, teamB } = action.payload;
                 state.Loading.playersLoading = false;
                 state.match.teams.teamA = {
-                    id: teamA._id,
-                    name: teamA.name,
-                    players: teamA.players,
+                    id: teamA?._id,
+                    name: teamA?.name,
+                    isBatting: null,
+                    players: teamA?.players?.map(P => ({
+                        ...P,
+                        isDismissed: false,
+                    })),
                 };
 
                 state.match.teams.teamB = {
-                    id: teamB._id,
-                    name: teamB.name,
-                    players: teamB.players,
+                    id: teamB?._id,
+                    name: teamB?.name,
+                    isBatting: null,
+                    players: teamB?.players?.players?.map(P => ({
+                        ...P,
+                        isDismissed: false,
+                    })),
                 };
             });
     },
@@ -333,3 +351,26 @@ function loadMatchState() {
         return undefined;
     }
 };
+
+
+function inject_isDismissedInPlayers(params) {
+    if (!params) return;
+
+    return {
+        teamA: {
+            ...params.teamA, isBatting: false,
+            players: params.teamA.players.map((player) => ({
+                ...player,
+                isDismissed: false,
+            })),
+        },
+
+        teamB: {
+            ...params.teamB, isBatting: false,
+            players: params.teamB.players.map((player) => ({
+                ...player,
+                isDismissed: false,
+            })),
+        },
+    };
+}

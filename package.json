@@ -17,6 +17,7 @@
     "cloudinary": "^2.10.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
+    "framer-motion": "^12.40.0",
     "install": "^0.13.0",
     "lucide-react": "^0.577.0",
     "mongoose": "^9.3.0",
