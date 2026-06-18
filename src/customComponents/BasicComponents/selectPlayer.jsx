@@ -93,45 +93,24 @@ export default function PlayerSelectionModal({ open, onClose }) {
                 overflow-hidden
               "
           >
-            {/* Drag Handle */}
-            <div className="flex justify-center py-4">
-              <div className="h-1.5 w-12 rounded-full bg-muted" />
-            </div>
+            <Notch></Notch>
+            <Header></Header>
+            <SearchPlayers></SearchPlayers>
+            <PlayersList players={players}></PlayersList>
+            <Footer></Footer>
+          </motion.div>
+        </motion.div>
+      </>
+    </AnimatePresence>
+  )
 
-            {/* Header */}
-            <div className="px-6 pb-4">
-              <h2 className="text-2xl font-bold">Select Player</h2>
-
-              <p className="mt-1 text-sm text-muted-foreground">Assigning next batter for Innings 1</p>
-            </div>
-
-            {/* Search + Filters */}
-            <div className="space-y-4 px-6 pb-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
-                <Input placeholder="Search by name or role..." className="pl-10" />
-              </div>
-
-              <div className="flex gap-3">
-                <Button className="flex-1 bg-primary text-white hover:bg-primary/90">
-                  <Trophy className="mr-2 h-4 w-4" />
-                  Batting
-                </Button>
-
-                <Button variant="outline" className="flex-1">
-                  <Shield className="mr-2 h-4 w-4" />
-                  Bowling
-                </Button>
-              </div>
-            </div>
-
-            {/* Player List */}
-            <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-3">
-              {players.map((player) => (
-                <div
-                  key={player.id}
-                  className="
+  function PlayersList({ players }) {
+    return (
+      <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-3">
+        {players.map((player) => (
+          <div
+            key={player.id}
+            className="
                       flex
                       items-center
                       gap-4
@@ -141,17 +120,13 @@ export default function PlayerSelectionModal({ open, onClose }) {
                       transition-all
                       hover:bg-muted
                     "
-                >
-                  <div className="relative">
-                    <img
-                      src={player.image}
-                      alt={player.name}
-                      className="h-14 w-14 rounded-full object-cover"
-                    />
+          >
+            <div className="relative">
+              <img src={player.image} alt={player.name} className="h-14 w-14 rounded-full object-cover" />
 
-                    {player.number && (
-                      <div
-                        className="
+              {player.number && (
+                <div
+                  className="
                             absolute
                             -bottom-1
                             -right-1
@@ -166,51 +141,75 @@ export default function PlayerSelectionModal({ open, onClose }) {
                             font-bold
                             text-white
                           "
-                      >
-                        {player.number}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{player.name}</h3>
-
-                    <p className="text-xs text-muted-foreground">{player.role}</p>
-
-                    <div className="mt-2 flex gap-5">
-                      <div>
-                        <p className="text-[10px] text-muted-foreground">AVG</p>
-
-                        <p className="font-bold">{player.avg}</p>
-                      </div>
-
-                      <div>
-                        <p className="text-[10px] text-muted-foreground">SR</p>
-
-                        <p className="font-bold">{player.sr}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button className="bg-primary text-white hover:bg-primary/90">Select</Button>
+                >
+                  {player.number}
                 </div>
-              ))}
+              )}
             </div>
 
-            {/* Footer */}
-            <div className="flex items-center justify-between border-t px-6 py-4">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Users className="h-4 w-4" />
-                <span className="text-sm">11 Players Available</span>
+            <div className="flex-1">
+              <h3 className="font-semibold">{player.name}</h3>
+
+              <p className="text-xs text-muted-foreground">{player.role}</p>
+
+              <div className="mt-2 flex gap-5">
+                <div>
+                  <p className="text-[10px] text-muted-foreground">AVG</p>
+
+                  <p className="font-bold">{player.avg}</p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] text-muted-foreground">SR</p>
+
+                  <p className="font-bold">{player.sr}</p>
+                </div>
               </div>
-
-              <Button variant="ghost" onClick={onClose}>
-                Close
-              </Button>
             </div>
-          </motion.div>
-        </motion.div>
-      </>
-    </AnimatePresence>
+
+            <Button className="bg-primary text-white hover:bg-primary/90">Select</Button>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  function SearchPlayers() {
+    return (
+      <div className="space-y-4 px-6 pb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Search by name or role..." className="pl-10" />
+        </div>
+      </div>
+    )
+  }
+
+  function Header() {
+    return (
+      <div className="px-6 pb-4">
+        <h2 className="text-2xl font-bold">Select Player</h2>
+
+        <p className="mt-1 text-sm text-muted-foreground">Assigning next batter for Innings 1</p>
+      </div>
+    )
+  }
+
+  function Notch() {
+    return (
+      <div className="flex justify-center py-4">
+        <div className="h-1.5 w-12 rounded-full bg-black/30" />
+      </div>
+    )
+  }
+}
+function Footer() {
+  return (
+    <div className="flex items-center justify-between border-t px-6 py-4">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Users className="h-4 w-4" />
+        <span className="text-sm">11 Players Available</span>
+      </div>
+    </div>
   )
 }

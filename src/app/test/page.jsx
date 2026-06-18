@@ -225,21 +225,33 @@ export default function LiveScoringPage() {
     }, 0)
   }, [matchState.recentBalls])
 
-  function PlayerSelection(params) {
-    if (tossDecision == "bat") {
-      const battingteam = [teamA, teamB].map((t) => {
-        if (t.id === tossWinner.id) return t
-      })
-      console.log(battingteam)
-    }
-  }
+  
 
-  // [] batting side players
-  PlayerSelection()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 
   return (
     <>
-      {showPopup && <PlayerSelectionModal></PlayerSelectionModal>}
+      {true && <PlayerSelectionModal></PlayerSelectionModal>}
 
       <div className="min-h-screen bg-slate-50 pb-52">
         {/* HEADER */}

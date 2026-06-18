@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { useDispatch, useSelector } from "react-redux"
-
+import { setInings } from "@/utils/reduxSclices/matchSlice"
 import { tossWinner_fn, tossDecision_fn } from "@/utils/reduxSclices/matchSlice"
 import { useEffect } from "react"
 
@@ -43,7 +43,7 @@ export default function MatchSetupPage() {
     <>
       <div className="min-h-screen bg-background flex justify-center">
         <div className="relative w-full max-w-2xl border-x bg-background">
-          <Header router={router}/>
+          <Header router={router} />
           <main className="space-y-6 pb-32">
             <Teams teams={teams} />
             <section className="space-y-6 px-4">
@@ -52,7 +52,7 @@ export default function MatchSetupPage() {
             </section>
             <MatchSettings />
           </main>
-          <StartMatchSection router={router} />
+          <StartMatchSection router={router} dispatch={dispatch}/>
         </div>
       </div>
     </>
@@ -174,17 +174,21 @@ function Teams({ teams }) {
   )
 }
 
-function StartMatchSection({ router }) {
+function StartMatchSection({ router, dispatch}) {
+  function startMatch_handler(e) {
+    dispatch(setInings(true))
+    router.push("/test")
+  }
   return (
     <div className="fixed bottom-0 left-1/2 w-full max-w-2xl -translate-x-1/2 border-t bg-background p-4">
-      <Button className="h-14 w-full gap-2 text-base font-bold" onClick={() => router.push("/test")}>
+      <Button className="h-14 w-full gap-2 text-base font-bold" onClick={startMatch_handler}>
         Start Match
       </Button>
     </div>
   )
 }
 
-function Header({router}) {
+function Header({ router }) {
   return (
     <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
       <div className="flex items-center justify-between p-4">
