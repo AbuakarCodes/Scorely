@@ -66,13 +66,13 @@ const defaultState = {
     },
 
     innings: {
+        isInings: false,
         isFirstInings: null,
 
         battingTeamId: "",
         bowlingTeamId: "",
 
         dismissedPlayers: [],
-        yetToBall: [],
 
         score: {
             runs: 0,
@@ -85,13 +85,13 @@ const defaultState = {
 
         balls: [],
 
-        pendingNewBatsman: false,
-        pendingBowlerChange: false,
+        pendingNewBatsman: { stricker: null, nonStricker: null },
+        pendingNewBowler: null,
     },
 
     batsmen: {
         batsmenA: {
-            id: "BAT001",
+            id: "",
             name: "Abdullah Khan",
             runs: 45,
             balls: 32,
@@ -102,7 +102,7 @@ const defaultState = {
         },
 
         batsmenB: {
-            id: "BAT002",
+            id: "",
             name: "Ali",
             runs: 28,
             balls: 25,
@@ -114,14 +114,18 @@ const defaultState = {
     },
 
     bowler: {
-        bowler_Id: "",
-        bowler_Name: "",
-        bowler_over: 0,
-        bowler_ballInOver: 0,
-        bowler_Runs: 0,
-        bowler_Econ: 0,
-        bowler_Wickets: 0,
-
+        alreadyBowled: [],
+        currentBowler: {
+            id: "",
+            name: "",
+            over: 0,
+            ballInOver: 0,
+            runsOnThatBall: 0,
+            Econ: 0,
+            TotalWickets: 0,
+            TotalOver: 0,
+            TotalRunsConceded: 0
+        }
     },
 
     Loading: {
@@ -166,37 +170,34 @@ const matchSlice = createSlice({
 
             const innings = state.innings;
 
+            // function will return that object 
             const ball = {
                 matchId: state.match.id,
 
-                inningsNumber: state.innings.isFirstInings ? 1 : 2,
+                inningsNumber: state.innings.isFirstInnings ? 1 : 2,
 
                 over: state.innings.score.overs,
                 ballInOver: state.innings.score.balls,
 
                 isLegalDelivery:
-                    action.payload.extraType !== "wide" &&
-                    action.payload.extraType !== "noball",
+                    action.payload.extraType !== "Wide" &&
+                    action.payload.extraType !== "NB",
 
                 strikerId: state.innings.strikerId,
                 nonStrikerId: state.innings.nonStrikerId,
-
                 bowlerId: state.innings.currentBowlerId,
-
-                battingTeamId: state.innings.battingTeamId,
-                bowlingTeamId: state.innings.bowlingTeamId,
 
                 runs: action.payload.runs || 0,
 
                 extraType: action.payload.extraType || null,
-
                 extraRuns: action.payload.extraRuns || 0,
 
                 isWicket: action.payload.wicket || false,
-
             };
 
+            // state shange 
             innings.balls.push(ball);
+
 
             innings.score.runs += runs;
 
@@ -210,7 +211,7 @@ const matchSlice = createSlice({
             }
 
             // over completed
-            if (innings.score.balls === 6) {
+            if (innings.score.balls === 5) {
                 innings.score.overs += 1;
                 innings.score.balls = 0;
 
@@ -224,6 +225,12 @@ const matchSlice = createSlice({
                 swapStrike(state);
             }
         },
+
+
+
+
+
+
 
 
         // SET PLAYERS AFTER FETCH (optional manual)
@@ -273,7 +280,6 @@ const matchSlice = createSlice({
         },
 
         setInings(state, action) {
-            console.log(action.payload)
             if (!action.payload || typeof action.payload != "boolean") return
             state.innings.isFirstInings = action.payload
         }
@@ -319,7 +325,7 @@ const matchSlice = createSlice({
                     id: teamB?._id,
                     name: teamB?.name,
                     isBatting: null,
-                    players: teamB?.players?.players?.map(P => ({
+                    players: teamB?.players?.map(P => ({
                         ...P,
                         isDismissed: false,
                     })),

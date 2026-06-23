@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import { ArrowLeft, Trophy, Shield } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
@@ -52,7 +51,7 @@ export default function MatchSetupPage() {
             </section>
             <MatchSettings />
           </main>
-          <StartMatchSection router={router} dispatch={dispatch}/>
+          <StartMatchSection router={router} dispatch={dispatch} />
         </div>
       </div>
     </>
@@ -174,7 +173,7 @@ function Teams({ teams }) {
   )
 }
 
-function StartMatchSection({ router, dispatch}) {
+function StartMatchSection({ router, dispatch }) {
   function startMatch_handler(e) {
     dispatch(setInings(true))
     router.push("/test")

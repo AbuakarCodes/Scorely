@@ -2,9 +2,7 @@ import mongoose from "mongoose";
 
 const BallSchema = new mongoose.Schema(
   {
-    // -----------------------------
     // IDENTIFIERS
-    // -----------------------------
     matchId: {
       type: String,
       required: true,
@@ -31,9 +29,7 @@ const BallSchema = new mongoose.Schema(
       required: true,
     },
 
-    // -----------------------------
     // PLAYERS
-    // -----------------------------
     strikerId: {
       type: String,
       required: true,
@@ -48,19 +44,9 @@ const BallSchema = new mongoose.Schema(
       required: true,
     },
 
-    battingTeamId: {
-      type: String,
-      required: true,
-    },
 
-    bowlingTeamId: {
-      type: String,
-      required: true,
-    },
 
-    // -----------------------------
     // SCORING CORE
-    // -----------------------------
     runs: {
       type: Number,
       required: true,
@@ -71,10 +57,10 @@ const BallSchema = new mongoose.Schema(
       type: String,
       enum: [
         null,
-        "wide",
-        "noball",
-        "bye",
-        "legbye",
+        "Wide",
+        "NB",
+        "Bye",
+        "Legbye",
       ],
       default: null,
     },

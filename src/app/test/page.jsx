@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { ArrowLeft, RotateCcw, Star, RefreshCcw } from "lucide-react"
 import { useSelector } from "react-redux"
 import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlayer"
@@ -9,50 +9,9 @@ export default function LiveScoringPage() {
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
 
   const { batsmen, bowler, innings } = useSelector((state) => state.match)
-  const { tossDecision, tossWinner } = useSelector((state) => state.match.match)
-
-  const { bowler_Id, bowler_Name, bowler_over, bowler_ballInOver, bowler_Runs, bowler_Econ, bowler_Wickets } =
-    bowler
-
-  const {
-    isFirstInings,
-    battingTeamId,
-    bowlingTeamId,
-    dismissedPlayers,
-    yetToBall,
-    score,
-    balls,
-    pendingNewBatsman,
-    pendingBowlerChange,
-  } = innings
-
-  const { runs, wickets, over, balls: totalBalls, CRR, RRR } = score
-
   const { batsmenA, batsmenB } = batsmen
-
-  const {
-    batsmenA: {
-      batsmenA_Id,
-      isStriker: batsmenA_isStriker,
-      batsmenAName,
-      batsmenA_Runs,
-      batsmenA_facedBalls,
-      batsmenA_fours,
-      batsmenA_sixes,
-      batsmenA_strikRate,
-    },
-
-    batsmenB: {
-      batsmenB_Id,
-      isStriker: batsmenB_isStriker,
-      batsmenB_Name,
-      batsmenB_Runs,
-      batsmenB_facedBalls,
-      batsmenB_fours,
-      batsmenB_sixes,
-      batsmenB_strikRate,
-    },
-  } = batsmen
+  const { runs, wickets, over, balls: totalBalls, CRR, RRR } = innings?.score
+  const { pendingNewBowler, pendingNewBatsman } = innings
 
   const initialMatch = {
     match: {
@@ -116,12 +75,6 @@ export default function LiveScoringPage() {
 
   const [showPopup, setshowPopup] = useState(false)
 
-  useEffect(() => {
-    if (pendingNewBatsman) {
-      setshowPopup(true)
-    }
-  }, [])
-
   // LOCAL UI STATE
 
   const [selectedExtra, setSelectedExtra] = useState(null)
@@ -138,7 +91,7 @@ export default function LiveScoringPage() {
 
       over: over,
 
-      ballInOver: bowler_ballInOver,
+      ballInOver: bowler.bowler_ballInOver,
 
       isLegalDelivery: !extraType || (extraType !== "wide" && extraType !== "noball"),
 
@@ -148,9 +101,9 @@ export default function LiveScoringPage() {
 
       bowlerId: matchState.bowler.id,
 
-      battingTeamId: battingTeamId,
+      battingTeamId: innings?.battingTeamId,
 
-      bowlingTeamId: bowlingTeamId,
+      bowlingTeamId: innings?.bowlingTeamId,
 
       runs,
 
@@ -182,8 +135,8 @@ export default function LiveScoringPage() {
         updatedBalls.shift()
       }
 
-      let newBalls = prev.score.balls
-      let newOvers = prev.score.overs
+      let newBalls = prev.innings?.score.balls
+      let newOvers = prev.innings?.score.overs
 
       if (!extraType || extraType === "bye" || extraType === "legbye") {
         newBalls += 1
@@ -200,9 +153,9 @@ export default function LiveScoringPage() {
         recentBalls: updatedBalls,
 
         score: {
-          ...prev.score,
-          runs: prev.score.runs + runs,
-          wickets: type === "wicket" ? prev.score.wickets + 1 : prev.score.wickets,
+          ...prev.innings?.score,
+          runs: prev.innings?.score.runs + runs,
+          wickets: type === "wicket" ? prev.innings?.score.wickets + 1 : prev.innings?.score.wickets,
           overs: newOvers,
           balls: newBalls,
         },
@@ -225,33 +178,74 @@ export default function LiveScoringPage() {
     }, 0)
   }, [matchState.recentBalls])
 
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   
 
 
+   const players = [
+  {
+    id: 1,
+    name: "Alastair Cook",
+    role: "Left-hand Bat",
+    avg: 45.35,
+    sr: 112.4,
+    number: 8,
+    image: "https://i.pravatar.cc/150?img=1",
+  },
+  {
+    id: 2,
+    name: "James Anderson",
+    role: "Right-arm Fast",
+    avg: 12.1,
+    sr: 95.2,
+    number: 12,
+    image: "https://i.pravatar.cc/150?img=2",
+  },
+  {
+    id: 3,
+    name: "Sarah Taylor",
+    role: "Wicket Keeper Bat",
+    avg: 38.4,
+    sr: 128.5,
+    number: 4,
+    image: "https://i.pravatar.cc/150?img=3",
+  },
+  {
+    id: 4,
+    name: "Kevin Pietersen",
+    role: "Right-hand Bat",
+    avg: 47.28,
+    sr: 145.2,
+    image: "https://i.pravatar.cc/150?img=4",
+  },
+]
 
+  const criteria = useRef({ stricker: null, nonStricker: null, bowler: null })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
+  useEffect(() => {
+    setshowPopup(true)
+  }, [pendingNewBowler, pendingNewBowler])
   return (
     <>
-      {true && <PlayerSelectionModal></PlayerSelectionModal>}
+      {showPopup && <PlayerSelectionModal player={players} />}
 
       <div className="min-h-screen bg-slate-50 pb-52">
         {/* HEADER */}
@@ -273,7 +267,8 @@ export default function LiveScoringPage() {
                     <div className="size-2 rounded-full bg-red-500 animate-pulse" />
 
                     <span className="text-[10px] font-bold uppercase tracking-wider">
-                      Live • {isFirstInings === null ? "" : isFirstInings ? "1" : "2"}st Innings
+                      Live • {innings.isFirstInings === null ? "" : innings.isFirstInings ? "1" : "2"}st
+                      Innings
                     </span>
                   </div>
                 </div>
@@ -281,7 +276,7 @@ export default function LiveScoringPage() {
 
               <div className="text-right">
                 <p className="text-[10px] uppercase font-bold opacity-70">
-                  Target: {isFirstInings === false || isFirstInings === null ? "N/A" : "123"}
+                  Target: {innings.isFirstInings === false || innings.isFirstInings === null ? "N/A" : "123"}
                 </p>
 
                 <div className="mt-1 flex gap-4 text-sm font-bold">
@@ -292,7 +287,7 @@ export default function LiveScoringPage() {
                   <p>
                     RRR{" "}
                     <span className="opacity-70">
-                      {isFirstInings === false || isFirstInings === null ? "N/A" : RRR}
+                      {innings.isFirstInings === false || innings.isFirstInings === null ? "N/A" : RRR}
                     </span>
                   </p>
                 </div>
@@ -305,7 +300,7 @@ export default function LiveScoringPage() {
               </h2>
 
               <p className="pb-1 text-lg opacity-80">
-                {over}.{matchState.score.balls} Overs
+                {over}.{matchState.innings?.score.balls} Overs
               </p>
             </div>
           </div>
@@ -353,7 +348,7 @@ export default function LiveScoringPage() {
           {/* BATSMEN */}
           {[batsmenA, batsmenB].map((player) => (
             <div
-              key={player.id}
+              key={`${player.id + Math.random()}`}
               className={`flex items-center px-4 py-4 border-t
     ${player.isStriker ? "bg-primary/5" : "bg-white"}`}
             >

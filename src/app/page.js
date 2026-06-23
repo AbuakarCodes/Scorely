@@ -294,7 +294,7 @@ function Header() {
           className="w-full h-full object-cover" />
       </div>
 
-    <div class="md:block hidden">
+    <div className="md:block hidden">
         <p className="text-xs text-primary font-medium uppercase tracking-wider">
           Good Morning
         </p>
