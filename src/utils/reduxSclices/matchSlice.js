@@ -72,7 +72,7 @@ const defaultState = {
         battingTeamId: "",
         bowlingTeamId: "",
 
-        dismissedPlayers: [],
+
 
         score: {
             runs: 0,
@@ -85,8 +85,8 @@ const defaultState = {
 
         balls: [],
 
-        pendingNewBatsman: { stricker: null, nonStricker: null },
-        pendingNewBowler: null,
+        pendingNewBatsman: { stricker: true, nonStricker: true },
+        pendingNewBowler: true,
     },
 
     batsmen: {
