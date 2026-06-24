@@ -25,8 +25,7 @@ export const fetchTeamPlayers = createAsyncThunk(
                 teamAId,
                 teamBId,
             });
-            // return inject_isDismissedInPlayers(data?.data);
-            return data?.data
+            return inject_isDismissedInPlayers(data?.data);
         } catch (err) {
             console.error(err.message)
             return rejectWithValue(
@@ -67,7 +66,7 @@ const defaultState = {
 
     innings: {
         isInings: false,
-        isFirstInings: null,
+        isFirstInings: false,
 
         battingTeamId: "",
         bowlingTeamId: "",
@@ -142,6 +141,7 @@ const defaultState = {
 };
 // INITIAL STATE
 const initialState = loadMatchState() || defaultState
+
 
 
 
@@ -234,11 +234,11 @@ const matchSlice = createSlice({
 
 
         // SET PLAYERS AFTER FETCH (optional manual)
-        setTeamPlayers: (state, action) => {
-            const { teamId, players } = action.payload;
+        // setTeamPlayers: (state, action) => {
+        //     const { teamId, players } = action.payload;
 
-            state.match.teams[teamId].players = players;
-        },
+        //     state.match.teams[teamId].players = players;
+        // },
 
 
         // SELECT NEW BATSMAN
@@ -282,7 +282,8 @@ const matchSlice = createSlice({
         setInings(state, action) {
             if (!action.payload || typeof action.payload != "boolean") return
             state.innings.isFirstInings = action.payload
-        }
+        },
+
 
 
 
@@ -336,7 +337,7 @@ const matchSlice = createSlice({
 
 export const {
     addBall,
-    setTeamPlayers,
+    // setTeamPlayers,
     selectNewBatsman,
     changeBowler,
     tossWinner_fn,

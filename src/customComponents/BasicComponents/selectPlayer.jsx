@@ -116,10 +116,7 @@ const DUMMY_BOWLERS = [
   },
 ]
 
-
 export default function SelectParticipantsModal({ onClose, onConfirm }) {
-  // 0 = batting, 1 = balling
-  const OrderdTeams = useRef([])
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
   const { tossDecision, tossWinner } = useSelector((state) => state?.match?.match)
   const pendingNewBatsman = useSelector(
@@ -129,23 +126,12 @@ export default function SelectParticipantsModal({ onClose, onConfirm }) {
 
   const [search, setSearch] = useState("")
 
+  // 0 = batting, 1 = balling
+  const [OrderdTeams, setOrderdTeams] = useState([{ players: [] }, { players: [] }])
+
   useEffect(() => {
-    orderingTeams()
+    setOrderdTeams(orderingTeams(teamA, teamB, tossWinner, tossDecision))
   }, [teamA, teamB])
-
-  // order teams temas in array [0] = batting, [1] = bowling
-  function orderingTeams() {
-    const TosswinningTeam = [teamA, teamB].find((team) => team.id === tossWinner.id)
-    const ToosLostTeam = [teamA, teamB].find((team) => team.id !== tossWinner.id)
-
-    if (tossDecision === "bat") {
-      OrderdTeams.current[0] = TosswinningTeam
-      OrderdTeams.current[1] = ToosLostTeam
-    } else if (tossDecision === "bowl") {
-      OrderdTeams.current[0] = ToosLostTeam
-      OrderdTeams.current[1] = TosswinningTeam
-    }
-  }
 
   const needStriker = pendingNewBatsman?.stricker
   const needBothBatsmen = pendingNewBatsman.nonStricker && pendingNewBatsman.stricker
@@ -186,12 +172,12 @@ export default function SelectParticipantsModal({ onClose, onConfirm }) {
   // For bowler [1]
   // revers the team order when the inings got changed
 
-  const allPlayers = isBowlerTab ? DUMMY_BOWLERS : DUMMY_BATSMEN
+  const allPlayers = isBowlerTab ? OrderdTeams[1].players : OrderdTeams[0].players
   const filtered = allPlayers.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
 
   // ── Select a player ───────────────────────────────────────────────────────
   function handleSelect(player) {
-    const next = { ...playerSelections, [activeTab]: player.id }
+    const next = { ...playerSelections, [activeTab]: player._id }
     setplayerSelections(next)
 
     // Auto-advance to next unselected tab
@@ -199,7 +185,11 @@ export default function SelectParticipantsModal({ onClose, onConfirm }) {
     const nextTab = tabList.find((t, i) => i > currentIdx && !next[t] === true)
     // If there's a next tab that has no selection yet, move there
     const nextUnfilled = tabList.find((t, i) => i > currentIdx && next[t] === null)
-    if (nextUnfilled) setActiveTab(nextUnfilled)
+    if (nextUnfilled) {
+      setTimeout(() => {
+        setActiveTab(nextUnfilled)
+      }, 180)
+    }
   }
 
   // ── Confirm ───────────────────────────────────────────────────────────────
@@ -243,7 +233,6 @@ export default function SelectParticipantsModal({ onClose, onConfirm }) {
           {/* Header */}
           <header className="bg-[] flex items-center justify-between px-5 py-4 z-10">
             <button
-              onClick={onClose}
               className="p-2 rounded-full  active:scale-95 transition-all text-transparent"
             >
               <X size={20} />
@@ -268,7 +257,7 @@ export default function SelectParticipantsModal({ onClose, onConfirm }) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search players by name…"
-                className="w-full rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:ring-2 focus:ring-chart-4 transition-all"
+                className="w-full rounded-xl pl-10 pr-4 py-3 text-sm outline-none  focus:ring-2 focus:ring-chart-4 transition-all"
               />
             </div>
 
@@ -303,7 +292,7 @@ export default function SelectParticipantsModal({ onClose, onConfirm }) {
                 key={player.id}
                 player={player}
                 isBowler={isBowlerTab}
-                isSelected={playerSelections[activeTab] === player.id}
+                isSelected={playerSelections[activeTab] === player._id}
                 onClick={() => handleSelect(player)}
               />
             ))}
@@ -333,7 +322,6 @@ export default function SelectParticipantsModal({ onClose, onConfirm }) {
               onClick={handleConfirm}
               disabled={!allFilled}
               className=" bg-primary text-white w-full py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 disabled:opacity-40"
-             
             >
               {allFilled
                 ? "Confirm Selection"
@@ -376,24 +364,17 @@ function PlayerCard({ player, isSelected, onClick, isBowler }) {
   function Stat({ label, value, selected }) {
     return (
       <div className="flex flex-col">
-        <span
-          className={`text-[10px] uppercase font-bold tracking-wider text-gray-500 }`}
-        >
-          {label}
-        </span>
-        <span
-          className={`text-sm font-bold ${selected ? " text-chart-4" : "text-gray-950"}`}
-        >
-          {value}
-        </span>
+        <span className={`text-[10px] uppercase font-bold tracking-wider text-gray-500 }`}>{label}</span>
+        <span className={`text-sm font-bold ${selected ? " text-chart-4" : "text-gray-950"}`}>{value}</span>
       </div>
     )
   }
 
   function Avatar({ initials }) {
+    const value = initials.split("")[0]
     return (
       <div className="w-14 h-14 rounded-full bg-white-100 flex items-center justify-center text-gray-950 font-bold text-lg select-none">
-        {initials}
+        {value}
       </div>
     )
   }
@@ -410,18 +391,16 @@ function PlayerCard({ player, isSelected, onClick, isBowler }) {
     >
       {/* Avatar */}
       <div
-        className={`relative w-14 h-14 rounded-full overflow-hidden border-2 transition-colors flex-shrink-0
+        className={`relative w-14 h-14 rounded-full overflow-hidden border-2 transition-colors 
         ${isSelected ? "border-chart-4" : "border-gray-200 group-hover:border-chart-4"}`}
       >
-        <Avatar initials={player.initials} />
+        <Avatar initials={player.name} />
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <h3
-            className={`font-bold text-base truncate ${isSelected ? "text-chart-4" : "text-gray-900"}`}
-          >
+          <h3 className={`font-bold text-base truncate ${isSelected ? "text-chart-4" : "text-gray-900"}`}>
             {player.name}
           </h3>
           <span
@@ -448,7 +427,7 @@ function PlayerCard({ player, isSelected, onClick, isBowler }) {
 
       {/* Chevron / check */}
       <div
-        className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all
+        className={`w-9 h-9 rounded-full flex items-center justify-center  transition-all
         ${
           isSelected
             ? "bg-chart-4 text-white"
@@ -459,4 +438,17 @@ function PlayerCard({ player, isSelected, onClick, isBowler }) {
       </div>
     </div>
   )
+}
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// Logic
+
+function orderingTeams(teamA, teamB, tossWinner, tossDecision) {
+  const TosswinningTeam = [teamA, teamB].find((team) => team.id === tossWinner.id)
+  const ToosLostTeam = [teamA, teamB].find((team) => team.id !== tossWinner.id)
+
+  if (tossDecision === "bat") return [TosswinningTeam, ToosLostTeam]
+  if (tossDecision === "bowl") return [ToosLostTeam, TosswinningTeam]
+
+  return [{ Players: [] }, { Players: [] }]
 }

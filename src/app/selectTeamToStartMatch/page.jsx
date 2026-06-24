@@ -63,13 +63,13 @@ export default function SelectTeamsPage() {
 
     const selectedTeamsData = teams.filter((team) => selectedTeams.includes(team._id))
 
-  const a =  await dispatch(
+    await dispatch(
       fetchTeamPlayers({
         teamAId: selectedTeamsData[0]._id,
         teamBId: selectedTeamsData[1]._id,
       }),
     )
-    console.log("A",a)
+
     router.push("/matchSetup")
   }
 
@@ -82,14 +82,14 @@ export default function SelectTeamsPage() {
         <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
           <div className="mx-auto flex h-16 max-w-md items-center justify-between px-4">
             <div className="flex items-center gap-3">
-               <Button
-               className={"text-black "}
-                  onClick={() => {
-                    router.back()
-                  }}
-                >
-                  <ArrowLeft className="size-5" />
-                </Button>
+              <Button
+                className={"text-black "}
+                onClick={() => {
+                  router.back()
+                }}
+              >
+                <ArrowLeft className="size-5" />
+              </Button>
 
               <h1 className="text-xl font-bold">Select Teams</h1>
             </div>

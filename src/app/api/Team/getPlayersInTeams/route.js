@@ -43,7 +43,7 @@ export async function POST(req) {
 
         // 2. fetch players separately (THIS is your requirement)
         const teamAPlayers = enrichPlayers(await Player.find({ teamId: teamAId }))
-        const teamBPlayers = enrichPlayers(await Player.find({ teamId: teamAId }))
+        const teamBPlayers = enrichPlayers(await Player.find({ teamId: teamBId }))
 
         // 3. map teams
         const teamA = teams.find(t => t._id.toString() === teamAId);
