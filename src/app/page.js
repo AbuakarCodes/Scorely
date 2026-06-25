@@ -10,7 +10,7 @@ import { AddPlayers } from "@/customComponents/addPlayer/AddPlayers"
 import { AddTeams } from "@/customComponents/addTeam/addTeam"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import { useDispatch, useSelector } from "react-redux"
-import { initiate_LS_presistance } from "@/utils/reduxSclices/matchSlice"
+import { initiate_LS_presistance, setMatch_id } from "@/utils/reduxSclices/matchSlice"
 import { X, History, Plus, ChevronRight, Settings } from "lucide-react";
 import {
   Dialog,
@@ -51,16 +51,14 @@ export default function Home() {
 
   function sratMatch_handler(e) {
     const has_matchIn_LS = !!localStorage.getItem("match")
-
     if (has_matchIn_LS && balls.length == 0) dispatch(resetMatch())
-
-
     if (has_matchIn_LS && balls.length > 0) {
       setPopup((prev) => ({
         ...prev, visiable: true, matchDetails: matchDetails_setter(teams, overs)
       }));
     } else {
       dispatch(initiate_LS_presistance())
+      dispatch(setMatch_id(crypto.randomUUID()))
       router.push("/selectTeamToStartMatch")
     }
 
@@ -294,7 +292,7 @@ function Header() {
           className="w-full h-full object-cover" />
       </div>
 
-    <div className="md:block hidden">
+      <div className="md:block hidden">
         <p className="text-xs text-primary font-medium uppercase tracking-wider">
           Good Morning
         </p>
@@ -305,10 +303,10 @@ function Header() {
     </div>
 
     <div className="flex gap-2">
-     
+
 
       <button className="p-2 rounded-full hover:bg-primary/5 text-primary">
-        <Link href="/settings" className="material-symbols-outlined"><Settings/></Link>
+        <Link href="/settings" className="material-symbols-outlined"><Settings /></Link>
       </button>
     </div>
 
@@ -331,34 +329,5 @@ function matchDetails_setter(teams, overs) {
     overs
   };
 
-  function Header({ }) {
-    return (<header className="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4 flex items-center justify-between border-b border-primary/10">
 
-      <div className="flex items-center gap-3">
-        <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border border-primary/20">
-          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDw92vwsyi2zP3Gklgyf7-OCGfz7-2ODDCk_BP2uNknjvxrkKcIYfgkYaefbMzjPW-3HQWK2S3QEtuE72TLR06jqkCDPk8amkOhPaq2dhQPVRLrfnPfv4eDoCsJdbwzSJq3pyNfHtpO4PBTGPsPwmkdvX9n2PX1d--mpxipSP6x2bbKuVSSGvF5z3CQxymUWtjLhKUYxsJxGQH0SGauT2dlrOh2ZKuUpMGL0bcAIthgfIo6iHBGO6CznDnoEnaATj9x7tptB0GXR8E" className="w-full h-full object-cover" />
-        </div>
-
-        <div>
-          <p className="text-xs text-primary font-medium uppercase tracking-wider">
-            Good Morning
-          </p>
-          <h1 className="text-lg font-bold text-primary dark:text-emerald-400">
-            Welcome, Rahul
-          </h1>
-        </div>
-      </div>
-
-      <div className="flex gap-2">
-        <button className="p-2 rounded-full hover:bg-primary/5 text-primary">
-          <span className="material-symbols-outlined">notifications</span>
-        </button>
-
-        <button className="p-2 rounded-full hover:bg-primary/5 text-primary">
-          <Link href="/settings" className="material-symbols-outlined">settings</Link>
-        </button>
-      </div>
-
-    </header>);
-  }
 }

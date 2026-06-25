@@ -231,32 +231,10 @@ const matchSlice = createSlice({
 
 
 
-
-
-        // SET PLAYERS AFTER FETCH (optional manual)
-        // setTeamPlayers: (state, action) => {
-        //     const { teamId, players } = action.payload;
-
-        //     state.match.teams[teamId].players = players;
-        // },
-
-
-        // SELECT NEW BATSMAN
-        selectNewBatsman: (state, action) => {
-            const playerId = action.payload;
-
-            state.innings.strikerId = playerId;
-            // state.innings.pendingNewBatsman = false;
+        setMatch_id(state, action) {
+            if (!action.payload) return
+            state.match.id = action.payload
         },
-
-        // CHANGE BOWLER
-        changeBowler: (state, action) => {
-            const bowlerId = action.payload;
-
-            state.innings.currentBowlerId = bowlerId;
-            state.innings.pendingBowlerChange = false;
-        },
-
 
         tossWinner_fn: (state, action) => {
             const id = action?.payload?.id
@@ -329,7 +307,7 @@ const matchSlice = createSlice({
             }
 
             if (needBowler) {
-               resetBowler(state.bowler.currentBowler, bowler);
+                resetBowler(state.bowler.currentBowler, bowler);
             }
 
             state.innings.pendingNewBatsman.striker = false;
@@ -386,10 +364,8 @@ const matchSlice = createSlice({
 });
 
 export const {
+    setMatch_id,
     addBall,
-    // setTeamPlayers,
-    selectNewBatsman,
-    changeBowler,
     tossWinner_fn,
     tossDecision_fn,
     initiate_LS_presistance,

@@ -11,8 +11,9 @@ import { cn } from "@/lib/utils"
 import { fetchTeams } from "@/utils/reduxSclices/teamSlice"
 import { useRouter } from "next/navigation"
 
-import { fetchTeamPlayers } from "@/utils/reduxSclices/matchSlice"
+import { fetchTeamPlayers, initiate_LS_presistance, setMatch_id } from "@/utils/reduxSclices/matchSlice"
 import PageLoader from "@/customComponents/loaders/pageLoader"
+import { resetMatch } from "../test/test"
 
 export default function SelectTeamsPage() {
   const dispatch = useDispatch()
@@ -60,6 +61,14 @@ export default function SelectTeamsPage() {
 
   const handleProceed = async () => {
     if (selectedTeams.length !== 2) return
+
+    // Reset Local storage othewise some flags and temas would be take from alrady started match
+    const has_matchIn_LS = !!localStorage.getItem("match")
+    if (has_matchIn_LS) {
+      dispatch(resetMatch())
+      dispatch(initiate_LS_presistance())
+      dispatch(setMatch_id(crypto.randomUUID()))
+    }
 
     const selectedTeamsData = teams.filter((team) => selectedTeams.includes(team._id))
 
