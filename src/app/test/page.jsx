@@ -12,6 +12,11 @@ export default function LiveScoringPage() {
   const { batsmenA, batsmenB } = batsmen
   const { runs, wickets, over, balls: totalBalls, CRR, RRR } = innings?.score
   const { pendingNewBowler, pendingNewBatsman } = innings
+  const {currentBowler} = bowler
+
+  useEffect(()=>{
+    console.log([batsmenA, batsmenB, currentBowler])
+  },[batsmen])
 
   const initialMatch = {
     match: {
@@ -73,7 +78,7 @@ export default function LiveScoringPage() {
     lastWicket: "M. Marsh 22 (15)",
   }
 
-  const [showPopup, setshowPopup] = useState(false)
+  const [showPopup, setshowPopup] = useState(true)
 
   // LOCAL UI STATE
 
@@ -197,55 +202,20 @@ export default function LiveScoringPage() {
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  
 
-
-   const players = [
-  {
-    id: 1,
-    name: "Alastair Cook",
-    role: "Left-hand Bat",
-    avg: 45.35,
-    sr: 112.4,
-    number: 8,
-    image: "https://i.pravatar.cc/150?img=1",
-  },
-  {
-    id: 2,
-    name: "James Anderson",
-    role: "Right-arm Fast",
-    avg: 12.1,
-    sr: 95.2,
-    number: 12,
-    image: "https://i.pravatar.cc/150?img=2",
-  },
-  {
-    id: 3,
-    name: "Sarah Taylor",
-    role: "Wicket Keeper Bat",
-    avg: 38.4,
-    sr: 128.5,
-    number: 4,
-    image: "https://i.pravatar.cc/150?img=3",
-  },
-  {
-    id: 4,
-    name: "Kevin Pietersen",
-    role: "Right-hand Bat",
-    avg: 47.28,
-    sr: 145.2,
-    image: "https://i.pravatar.cc/150?img=4",
-  },
-]
-
-  const criteria = useRef({ stricker: null, nonStricker: null, bowler: null })
+ 
 
   useEffect(() => {
-    setshowPopup(true)
-  }, [pendingNewBowler, pendingNewBowler])
+    if (pendingNewBowler || pendingNewBatsman?.nonStricker || pendingNewBatsman?.stricker) setshowPopup(true)
+    else if (!pendingNewBowler && !pendingNewBatsman?.nonStricker && !pendingNewBatsman?.stricker)
+      setshowPopup(false)
+  }, [pendingNewBowler, pendingNewBatsman])
+
+
+
   return (
     <>
-      {showPopup && <PlayerSelectionModal player={players} />}
+      {showPopup && <PlayerSelectionModal/>}
 
       <div className="min-h-screen bg-slate-50 pb-52">
         {/* HEADER */}
@@ -382,7 +352,7 @@ export default function LiveScoringPage() {
 
             <div className="flex items-center px-4 py-4">
               <div className="flex-1">
-                <h3 className="font-bold">{matchState.bowler.name}</h3>
+                <h3 className="font-bold">{currentBowler?.name}</h3>
 
                 <p className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">
                   Fast • Over the wicket
@@ -405,7 +375,7 @@ export default function LiveScoringPage() {
         {/* SCORING PANEL */}
         <div className="fixed bottom-0 left-0 right-0 border-t bg-white/95 backdrop-blur-md p-4 shadow-2xl">
           {/* ACTIONS */}
-          <div className="mb-3 bg-amber-200 grid grid-cols-6 gap-2">
+          <div className="mb-3  grid grid-cols-6 gap-2">
             <button
               onClick={() =>
                 addBall({
@@ -413,7 +383,7 @@ export default function LiveScoringPage() {
                   type: "wicket",
                 })
               }
-              className="h-12 rounded-xl bg-red-500 text-xs font-black text-white"
+              className="h-12 rounded-xl  text-xs font-black text-white"
             >
               WKT
             </button>
@@ -452,7 +422,7 @@ export default function LiveScoringPage() {
           </div>
 
           {/* RUN BUTTONS */}
-          <div className="grid bg-red-800 grid-cols-6 gap-2">
+          <div className="grid grid-cols-6 gap-2">
             {runButtons.map((run) => (
               <button
                 key={run}

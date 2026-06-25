@@ -3,128 +3,27 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { Search } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { MdSportsCricket } from "react-icons/md"
 import { BiSolidCricketBall } from "react-icons/bi"
 import { FaUser } from "react-icons/fa"
 import { useMemo } from "react"
+import { chnageBatsmen_OR_Bowler } from "@/utils/reduxSclices/matchSlice"
 
 import { X, SlidersHorizontal, ChevronRight, Check } from "lucide-react"
 
-const DUMMY_BATSMEN = [
-  {
-    id: 1,
-    name: "Alastair Cook",
-    role: "LH Bat",
-    roleVariant: "secondary",
-    avg: "45.35",
-    sr: "128.4",
-    initials: "AC",
-  },
-  {
-    id: 2,
-    name: "Joe Root",
-    role: "RH Bat",
-    roleVariant: "secondary",
-    avg: "50.12",
-    sr: "135.2",
-    initials: "JR",
-  },
-  {
-    id: 3,
-    name: "Ben Stokes",
-    role: "All-Rounder",
-    roleVariant: "primary",
-    avg: "36.10",
-    sr: "148.9",
-    initials: "BS",
-  },
-  {
-    id: 4,
-    name: "Jonny Bairstow",
-    role: "RH Bat",
-    roleVariant: "secondary",
-    avg: "38.44",
-    sr: "141.2",
-    initials: "JB",
-  },
-  {
-    id: 5,
-    name: "Zak Crawley",
-    role: "RH Bat",
-    roleVariant: "secondary",
-    avg: "31.20",
-    sr: "59.8",
-    initials: "ZC",
-  },
-  {
-    id: 6,
-    name: "Harry Brook",
-    role: "RH Bat",
-    roleVariant: "secondary",
-    avg: "55.80",
-    sr: "72.1",
-    initials: "HB",
-  },
-]
 
-const DUMMY_BOWLERS = [
-  {
-    id: 7,
-    name: "James Anderson",
-    role: "Fast",
-    roleVariant: "tertiary",
-    econ: "3.24",
-    wkts: "690",
-    initials: "JA",
-  },
-  {
-    id: 8,
-    name: "Stuart Broad",
-    role: "Fast-Medium",
-    roleVariant: "tertiary",
-    econ: "3.56",
-    wkts: "604",
-    initials: "SB",
-  },
-  {
-    id: 9,
-    name: "Jack Leach",
-    role: "Spin",
-    roleVariant: "tertiary",
-    econ: "3.01",
-    wkts: "165",
-    initials: "JL",
-  },
-  {
-    id: 10,
-    name: "Ollie Robinson",
-    role: "Fast-Medium",
-    roleVariant: "tertiary",
-    econ: "3.38",
-    wkts: "98",
-    initials: "OR",
-  },
-  {
-    id: 11,
-    name: "Mark Wood",
-    role: "Fast",
-    roleVariant: "tertiary",
-    econ: "4.12",
-    wkts: "200",
-    initials: "MW",
-  },
-]
 
-export default function SelectParticipantsModal({ onClose, onConfirm }) {
+export default function SelectParticipantsModal({ onClose }) {
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
   const { tossDecision, tossWinner } = useSelector((state) => state?.match?.match)
   const pendingNewBatsman = useSelector(
-    (state) => state.match?.innings?.pendingNewBatsman ?? { stricker: null, nonStricker: null },
+    (state) => state.match?.innings?.pendingNewBatsman ?? { striker: null, nonStriker: null },
   )
   const pendingNewBowler = useSelector((state) => state.match?.innings?.pendingNewBowler ?? null)
 
   const [search, setSearch] = useState("")
+  const dispatch = useDispatch()
 
   // 0 = batting, 1 = balling
   const [OrderdTeams, setOrderdTeams] = useState([{ players: [] }, { players: [] }])
@@ -133,9 +32,9 @@ export default function SelectParticipantsModal({ onClose, onConfirm }) {
     setOrderdTeams(orderingTeams(teamA, teamB, tossWinner, tossDecision))
   }, [teamA, teamB])
 
-  const needStriker = pendingNewBatsman?.stricker
-  const needBothBatsmen = pendingNewBatsman.nonStricker && pendingNewBatsman.stricker
-  const needNonstricker = pendingNewBatsman.nonStricker
+  const needStriker = pendingNewBatsman?.striker
+  const needBothBatsmen = pendingNewBatsman?.nonStriker && pendingNewBatsman?.striker
+  const needNonstricker = pendingNewBatsman?.nonStriker
   const needBowler = pendingNewBowler
 
   // Build ordered tab list
@@ -163,28 +62,23 @@ export default function SelectParticipantsModal({ onClose, onConfirm }) {
 
   const isBowlerTab = activeTab === "bowler"
 
-  // Player selection >>>>>
-  // There are listing batsman By defalut,
-  // and Bowler when the Bowler tab is active
-
-  //  What we'll do ? >>>>>>>>
-  // For batsmen [0] and only whos's isDissmissed is false
-  // For bowler [1]
-  // revers the team order when the inings got changed
-
-  const allPlayers = isBowlerTab ? OrderdTeams[1].players : OrderdTeams[0].players
-  const filtered = allPlayers.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+  const allPlayers = isBowlerTab ? OrderdTeams[1]?.players : OrderdTeams[0]?.players
+  const filtered = Array.isArray(allPlayers)
+    ? allPlayers.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+    : []
 
   // ── Select a player ───────────────────────────────────────────────────────
   function handleSelect(player) {
-    const next = { ...playerSelections, [activeTab]: player._id }
+    const next = { ...playerSelections, [activeTab]: {id:player?._id, name:player?.name}}
     setplayerSelections(next)
 
     // Auto-advance to next unselected tab
     const currentIdx = tabList.indexOf(activeTab)
-    const nextTab = tabList.find((t, i) => i > currentIdx && !next[t] === true)
+    // const nextTab = tabList.find((t, i) => i > currentIdx && !next[t] === true)
     // If there's a next tab that has no selection yet, move there
-    const nextUnfilled = tabList.find((t, i) => i > currentIdx && next[t] === null)
+    const nextUnfilled = Array.isArray(tabList)
+      ? tabList.find((t, i) => i > currentIdx && next[t] === null)
+      : []
     if (nextUnfilled) {
       setTimeout(() => {
         setActiveTab(nextUnfilled)
@@ -197,12 +91,7 @@ export default function SelectParticipantsModal({ onClose, onConfirm }) {
 
   function handleConfirm() {
     if (!allFilled) return
-    const resolve = (tab, pool) => pool.find((p) => p.id === playerSelections[tab]) ?? null
-    onConfirm?.({
-      striker: resolve("striker", DUMMY_BATSMEN),
-      nonStriker: resolve("nonStriker", DUMMY_BATSMEN),
-      bowler: resolve("bowler", DUMMY_BOWLERS),
-    })
+    dispatch(chnageBatsmen_OR_Bowler(playerSelections))
   }
 
   // ── Tab meta for UI
@@ -232,9 +121,7 @@ export default function SelectParticipantsModal({ onClose, onConfirm }) {
         <div className="bg-white w-full max-w-xl max-h-[92dvh] md:max-h-[780px] rounded-t-[2rem] md:rounded-[2rem] shadow-2xl flex flex-col overflow-hidden">
           {/* Header */}
           <header className="bg-[] flex items-center justify-between px-5 py-4 z-10">
-            <button
-              className="p-2 rounded-full  active:scale-95 transition-all text-transparent"
-            >
+            <button className="p-2 rounded-full  active:scale-95 transition-all text-transparent">
               <X size={20} />
             </button>
             <div className="flex flex-col items-center">
@@ -441,7 +328,7 @@ function PlayerCard({ player, isSelected, onClick, isBowler }) {
 }
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// Logic
+// Utility functions
 
 function orderingTeams(teamA, teamB, tossWinner, tossDecision) {
   const TosswinningTeam = [teamA, teamB].find((team) => team.id === tossWinner.id)

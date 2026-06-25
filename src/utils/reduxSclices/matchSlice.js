@@ -1,5 +1,5 @@
 import axios from "axios";
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit";
 
 
 
@@ -84,7 +84,7 @@ const defaultState = {
 
         balls: [],
 
-        pendingNewBatsman: { stricker: true, nonStricker: true },
+        pendingNewBatsman: { striker: true, nonStriker: true },
         pendingNewBowler: true,
     },
 
@@ -286,6 +286,56 @@ const matchSlice = createSlice({
 
 
 
+        chnageBatsmen_OR_Bowler(state, action) {
+            const { striker, nonStriker, bowler } = action.payload;
+
+            const needBothBatsmen =
+                state.innings.pendingNewBatsman.striker &&
+                state.innings.pendingNewBatsman.nonStriker;
+
+            const needStriker =
+                state.innings.pendingNewBatsman.striker &&
+                !needBothBatsmen;
+
+            const needNonStriker =
+                state.innings.pendingNewBatsman.nonStriker &&
+                !needBothBatsmen;
+
+            const needBowler = state.innings.pendingNewBowler;
+
+            // Validation
+            if (needBothBatsmen && (!striker?.id || !nonStriker?.id)) return;
+            if (needStriker && !striker?.id) return;
+            if (needNonStriker && !nonStriker?.id) return;
+            if (needBowler && !bowler?.id) return;
+
+            const strikerBatsman = Object.values(state.batsmen).find(
+                batsman => batsman.isStriker
+            );
+
+            const nonStrikerBatsman = Object.values(state.batsmen).find(
+                batsman => !batsman.isStriker
+            );
+
+            if (needStriker) resetBatsman(strikerBatsman, striker);
+
+
+            if (needNonStriker) resetBatsman(nonStrikerBatsman, nonStriker);
+
+
+            if (needBothBatsmen) {
+                resetBatsman(strikerBatsman, striker);
+                resetBatsman(nonStrikerBatsman, nonStriker);
+            }
+
+            if (needBowler) {
+               resetBowler(state.bowler.currentBowler, bowler);
+            }
+
+            state.innings.pendingNewBatsman.striker = false;
+            state.innings.pendingNewBatsman.nonStriker = false;
+            state.innings.pendingNewBowler = false;
+        }
 
     },
 
@@ -344,7 +394,8 @@ export const {
     tossDecision_fn,
     initiate_LS_presistance,
     resetMatch,
-    setInings
+    setInings,
+    chnageBatsmen_OR_Bowler
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
@@ -382,3 +433,25 @@ function inject_isDismissedInPlayers(params) {
         },
     };
 }
+
+const resetBatsman = (batsman, player) => {
+    batsman.id = player.id;
+    batsman.name = player.name;
+    batsman.runs = 0;
+    batsman.balls = 0;
+    batsman.fours = 0;
+    batsman.sixes = 0;
+    batsman.strikeRate = 0;
+};
+
+const resetBowler = (currentBowler, player) => {
+    currentBowler.id = player.id;
+    currentBowler.name = player.name;
+    currentBowler.over = 0;
+    currentBowler.ballInOver = 0;
+    currentBowler.runsOnThatBall = 0;
+    currentBowler.Econ = 0;
+    currentBowler.TotalWickets = 0;
+    currentBowler.TotalOver = 0;
+    currentBowler.TotalRunsConceded = 0;
+};
