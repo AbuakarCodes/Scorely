@@ -383,7 +383,7 @@ export default function LiveScoringPage() {
                   type: "wicket",
                 })
               }
-              className="h-12 rounded-xl  text-xs font-black text-white"
+              className="h-12 bg-[#FB2C36] rounded-xl  text-xs font-black text-white"
             >
               WKT
             </button>

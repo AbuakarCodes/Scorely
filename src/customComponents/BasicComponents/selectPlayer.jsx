@@ -12,8 +12,6 @@ import { chnageBatsmen_OR_Bowler } from "@/utils/reduxSclices/matchSlice"
 
 import { X, SlidersHorizontal, ChevronRight, Check } from "lucide-react"
 
-
-
 export default function SelectParticipantsModal({ onClose }) {
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
   const { tossDecision, tossWinner } = useSelector((state) => state?.match?.match)
@@ -69,7 +67,7 @@ export default function SelectParticipantsModal({ onClose }) {
 
   // ── Select a player ───────────────────────────────────────────────────────
   function handleSelect(player) {
-    const next = { ...playerSelections, [activeTab]: {id:player?._id, name:player?.name}}
+    const next = { ...playerSelections, [activeTab]: { id: player?._id, name: player?.name } }
     setplayerSelections(next)
 
     // Auto-advance to next unselected tab
@@ -176,10 +174,10 @@ export default function SelectParticipantsModal({ onClose }) {
             )}
             {filtered.map((player) => (
               <PlayerCard
-                key={player.id}
+                key={player._id}
                 player={player}
                 isBowler={isBowlerTab}
-                isSelected={playerSelections[activeTab] === player._id}
+                isSelected={playerSelections[activeTab]?.id === player._id}
                 onClick={() => handleSelect(player)}
               />
             ))}
@@ -257,11 +255,12 @@ function PlayerCard({ player, isSelected, onClick, isBowler }) {
     )
   }
 
-  function Avatar({ initials }) {
+  function Avatar({ initials, img }) {
     const value = initials.split("")[0]
+
     return (
       <div className="w-14 h-14 rounded-full bg-white-100 flex items-center justify-center text-gray-950 font-bold text-lg select-none">
-        {value}
+        {img ? <img className="bg-contain" src={img}></img> : value}
       </div>
     )
   }
@@ -281,19 +280,19 @@ function PlayerCard({ player, isSelected, onClick, isBowler }) {
         className={`relative w-14 h-14 rounded-full overflow-hidden border-2 transition-colors 
         ${isSelected ? "border-chart-4" : "border-gray-200 group-hover:border-chart-4"}`}
       >
-        <Avatar initials={player.name} />
+        <Avatar initials={player?.name} img={player?.avatar} />
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className={`font-bold text-base truncate ${isSelected ? "text-chart-4" : "text-gray-900"}`}>
-            {player.name}
+            {player?.name}
           </h3>
           <span
             className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase whitespace-nowrap ${""}`}
           >
-            {player.role}
+            {player?.role}
           </span>
         </div>
 
@@ -305,8 +304,8 @@ function PlayerCard({ player, isSelected, onClick, isBowler }) {
             </>
           ) : (
             <>
-              <Stat label="Avg" value={player.avg} selected={isSelected} />
-              <Stat label="S/R" value={player.sr} selected={isSelected} />
+              <Stat label="Avg" value={player?.avg} selected={isSelected} />
+              <Stat label="S/R" value={player?.sr} selected={isSelected} />
             </>
           )}
         </div>
