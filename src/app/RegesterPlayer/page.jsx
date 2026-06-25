@@ -2,13 +2,11 @@
 
 import { useRef, useState } from "react"
 import { User, Trophy, Camera, ArrowLeft } from "lucide-react"
-import Page from "@/app/page"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import ImageUpload from "@/customComponents/BasicComponents/ImageUpload"
 import { RegesterPlayer_APIcall } from "./RegesterPlayer_APIcall"
 import { useSession } from "next-auth/react"
 import { toast } from "sonner"
-import { updateAvatar } from "@/utils/Basic/updateAvatar_Api"
 import { useDispatch } from "react-redux"
 import { insertPlayer } from "@/utils/reduxSclices/playerSlice"
 import Link from "next/link"

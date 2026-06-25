@@ -290,8 +290,8 @@ export default function LiveScoringPage() {
               </p>
             </div>
 
-            <div className="flex gap-2 overflow-x-auto">
-              {matchState.recentBalls.map((ball, index) => {
+            <div className="flex gap-2 overflow-x-auto justify-center">
+                {matchState.recentBalls.map((ball, index) => {
                 const isWicket = ball === "W"
                 const isBoundary = ball === "4" || ball === "6"
 

@@ -13,6 +13,7 @@ import { fetchPlayers, insertPlayer } from "@/utils/reduxSclices/playerSlice"
 import { toast } from "sonner"
 import { defaultImage } from "@/utils/Basic/constant"
 import { PlayerCardSkeletonTeam } from "@/customComponents/loaders/playerCard_TeamOptionSkeleton"
+import { insertTeam } from "@/utils/reduxSclices/teamSlice"
 
 export default function AddTeamForm() {
   const { players, loading: playersLoading } = useSelector((state) => state.players)
@@ -70,7 +71,10 @@ export default function AddTeamForm() {
 
       const res = await axios.post("/api/Team/createTeam", payload)
 
-      dispatch(insertPlayer(res.data.data.players || []))
+      // These are the players which are now the part of team, update there team senerio
+      dispatch(insertPlayer(res?.data?.data?.players || []))
+      // Thats the actual new created team
+      dispatch(insertTeam(res?.data?.data?.team || []))
 
       setExcludedPlayers((prev) => [...prev, ...selectedPlayers])
 
@@ -128,7 +132,7 @@ export default function AddTeamForm() {
 
             <div className="space-y-3">
               {playersLoading ? (
-               <PlayerCardSkeletonTeam/>
+                <PlayerCardSkeletonTeam />
               ) : (
                 filteredPlayers.map((p) => (
                   <PlayerCard
