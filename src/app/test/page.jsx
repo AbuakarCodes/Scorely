@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ArrowLeft, RotateCcw, Star, RefreshCcw } from "lucide-react"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlayer"
+import { deliverBall } from "@/utils/reduxSclices/matchSlice"
 
 export default function LiveScoringPage() {
+  const dispatch = useDispatch()
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
 
   const { batsmen, bowler, innings } = useSelector((state) => state.match)
@@ -120,6 +122,7 @@ export default function LiveScoringPage() {
     }
 
     console.log("BALL OBJECT:", ballObject)
+    dispatch(deliverBall(ballObject))
 
     // DUMMY SCORE UPDATE
 
@@ -136,7 +139,7 @@ export default function LiveScoringPage() {
         updatedBalls.push(String(runs))
       }
 
-      if (updatedBalls.length >= 6) {
+      if (updatedBalls.length > 6) {
         updatedBalls.shift()
       }
 

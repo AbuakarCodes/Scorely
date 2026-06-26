@@ -262,8 +262,6 @@ const matchSlice = createSlice({
             state.innings.isFirstInings = action.payload
         },
 
-
-
         chnageBatsmen_OR_Bowler(state, action) {
             const { striker, nonStriker, bowler } = action.payload;
 
@@ -313,7 +311,17 @@ const matchSlice = createSlice({
             state.innings.pendingNewBatsman.striker = false;
             state.innings.pendingNewBatsman.nonStriker = false;
             state.innings.pendingNewBowler = false;
+        },
+
+        deliverBall(state, action) {
+            if (!action.payload) return
+            const ballObject = action.payload
+            state.innings.balls.push(ballObject)
         }
+
+
+
+
 
     },
 
@@ -371,7 +379,8 @@ export const {
     initiate_LS_presistance,
     resetMatch,
     setInings,
-    chnageBatsmen_OR_Bowler
+    chnageBatsmen_OR_Bowler,
+    deliverBall
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
