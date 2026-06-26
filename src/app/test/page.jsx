@@ -310,7 +310,7 @@ export default function LiveScoringPage() {
 
           {/* BATSMEN */}
           {[batsmenA, batsmenB].map((player) => {
-            const { runs, ballsPlayed, fours, sixes, strikeRate } = calBattingFiguers(player?.id, balls)
+            const stats = calBattingFiguers(player?.id, balls)
             return (
               <>
                 <section
@@ -326,7 +326,7 @@ export default function LiveScoringPage() {
                   </div>
 
                   <div
-                    key={`${player?.id }`}
+                    key={`${player?.id}`}
                     className={`flex items-center px-4 py-4 border-t
     ${player?.isStriker ? "bg-primary/10" : "bg-white"}`}
                   >
@@ -336,11 +336,11 @@ export default function LiveScoringPage() {
                       </span>
                     </div>
 
-                    <span className="w-12 text-center font-black">{runs}</span>
-                    <span className="w-12 text-center text-sm text-slate-500">{ballsPlayed}</span>
-                    <span className="w-12 text-center text-sm text-slate-500">{fours}</span>
-                    <span className="w-12 text-center text-sm text-slate-500">{sixes}</span>
-                    <span className="w-16 text-right text-sm font-bold">{strikeRate}</span>
+                    <span className="w-12 text-center font-black">{stats?.runs || 0}</span>
+                    <span className="w-12 text-center text-sm text-slate-500">{stats?.ballsPlayed || 0}</span>
+                    <span className="w-12 text-center text-sm text-slate-500">{stats?.fours || 0}</span>
+                    <span className="w-12 text-center text-sm text-slate-500">{stats?.sixes || 0}</span>
+                    <span className="w-16 text-right text-sm font-bold">{stats?.strikeRate || 0}</span>
                   </div>
                 </section>
               </>
@@ -488,7 +488,7 @@ function calBattingFiguers(PlayerId, matchBalls) {
     ballsPlayed: 0,
     fours: 0,
     sixes: 0,
-    strikeRate:0,
+    strikeRate: 0,
   }
 
   for (const ball of matchBalls) {
