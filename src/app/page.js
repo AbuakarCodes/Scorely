@@ -10,7 +10,7 @@ import { AddPlayers } from "@/customComponents/addPlayer/AddPlayers"
 import { AddTeams } from "@/customComponents/addTeam/addTeam"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import { useDispatch, useSelector } from "react-redux"
-import { initiate_LS_presistance, setMatch_id } from "@/utils/reduxSclices/matchSlice"
+import { startInnings_fn, setMatch_id } from "@/utils/reduxSclices/matchSlice"
 import { X, History, Plus, ChevronRight, Settings } from "lucide-react";
 import {
   Dialog,
@@ -39,7 +39,7 @@ export default function Home() {
     } else if (popup?.startPrevMatch === false) {
       // removing prevmatch state
       dispatch(resetMatch())
-      dispatch(initiate_LS_presistance())
+      dispatch(startInnings_fn())
       router.push("/selectTeamToStartMatch")
     }
   }, [popup])
@@ -57,7 +57,7 @@ export default function Home() {
         ...prev, visiable: true, matchDetails: matchDetails_setter(teams, overs)
       }));
     } else {
-      dispatch(initiate_LS_presistance())
+      dispatch(startInnings_fn())
       dispatch(setMatch_id(crypto.randomUUID()))
       router.push("/selectTeamToStartMatch")
     }

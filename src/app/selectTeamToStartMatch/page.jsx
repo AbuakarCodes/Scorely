@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 import { fetchTeams } from "@/utils/reduxSclices/teamSlice"
 import { useRouter } from "next/navigation"
 
-import { fetchTeamPlayers, initiate_LS_presistance, setMatch_id } from "@/utils/reduxSclices/matchSlice"
+import { fetchTeamPlayers, startInnings_fn, setMatch_id } from "@/utils/reduxSclices/matchSlice"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import { resetMatch } from "../test/test"
 
@@ -66,7 +66,7 @@ export default function SelectTeamsPage() {
     const has_matchIn_LS = !!localStorage.getItem("match")
     if (has_matchIn_LS) {
       dispatch(resetMatch())
-      dispatch(initiate_LS_presistance())
+      dispatch(startInnings_fn())
       dispatch(setMatch_id(crypto.randomUUID()))
     }
 

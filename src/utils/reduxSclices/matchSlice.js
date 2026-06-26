@@ -133,7 +133,7 @@ const defaultState = {
     },
 
     flags: {
-        shouldPersistmatch: false,
+        isIningsStarted: false,
         show_prevMatch_popup: false
 
     }
@@ -249,8 +249,8 @@ const matchSlice = createSlice({
             state.match.tossDecision = decision
         },
 
-        initiate_LS_presistance(state) {
-            state.flags.shouldPersistmatch = true;
+        startInnings_fn(state) {
+            state.flags.isIningsStarted = true;
         },
         resetMatch(state) {
             localStorage.removeItem("match");
@@ -376,7 +376,7 @@ export const {
     addBall,
     tossWinner_fn,
     tossDecision_fn,
-    initiate_LS_presistance,
+    startInnings_fn,
     resetMatch,
     setInings,
     chnageBatsmen_OR_Bowler,

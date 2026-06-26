@@ -8,7 +8,7 @@ export const persistMatchMiddleware =
          return;
       }
 
-      if (!state.match.flags.shouldPersistmatch) return;
+      if (!state?.match?.flags?.isIningsStarted) return;
 
       if (action.type.endsWith("/pending") || action.type.endsWith("/rejected")) return;
 

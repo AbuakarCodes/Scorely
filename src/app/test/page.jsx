@@ -10,15 +10,15 @@ export default function LiveScoringPage() {
   const dispatch = useDispatch()
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
 
-  const { batsmen, bowler, innings } = useSelector((state) => state.match)
+  const { batsmen, bowler, innings, id } = useSelector((state) => state.match)
   const { batsmenA, batsmenB } = batsmen
   const { runs, wickets, over, balls: totalBalls, CRR, RRR } = innings?.score
   const { pendingNewBowler, pendingNewBatsman } = innings
-  const {currentBowler} = bowler
+  const { currentBowler } = bowler
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log([batsmenA, batsmenB, currentBowler])
-  },[batsmen])
+  }, [batsmen])
 
   const initialMatch = {
     match: {
@@ -85,6 +85,10 @@ export default function LiveScoringPage() {
   // LOCAL UI STATE
 
   const [selectedExtra, setSelectedExtra] = useState(null)
+  useEffect(() => {
+    console.log(selectedExtra);
+  }, [selectedExtra])
+  
 
   const [matchState, setMatchState] = useState(initialMatch)
 
@@ -92,7 +96,7 @@ export default function LiveScoringPage() {
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
     const ballObject = {
-      matchId: "match_001",
+      matchId: id,
 
       inningsNumber: 1,
 
@@ -107,10 +111,6 @@ export default function LiveScoringPage() {
       nonStrikerId: matchState.batsmen.find((p) => !p.striker)?.id,
 
       bowlerId: matchState.bowler.id,
-
-      battingTeamId: innings?.battingTeamId,
-
-      bowlingTeamId: innings?.bowlingTeamId,
 
       runs,
 
@@ -206,19 +206,15 @@ export default function LiveScoringPage() {
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
- 
-
   useEffect(() => {
     if (pendingNewBowler || pendingNewBatsman?.nonStricker || pendingNewBatsman?.stricker) setshowPopup(true)
     else if (!pendingNewBowler && !pendingNewBatsman?.nonStricker && !pendingNewBatsman?.stricker)
       setshowPopup(false)
   }, [pendingNewBowler, pendingNewBatsman])
 
-
-
   return (
     <>
-      {showPopup && <PlayerSelectionModal/>}
+      {showPopup && <PlayerSelectionModal />}
 
       <div className="min-h-screen bg-slate-50 pb-52">
         {/* HEADER */}
@@ -294,7 +290,7 @@ export default function LiveScoringPage() {
             </div>
 
             <div className="flex gap-2 overflow-x-auto justify-center">
-                {matchState.recentBalls.map((ball, index) => {
+              {matchState.recentBalls.map((ball, index) => {
                 const isWicket = ball === "W"
                 const isBoundary = ball === "4" || ball === "6"
 
@@ -399,7 +395,7 @@ export default function LiveScoringPage() {
             </button>
 
             <button
-              onClick={() => setSelectedExtra("nb")}
+              onClick={() => setSelectedExtra("noball")}
               className="h-12 rounded-xl border bg-white text-xs font-bold"
             >
               NB
