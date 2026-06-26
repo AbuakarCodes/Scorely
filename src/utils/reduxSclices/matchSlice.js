@@ -76,8 +76,8 @@ const defaultState = {
         score: {
             runs: 0,
             wickets: 0,
-            over: 22.44,
-            balls: 0,
+            over: 0,
+            ballsInOver: 0,
             CRR: 0,
             RRR: 0
         },
@@ -317,6 +317,37 @@ const matchSlice = createSlice({
             if (!action.payload) return
             const ballObject = action.payload
             state.innings.balls.push(ballObject)
+        },
+
+        update_TotalRuns(state) {
+            const balls = state?.innings?.balls || []
+            const calculatedRuns = balls.reduce((total, ball) => {
+                return total + ball.runs + ball.extraRuns;
+            }, 0);
+            state.innings.score.runs = calculatedRuns
+        },
+        update_TotalWickets(state) {
+            const balls = state?.innings?.balls || []
+            const calculatingWickets = balls.reduce((wickets, ball) => {
+                return wickets + (ball.isWicket ? 1 : 0)
+            }, 0)
+            state.innings.score.wickets = calculatingWickets
+        },
+        update_overAndBallInOver(state, action) {
+            const { isLegalDelivery } = action.payload
+            const currentBall = state.innings.score.ballsInOver
+
+            if (currentBall < 5 && isLegalDelivery) {
+                state.innings.score.ballsInOver++
+            }
+
+            if (currentBall === 5 && isLegalDelivery) {
+                state.innings.score.over++
+                state.innings.score.ballsInOver = 0
+            }
+
+
+
         }
 
 
@@ -380,7 +411,11 @@ export const {
     resetMatch,
     setInings,
     chnageBatsmen_OR_Bowler,
-    deliverBall
+    deliverBall,
+    // mutating score board
+    update_TotalRuns,
+    update_TotalWickets,
+    update_overAndBallInOver
 } = matchSlice.actions;
 
 export default matchSlice.reducer;

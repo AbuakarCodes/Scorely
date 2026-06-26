@@ -4,7 +4,12 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { ArrowLeft, RotateCcw, Star, RefreshCcw } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlayer"
-import { deliverBall } from "@/utils/reduxSclices/matchSlice"
+import {
+  deliverBall,
+  update_overAndBallInOver,
+  update_TotalRuns,
+  update_TotalWickets,
+} from "@/utils/reduxSclices/matchSlice"
 
 export default function LiveScoringPage() {
   const dispatch = useDispatch()
@@ -12,11 +17,11 @@ export default function LiveScoringPage() {
 
   const { batsmen, bowler, innings, id } = useSelector((state) => state.match)
   const { batsmenA, batsmenB } = batsmen
-  const { runs, wickets, over, balls: totalBalls, CRR, RRR } = innings?.score
+  const { runs, wickets, over, balls, ballsInOver, CRR, RRR } = innings?.score
   const { pendingNewBowler, pendingNewBatsman } = innings
   const { currentBowler } = bowler
 
-
+ 
   const initialMatch = {
     match: {
       teamA: teamA.name,
@@ -77,95 +82,88 @@ export default function LiveScoringPage() {
     lastWicket: "M. Marsh 22 (15)",
   }
 
-  const [showPopup, setshowPopup] = useState(false)
-
   // LOCAL UI STATE
-
+  const [showPopup, setshowPopup] = useState(false)
   const [selectedExtra, setSelectedExtra] = useState(null)
-  useEffect(() => {
-    console.log(selectedExtra);
-  }, [selectedExtra])
-  
-
   const [matchState, setMatchState] = useState(initialMatch)
+  const [currentOver, setCurrentOver] = useState([])
 
   // ADD BALL HANDLER
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
     const ballObject = {
       matchId: id,
-
       inningsNumber: 1,
-
       over: over,
-
       ballInOver: bowler.bowler_ballInOver,
-
       isLegalDelivery: !extraType || (extraType !== "wide" && extraType !== "noball"),
-
       strikerId: matchState.batsmen.find((p) => p.striker)?.id,
-
       nonStrikerId: matchState.batsmen.find((p) => !p.striker)?.id,
-
       bowlerId: matchState.bowler.id,
-
-      runs,
-
-      extraType,
-
-      extraRuns: extraType === "wide" || extraType === "noball" ? 1 : 0,
-
       isWicket: type === "wicket",
+      // `runs` are batsman runs only. Byes/leg byes count entirely as extras.
+      //  Wides/no-balls automatically add 1 extra,
+      //  while any additional runs entered are credited to the batsman.
+      runs: extraType === "bye" || extraType === "legbye" ? 0 : runs,
+      extraRuns:
+        (extraType === "wide" || extraType === "noball" ? 1 : 0) ||
+        (extraType === "bye" || extraType === "legbye" ? runs : 0),
+      extraType,
     }
 
-    console.log("BALL OBJECT:", ballObject)
+    // console.log("BALL OBJECT:", ballObject)
     dispatch(deliverBall(ballObject))
+    dispatch(update_TotalRuns())
+    dispatch(update_TotalWickets())
+    dispatch(
+      update_overAndBallInOver({
+        isLegalDelivery: ballObject.isLegalDelivery,
+      }),
+    )
 
-    // DUMMY SCORE UPDATE
+    // setMatchState((prev) => {
+    //   const updatedBalls = [...prev.recentBalls]
 
-    setMatchState((prev) => {
-      const updatedBalls = [...prev.recentBalls]
+    //   if (type === "wicket") {
+    //     updatedBalls.push("W")
+    //   } else if (extraType === "nb") {
+    //     updatedBalls.push(`${runs}nb`)
+    //   } else if (extraType === "wide") {
+    //     updatedBalls.push(`${runs}wd`)
+    //   } else {
+    //     updatedBalls.push(String(runs))
+    //   }
 
-      if (type === "wicket") {
-        updatedBalls.push("W")
-      } else if (extraType === "nb") {
-        updatedBalls.push(`${runs}nb`)
-      } else if (extraType === "wide") {
-        updatedBalls.push(`${runs}wd`)
-      } else {
-        updatedBalls.push(String(runs))
-      }
+    //   if (updatedBalls.length > 6) {
+    //     updatedBalls.shift()
+    //   }
 
-      if (updatedBalls.length > 6) {
-        updatedBalls.shift()
-      }
+    //   let newBalls = prev.innings?.score.balls
+    //   let newOvers = prev.innings?.score.overs
 
-      let newBalls = prev.innings?.score.balls
-      let newOvers = prev.innings?.score.overs
+    //   if (!extraType || extraType === "bye" || extraType === "legbye") {
+    //     newBalls += 1
 
-      if (!extraType || extraType === "bye" || extraType === "legbye") {
-        newBalls += 1
+    //     if (newBalls >= 6) {
+    //       newOvers += 1
+    //       newBalls = 0
+    //     }
+    //   }
 
-        if (newBalls >= 6) {
-          newOvers += 1
-          newBalls = 0
-        }
-      }
+    //   return {
+    //     ...prev,
 
-      return {
-        ...prev,
+    //     recentBalls: updatedBalls,
 
-        recentBalls: updatedBalls,
-
-        score: {
-          ...prev.innings?.score,
-          runs: prev.innings?.score.runs + runs,
-          wickets: type === "wicket" ? prev.innings?.score.wickets + 1 : prev.innings?.score.wickets,
-          overs: newOvers,
-          balls: newBalls,
-        },
-      }
-    })
+    //     score: {
+    //       ...prev.innings?.score,
+    //       runs: prev.innings?.score.runs + runs,
+    //       wickets: type === "wicket" ? prev.innings?.score.wickets + 1 : prev.innings?.score.wickets,
+    //       overs: newOvers,
+    //       balls: newBalls,
+    //     },
+    //   }
+    // })
 
     setSelectedExtra(null)
   }
@@ -247,7 +245,7 @@ export default function LiveScoringPage() {
 
                 <div className="mt-1 flex gap-4 text-sm font-bold">
                   <p>
-                    CRR <span className="text-green-300">{CRR}</span>
+                    CRR <span className="text-green-300">{(runs/6).toFixed(2)}</span>
                   </p>
 
                   <p>
@@ -266,7 +264,7 @@ export default function LiveScoringPage() {
               </h2>
 
               <p className="pb-1 text-lg opacity-80">
-                {over}.{matchState.innings?.score.balls} Overs
+                {over}.{ballsInOver} Overs
               </p>
             </div>
           </div>
