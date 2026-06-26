@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux"
 import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlayer"
 import {
   deliverBall,
+  update_CRRandRRR,
   update_overAndBallInOver,
   update_TotalRuns,
   update_TotalWickets,
@@ -119,6 +120,7 @@ export default function LiveScoringPage() {
         isLegalDelivery: ballObject.isLegalDelivery,
       }),
     )
+    dispatch(update_CRRandRRR())
 
     // setMatchState((prev) => {
     //   const updatedBalls = [...prev.recentBalls]
@@ -244,7 +246,7 @@ export default function LiveScoringPage() {
 
                 <div className="mt-1 flex gap-4 text-sm font-bold">
                   <p>
-                    CRR <span className="text-green-300">{(runs / 6).toFixed(2)}</span>
+                    CRR <span className="text-green-300">{CRR}</span>
                   </p>
 
                   <p>

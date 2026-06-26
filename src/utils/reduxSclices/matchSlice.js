@@ -345,11 +345,17 @@ const matchSlice = createSlice({
                 state.innings.score.over++
                 state.innings.score.ballsInOver = 0
             }
+        },
+        update_CRRandRRR(state) {
+            const balls = state.innings?.balls || []
+            const legalDeliveries = balls.filter(b => b.isLegalDelivery).length
+            const runs = state.innings?.score?.runs || 0
 
-
-
+            state.innings.score.CRR =
+                legalDeliveries === 0
+                    ? "0.00"
+                    : ((runs * 6) / legalDeliveries).toFixed(2)
         }
-
 
 
 
@@ -415,7 +421,8 @@ export const {
     // mutating score board
     update_TotalRuns,
     update_TotalWickets,
-    update_overAndBallInOver
+    update_overAndBallInOver,
+    update_CRRandRRR
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
