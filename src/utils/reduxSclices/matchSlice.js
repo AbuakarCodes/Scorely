@@ -421,7 +421,7 @@ export const {
 export default matchSlice.reducer;
 
 
-
+// Ytility Functions
 function loadMatchState() {
     try {
         const data = localStorage.getItem("match");
@@ -475,3 +475,4 @@ const resetBowler = (currentBowler, player) => {
     currentBowler.TotalOver = 0;
     currentBowler.TotalRunsConceded = 0;
 };
+

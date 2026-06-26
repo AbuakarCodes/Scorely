@@ -17,11 +17,10 @@ export default function LiveScoringPage() {
 
   const { batsmen, bowler, innings, id } = useSelector((state) => state.match)
   const { batsmenA, batsmenB } = batsmen
-  const { runs, wickets, over, balls, ballsInOver, CRR, RRR } = innings?.score
-  const { pendingNewBowler, pendingNewBatsman } = innings
+  const { runs, wickets, over, ballsInOver, CRR, RRR } = innings?.score
+  const { pendingNewBowler, pendingNewBatsman, balls } = innings
   const { currentBowler } = bowler
 
- 
   const initialMatch = {
     match: {
       teamA: teamA.name,
@@ -97,8 +96,8 @@ export default function LiveScoringPage() {
       over: over,
       ballInOver: bowler.bowler_ballInOver,
       isLegalDelivery: !extraType || (extraType !== "wide" && extraType !== "noball"),
-      strikerId: matchState.batsmen.find((p) => p.striker)?.id,
-      nonStrikerId: matchState.batsmen.find((p) => !p.striker)?.id,
+      strikerId: getBatsmanIdByRole(batsmen, "striker"),
+      nonStrikerId: getBatsmanIdByRole(batsmen, "nonStriker"),
       bowlerId: matchState.bowler.id,
       isWicket: type === "wicket",
       // `runs` are batsman runs only. Byes/leg byes count entirely as extras.
@@ -245,7 +244,7 @@ export default function LiveScoringPage() {
 
                 <div className="mt-1 flex gap-4 text-sm font-bold">
                   <p>
-                    CRR <span className="text-green-300">{(runs/6).toFixed(2)}</span>
+                    CRR <span className="text-green-300">{(runs / 6).toFixed(2)}</span>
                   </p>
 
                   <p>
@@ -310,27 +309,43 @@ export default function LiveScoringPage() {
           </section>
 
           {/* BATSMEN */}
-          {[batsmenA, batsmenB].map((player) => (
-            <div
-              key={`${player.id + Math.random()}`}
-              className={`flex items-center px-4 py-4 border-t
-    ${player.isStriker ? "bg-primary/5" : "bg-white"}`}
-            >
-              <div className="flex flex-1 items-center gap-3">
-                {player.isStriker && <Star className="size-4 text-primary fill-primary" />}
+          {[batsmenA, batsmenB].map((player) => {
+            const { runs, ballsPlayed, fours, sixes, strikeRate } = calBattingFiguers(player?.id, balls)
+            return (
+              <>
+                <section
+                  className={`overflow-hidden rounded-xl border bg-white shadow-sm ${player?.isStriker ? "border-primary shadow-2xl" : ""}`}
+                >
+                  <div className="bg-slate-50 px-4 py-2 text-[10px] uppercase tracking-wider font-bold text-slate-500 flex">
+                    <span className="flex-1">{player?.isStriker ? "Striker" : "Non striker"}</span>
+                    <span className="w-12 text-center">R</span>
+                    <span className="w-12 text-center">B</span>
+                    <span className="w-12 text-center">4</span>
+                    <span className="w-12 text-center">6</span>
+                    <span className="w-16 text-right">SR</span>
+                  </div>
 
-                <span className={`font-bold ${player.isStriker ? "text-primary" : "text-slate-700"}`}>
-                  {player.name}
-                </span>
-              </div>
+                  <div
+                    key={`${player?.id + Math.random()}`}
+                    className={`flex items-center px-4 py-4 border-t
+    ${player?.isStriker ? "bg-primary/10" : "bg-white"}`}
+                  >
+                    <div className="flex flex-1 items-center gap-3">
+                      <span className={`font-bold ${player?.isStriker ? "text-primary" : "text-slate-700"}`}>
+                        {player?.name}
+                      </span>
+                    </div>
 
-              <span className="w-12 text-center font-black">{player.runs}</span>
-              <span className="w-12 text-center text-sm text-slate-500">{player.balls}</span>
-              <span className="w-12 text-center text-sm text-slate-500">{player.fours}</span>
-              <span className="w-12 text-center text-sm text-slate-500">{player.sixes}</span>
-              <span className="w-16 text-right text-sm font-bold">{player.strikeRate}</span>
-            </div>
-          ))}
+                    <span className="w-12 text-center font-black">{runs}</span>
+                    <span className="w-12 text-center text-sm text-slate-500">{ballsPlayed}</span>
+                    <span className="w-12 text-center text-sm text-slate-500">{fours}</span>
+                    <span className="w-12 text-center text-sm text-slate-500">{sixes}</span>
+                    <span className="w-16 text-right text-sm font-bold">{strikeRate}</span>
+                  </div>
+                </section>
+              </>
+            )
+          })}
 
           {/* BOWLER */}
 
@@ -453,4 +468,35 @@ export default function LiveScoringPage() {
       </div>
     </>
   )
+}
+
+//  Utility Functions
+function getBatsmanIdByRole(batsmen, role) {
+  for (const key in batsmen) {
+    const batsman = batsmen[key]
+
+    if (role === "striker" && batsman.isStriker) return batsman.id
+    if (role === "nonStriker" && !batsman.isStriker) return batsman.id
+  }
+}
+
+function calBattingFiguers(PlayerId, matchBalls) {
+  if (!PlayerId || !Array.isArray(matchBalls)) return
+
+  const stats = {
+    runs: 0,
+    ballsPlayed: 0,
+    fours: 0,
+    sixes: 0,
+  }
+
+  for (const ball of matchBalls) {
+    if (ball.strikerId !== PlayerId) continue
+    stats.runs += ball.runs
+    if (ball.isLegalDelivery) stats.ballsPlayed++
+    if (ball.runs === 4) stats.fours++
+    else if (ball.runs === 6) stats.sixes++
+  }
+  stats.strikeRate = stats.ballsPlayed === 0 ? "0.00" : ((stats.runs / stats.ballsPlayed) * 100).toFixed(2)
+  return stats
 }
