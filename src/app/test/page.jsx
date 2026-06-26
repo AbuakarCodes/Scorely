@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { ArrowLeft, RotateCcw, Star, RefreshCcw } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlayer"
@@ -16,9 +16,6 @@ export default function LiveScoringPage() {
   const { pendingNewBowler, pendingNewBatsman } = innings
   const { currentBowler } = bowler
 
-  useEffect(() => {
-    console.log([batsmenA, batsmenB, currentBowler])
-  }, [batsmen])
 
   const initialMatch = {
     match: {
@@ -80,7 +77,7 @@ export default function LiveScoringPage() {
     lastWicket: "M. Marsh 22 (15)",
   }
 
-  const [showPopup, setshowPopup] = useState(true)
+  const [showPopup, setshowPopup] = useState(false)
 
   // LOCAL UI STATE
 
@@ -206,7 +203,7 @@ export default function LiveScoringPage() {
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (pendingNewBowler || pendingNewBatsman?.nonStricker || pendingNewBatsman?.stricker) setshowPopup(true)
     else if (!pendingNewBowler && !pendingNewBatsman?.nonStricker && !pendingNewBatsman?.stricker)
       setshowPopup(false)
