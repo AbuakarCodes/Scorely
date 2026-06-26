@@ -326,7 +326,7 @@ export default function LiveScoringPage() {
                   </div>
 
                   <div
-                    key={`${player?.id + Math.random()}`}
+                    key={`${player?.id }`}
                     className={`flex items-center px-4 py-4 border-t
     ${player?.isStriker ? "bg-primary/10" : "bg-white"}`}
                   >
@@ -488,6 +488,7 @@ function calBattingFiguers(PlayerId, matchBalls) {
     ballsPlayed: 0,
     fours: 0,
     sixes: 0,
+    strikeRate:0,
   }
 
   for (const ball of matchBalls) {
