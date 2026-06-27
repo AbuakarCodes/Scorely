@@ -8,6 +8,7 @@ import {
   deliverBall,
   update_CRRandRRR,
   update_overAndBallInOver,
+  update_pendingPlayersFlag,
   Update_Strike,
   update_TotalRuns,
   update_TotalWickets,
@@ -15,6 +16,7 @@ import {
 
 export default function LiveScoringPage() {
   const dispatch = useDispatch()
+
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
 
   const { batsmen, bowler, innings, id } = useSelector((state) => state.match)
@@ -83,11 +85,9 @@ export default function LiveScoringPage() {
     lastWicket: "M. Marsh 22 (15)",
   }
 
-
   const [showPopup, setshowPopup] = useState(false)
   const [selectedExtra, setSelectedExtra] = useState(null)
   const [matchState, setMatchState] = useState(initialMatch)
-
 
   // ADD BALL HANDLER
 
@@ -96,7 +96,7 @@ export default function LiveScoringPage() {
       matchId: id,
       inningsNumber: 1,
       over: over,
-      ballInOver:ballsInOver,
+      ballInOver: ballsInOver,
       isLegalDelivery: !extraType || (extraType !== "wide" && extraType !== "noball"),
       strikerId: getBatsmanIdByRole(batsmen, "striker"),
       nonStrikerId: getBatsmanIdByRole(batsmen, "nonStriker"),
@@ -123,7 +123,7 @@ export default function LiveScoringPage() {
     )
     dispatch(update_CRRandRRR())
     dispatch(Update_Strike(ballObject))
-
+    dispatch(update_pendingPlayersFlag(ballObject))
 
     setSelectedExtra(null)
   }
@@ -162,8 +162,8 @@ export default function LiveScoringPage() {
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   useLayoutEffect(() => {
-    if (pendingNewBowler || pendingNewBatsman?.nonStricker || pendingNewBatsman?.stricker) setshowPopup(true)
-    else if (!pendingNewBowler && !pendingNewBatsman?.nonStricker && !pendingNewBatsman?.stricker)
+    if (pendingNewBowler || pendingNewBatsman?.nonStriker || pendingNewBatsman?.striker) setshowPopup(true)
+    else if (!pendingNewBowler && !pendingNewBatsman?.nonStriker && !pendingNewBatsman?.striker)
       setshowPopup(false)
   }, [pendingNewBowler, pendingNewBatsman])
 

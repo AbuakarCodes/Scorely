@@ -253,7 +253,9 @@ const matchSlice = createSlice({
         },
 
         chnageBatsmen_OR_Bowler(state, action) {
+            //  State Flags indicate what we need
             const { striker, nonStriker, bowler } = action.payload;
+            // Thats the info for new players (id's ad name)
 
             const needBothBatsmen =
                 state.innings.pendingNewBatsman.striker &&
@@ -363,6 +365,18 @@ const matchSlice = createSlice({
 
         },
 
+        update_pendingPlayersFlag(state, action) {
+            if (!action.payload) return
+            const ballObject = action.payload
+            const isWicket = ballObject.isWicket
+            const isOverEnd = ballObject.isLegalDelivery ? ballObject.ballInOver === 5 : false
+
+            if (isWicket) state.innings.pendingNewBatsman = { ...state.innings.pendingNewBatsman, striker: true }
+            if (isOverEnd) state.innings.pendingNewBowler = true
+
+        }
+
+
 
 
 
@@ -429,7 +443,8 @@ export const {
     update_TotalWickets,
     update_overAndBallInOver,
     update_CRRandRRR,
-    Update_Strike
+    Update_Strike,
+    update_pendingPlayersFlag
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
