@@ -146,16 +146,6 @@ const initialState = loadMatchState() || defaultState
 
 
 
-// HELPERS
-
-const swapStrike = (state) => {
-    const temp = state.innings.strikerId;
-    state.innings.strikerId = state.innings.nonStrikerId;
-    state.innings.nonStrikerId = temp;
-};
-
-
-
 // SLICE
 
 const matchSlice = createSlice({
@@ -164,67 +154,67 @@ const matchSlice = createSlice({
 
     reducers: {
 
-        // ADD BALL
-        addBall: (state, action) => {
-            const { runs = 0, wicket = false } = action.payload;
+        // // ADD BALL
+        // addBall: (state, action) => {
+        //     const { runs = 0, wicket = false } = action.payload;
 
-            const innings = state.innings;
+        //     const innings = state.innings;
 
-            // function will return that object 
-            const ball = {
-                matchId: state.match.id,
+        //     // function will return that object 
+        //     const ball = {
+        //         matchId: state.match.id,
 
-                inningsNumber: state.innings.isFirstInnings ? 1 : 2,
+        //         inningsNumber: state.innings.isFirstInnings ? 1 : 2,
 
-                over: state.innings.score.overs,
-                ballInOver: state.innings.score.balls,
+        //         over: state.innings.score.overs,
+        //         ballInOver: state.innings.score.balls,
 
-                isLegalDelivery:
-                    action.payload.extraType !== "Wide" &&
-                    action.payload.extraType !== "NB",
+        //         isLegalDelivery:
+        //             action.payload.extraType !== "Wide" &&
+        //             action.payload.extraType !== "NB",
 
-                strikerId: state.innings.strikerId,
-                nonStrikerId: state.innings.nonStrikerId,
-                bowlerId: state.innings.currentBowlerId,
+        //         strikerId: state.innings.strikerId,
+        //         nonStrikerId: state.innings.nonStrikerId,
+        //         bowlerId: state.innings.currentBowlerId,
 
-                runs: action.payload.runs || 0,
+        //         runs: action.payload.runs || 0,
 
-                extraType: action.payload.extraType || null,
-                extraRuns: action.payload.extraRuns || 0,
+        //         extraType: action.payload.extraType || null,
+        //         extraRuns: action.payload.extraRuns || 0,
 
-                isWicket: action.payload.wicket || false,
-            };
+        //         isWicket: action.payload.wicket || false,
+        //     };
 
-            // state shange 
-            innings.balls.push(ball);
+        //     // state shange 
+        //     innings.balls.push(ball);
 
 
-            innings.score.runs += runs;
+        //     innings.score.runs += runs;
 
-            // legal delivery
-            innings.score.balls += 1;
+        //     // legal delivery
+        //     innings.score.balls += 1;
 
-            // wicket
-            if (wicket) {
-                innings.score.wickets += 1;
-                innings.pendingNewBatsman = true;
-            }
+        //     // wicket
+        //     if (wicket) {
+        //         innings.score.wickets += 1;
+        //         innings.pendingNewBatsman = true;
+        //     }
 
-            // over completed
-            if (innings.score.balls === 5) {
-                innings.score.overs += 1;
-                innings.score.balls = 0;
+        //     // over completed
+        //     if (innings.score.balls === 5) {
+        //         innings.score.overs += 1;
+        //         innings.score.balls = 0;
 
-                swapStrike(state);
+        //         swapStrike(state);
 
-                innings.pendingBowlerChange = true;
-            }
+        //         innings.pendingBowlerChange = true;
+        //     }
 
-            // strike rotation
-            if (runs % 2 === 1) {
-                swapStrike(state);
-            }
-        },
+        //     // strike rotation
+        //     if (runs % 2 === 1) {
+        //         swapStrike(state);
+        //     }
+        // },
 
 
 
@@ -355,7 +345,23 @@ const matchSlice = createSlice({
                 legalDeliveries === 0
                     ? "0.00"
                     : ((runs * 6) / legalDeliveries).toFixed(2)
-        }
+        },
+        Update_Strike(state, action) {
+            if (!action.payload) return;
+
+            const ballObject = action.payload;
+
+            const isLastBall = ballObject.isLegalDelivery && ballObject.ballInOver === 5;
+            const isOddRuns = ballObject.runs % 2 !== 0;
+
+            if (
+                (isOddRuns && !isLastBall) ||
+                (!isOddRuns && isLastBall)
+            ) {
+                swapStriker(state.batsmen)
+            }
+
+        },
 
 
 
@@ -422,7 +428,8 @@ export const {
     update_TotalRuns,
     update_TotalWickets,
     update_overAndBallInOver,
-    update_CRRandRRR
+    update_CRRandRRR,
+    Update_Strike
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
@@ -483,3 +490,17 @@ const resetBowler = (currentBowler, player) => {
     currentBowler.TotalRunsConceded = 0;
 };
 
+function swapStriker(batsmen) {
+    const strikerKey = Object.keys(batsmen).find(
+        key => batsmen[key].isStriker
+    )
+
+    const nonStrikerKey = Object.keys(batsmen).find(
+        key => !batsmen[key].isStriker
+    )
+
+    if (!strikerKey || !nonStrikerKey) return
+
+    batsmen[strikerKey].isStriker = false
+    batsmen[nonStrikerKey].isStriker = true
+}

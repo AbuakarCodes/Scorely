@@ -8,6 +8,7 @@ import {
   deliverBall,
   update_CRRandRRR,
   update_overAndBallInOver,
+  Update_Strike,
   update_TotalRuns,
   update_TotalWickets,
 } from "@/utils/reduxSclices/matchSlice"
@@ -82,11 +83,11 @@ export default function LiveScoringPage() {
     lastWicket: "M. Marsh 22 (15)",
   }
 
-  // LOCAL UI STATE
+
   const [showPopup, setshowPopup] = useState(false)
   const [selectedExtra, setSelectedExtra] = useState(null)
   const [matchState, setMatchState] = useState(initialMatch)
-  const [currentOver, setCurrentOver] = useState([])
+
 
   // ADD BALL HANDLER
 
@@ -95,7 +96,7 @@ export default function LiveScoringPage() {
       matchId: id,
       inningsNumber: 1,
       over: over,
-      ballInOver: bowler.bowler_ballInOver,
+      ballInOver:ballsInOver,
       isLegalDelivery: !extraType || (extraType !== "wide" && extraType !== "noball"),
       strikerId: getBatsmanIdByRole(batsmen, "striker"),
       nonStrikerId: getBatsmanIdByRole(batsmen, "nonStriker"),
@@ -121,50 +122,8 @@ export default function LiveScoringPage() {
       }),
     )
     dispatch(update_CRRandRRR())
+    dispatch(Update_Strike(ballObject))
 
-    // setMatchState((prev) => {
-    //   const updatedBalls = [...prev.recentBalls]
-
-    //   if (type === "wicket") {
-    //     updatedBalls.push("W")
-    //   } else if (extraType === "nb") {
-    //     updatedBalls.push(`${runs}nb`)
-    //   } else if (extraType === "wide") {
-    //     updatedBalls.push(`${runs}wd`)
-    //   } else {
-    //     updatedBalls.push(String(runs))
-    //   }
-
-    //   if (updatedBalls.length > 6) {
-    //     updatedBalls.shift()
-    //   }
-
-    //   let newBalls = prev.innings?.score.balls
-    //   let newOvers = prev.innings?.score.overs
-
-    //   if (!extraType || extraType === "bye" || extraType === "legbye") {
-    //     newBalls += 1
-
-    //     if (newBalls >= 6) {
-    //       newOvers += 1
-    //       newBalls = 0
-    //     }
-    //   }
-
-    //   return {
-    //     ...prev,
-
-    //     recentBalls: updatedBalls,
-
-    //     score: {
-    //       ...prev.innings?.score,
-    //       runs: prev.innings?.score.runs + runs,
-    //       wickets: type === "wicket" ? prev.innings?.score.wickets + 1 : prev.innings?.score.wickets,
-    //       overs: newOvers,
-    //       balls: newBalls,
-    //     },
-    //   }
-    // })
 
     setSelectedExtra(null)
   }
