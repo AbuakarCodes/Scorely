@@ -105,7 +105,7 @@ export default function LiveScoringPage() {
       isLegalDelivery: !extraType || (extraType !== "wide" && extraType !== "noball"),
       strikerId: getBatsmanIdByRole(batsmen, "striker"),
       nonStrikerId: getBatsmanIdByRole(batsmen, "nonStriker"),
-      bowlerId: matchState.bowler.id,
+      bowlerId: currentBowler?.id,
       isWicket: type === "wicket",
       // `runs` are batsman runs only. Byes/leg byes count entirely as extras.
       //  Wides/no-balls automatically add 1 extra,
@@ -289,37 +289,47 @@ export default function LiveScoringPage() {
           })}
 
           {/* BOWLER */}
+          {[currentBowler].map((bowler) => {
+            const { overs, runs, wickets, economy } = calBowlingFiguers(bowler?.id, balls)
+            return (
+              <>
+                <section className="overflow-hidden rounded-xl border bg-white shadow-sm">
+                  <div className="bg-slate-50 px-4 py-2 text-[10px] uppercase tracking-wider font-bold text-slate-500 flex">
+                    <span className="flex-1">Bowler</span>
+                    <span className="w-12 text-center">O</span>
+                    <span className="w-12 text-center">M</span>
+                    <span className="w-12 text-center">R</span>
+                    <span className="w-12 text-center">W</span>
+                    <span className="w-16 text-right">Econ</span>
+                  </div>
 
-          <section className="overflow-hidden rounded-xl border bg-white shadow-sm">
-            <div className="bg-slate-50 px-4 py-2 text-[10px] uppercase tracking-wider font-bold text-slate-500 flex">
-              <span className="flex-1">Bowler</span>
-              <span className="w-12 text-center">O</span>
-              <span className="w-12 text-center">M</span>
-              <span className="w-12 text-center">R</span>
-              <span className="w-12 text-center">W</span>
-              <span className="w-16 text-right">Econ</span>
-            </div>
+                  <div className="flex items-center px-4 py-4">
+                    <div className="flex-1">
+                      <h3 className="font-bold">{bowler?.name}</h3>
 
-            <div className="flex items-center px-4 py-4">
-              <div className="flex-1">
-                <h3 className="font-bold">{currentBowler?.name}</h3>
+                      <p className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+                        Fast • Over the wicket
+                      </p>
+                    </div>
 
-                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">
-                  Fast • Over the wicket
-                </p>
-              </div>
+                    <span className="w-12 text-center font-bold">{overs}</span>
 
-              <span className="w-12 text-center font-bold">{matchState.bowler.overs}</span>
+                    <span className="w-12 text-center">{0}</span>
 
-              <span className="w-12 text-center">{matchState.bowler.maidens}</span>
+                    <span className="w-12 text-center">{runs}</span>
 
-              <span className="w-12 text-center">{matchState.bowler.runs}</span>
+                    <span className="w-12 text-center font-black text-red-500">
+                      {wickets}
+                    </span>
 
-              <span className="w-12 text-center font-black text-red-500">{matchState.bowler.wickets}</span>
-
-              <span className="w-16 text-right font-bold text-primary">{matchState.bowler.economy}</span>
-            </div>
-          </section>
+                    <span className="w-16 text-right font-bold text-primary">
+                      {economy}
+                    </span>
+                  </div>
+                </section>
+              </>
+            )
+          })}
         </main>
 
         {/* SCORING PANEL */}
@@ -441,4 +451,49 @@ function calBattingFiguers(PlayerId, matchBalls) {
   }
   stats.strikeRate = stats.ballsPlayed === 0 ? "0.00" : ((stats.runs / stats.ballsPlayed) * 100).toFixed(2)
   return stats
+}
+
+function calBowlingFiguers(bowlerId, matchBalls) {
+  if (!bowlerId || !matchBalls) return
+  if (!Array.isArray(matchBalls)) return
+
+  let numberOfLegalBalls = 0
+  let numberOfWickets = 0
+  let runs = 0
+  let maidenBalls = 0
+
+  if (!bowlerId) return
+
+  for (const ball of matchBalls) {
+    if (ball.bowlerId !== bowlerId) continue
+
+    const ballRuns =
+      ball.extraType === "bye" || ball.extraType === "legbye" ? ball.runs : ball.runs + ball.extraRuns
+    runs += ballRuns
+    numberOfLegalBalls += ball.isLegalDelivery ? 1 : 0
+    numberOfWickets += ball.isWicket ? 1 : 0
+  }
+
+  const economy = calculateEconomy(runs, numberOfLegalBalls)
+
+  // overs bowled
+  const overs = ballsToOvers(numberOfLegalBalls)
+
+  return {
+    overs,
+    runs,
+    wickets: numberOfWickets,
+    economy,
+  }
+}
+
+function ballsToOvers(balls) {
+  const overs = Math.floor(balls / 6)
+  const remainingBalls = balls % 6
+  return `${overs}.${remainingBalls}`
+}
+
+function calculateEconomy(runsConceded, legalBalls) {
+  if (legalBalls === 0) return 0
+  return ((runsConceded * 6) / legalBalls).toFixed(2)
 }

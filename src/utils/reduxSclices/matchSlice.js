@@ -256,7 +256,6 @@ const matchSlice = createSlice({
             //  State Flags indicate what we need
             const { striker, nonStriker, bowler } = action.payload;
             // Thats the info for new players (id's ad name)
-
             const needBothBatsmen =
                 state.innings.pendingNewBatsman.striker &&
                 state.innings.pendingNewBatsman.nonStriker;

@@ -78,7 +78,6 @@ export default function SelectParticipantsModal() {
   // ── Select a player ───────────────────────────────────────────────────────
   function handleSelect(player) {
     const next = { ...playerSelections, [activeTab]: { id: player?._id, name: player?.name } }
-    console.log(next[activeTab].id)
     setplayerSelections(next)
     // Auto-advance to next unselected tab
     const currentIdx = tabList.indexOf(activeTab)
@@ -353,6 +352,8 @@ function filterPlayers(players_param, batsmen) {
   const players = [...players_param]
 
   const nonStriker = Object.values(batsmen).find((player) => !player.isStriker)
-
+  // filtring nonStriker because when a player got out it will not shown in selection 
+  // as we are filtering it with isDissmissel propertie but
+  // the nonStriker will keep appering so we filter it as well
   return players.filter((p) => !p.isDismissed && p._id !== nonStriker.id)
 }
