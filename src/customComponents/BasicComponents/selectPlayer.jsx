@@ -1,8 +1,7 @@
 "use client"
 
-import { AnimatePresence, motion } from "framer-motion"
-import { Search } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { Layers, Search } from "lucide-react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { MdSportsCricket } from "react-icons/md"
 import { BiSolidCricketBall } from "react-icons/bi"
@@ -12,9 +11,10 @@ import { chnageBatsmen_OR_Bowler } from "@/utils/reduxSclices/matchSlice"
 
 import { X, SlidersHorizontal, ChevronRight, Check } from "lucide-react"
 
-export default function SelectParticipantsModal({ onClose }) {
+export default function SelectParticipantsModal() {
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
   const { tossDecision, tossWinner } = useSelector((state) => state?.match?.match)
+  const { batsmen } = useSelector((state) => state?.match)
   const pendingNewBatsman = useSelector(
     (state) => state.match?.innings?.pendingNewBatsman ?? { striker: null, nonStriker: null },
   )
@@ -58,22 +58,30 @@ export default function SelectParticipantsModal({ onClose }) {
     bowler: null,
   })
 
+  const battingTeam = OrderdTeams[0]?.players || []
+  const bowlingTeam = OrderdTeams[1]?.players || []
+
   const isBowlerTab = activeTab === "bowler"
 
-  const allPlayers = isBowlerTab ? OrderdTeams[1]?.players : OrderdTeams[0]?.players
-  const filtered = Array.isArray(allPlayers)
+  const allPlayers = isBowlerTab ? bowlingTeam : filterPlayers(battingTeam, batsmen)
+  let filtered = Array.isArray(allPlayers)
     ? allPlayers.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
     : []
+
+  if (activeTab === "nonStriker") {
+    filtered = filtered.filter((p) => p?._id !== playerSelections?.striker?.id)
+  }
+  if (activeTab === "striker") {
+    filtered = filtered.filter((p) => p?._id !== playerSelections?.nonStriker?.id)
+  }
 
   // ── Select a player ───────────────────────────────────────────────────────
   function handleSelect(player) {
     const next = { ...playerSelections, [activeTab]: { id: player?._id, name: player?.name } }
+    console.log(next[activeTab].id)
     setplayerSelections(next)
-
     // Auto-advance to next unselected tab
     const currentIdx = tabList.indexOf(activeTab)
-    // const nextTab = tabList.find((t, i) => i > currentIdx && !next[t] === true)
-    // If there's a next tab that has no selection yet, move there
     const nextUnfilled = Array.isArray(tabList)
       ? tabList.find((t, i) => i > currentIdx && next[t] === null)
       : []
@@ -337,4 +345,14 @@ function orderingTeams(teamA, teamB, tossWinner, tossDecision) {
   if (tossDecision === "bowl") return [ToosLostTeam, TosswinningTeam]
 
   return [{ Players: [] }, { Players: [] }]
+}
+
+function filterPlayers(players_param, batsmen) {
+  if (!players_param) return
+  if (!Array.isArray(players_param)) return
+  const players = [...players_param]
+
+  const nonStriker = Object.values(batsmen).find((player) => !player.isStriker)
+
+  return players.filter((p) => !p.isDismissed && p._id !== nonStriker.id)
 }

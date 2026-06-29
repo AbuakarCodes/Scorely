@@ -91,18 +91,18 @@ const defaultState = {
     batsmen: {
         batsmenA: {
             id: "",
-            name: "Abdullah Khan",
-            runs: 45,
-            balls: 32,
-            fours: 6,
-            sixes: 2,
-            strikeRate: 140.62,
+            name: "",
+            runs: "",
+            balls: "",
+            fours: "",
+            sixes: "",
+            strikeRate: "140.62",
             isStriker: false,
         },
 
         batsmenB: {
             id: "",
-            name: "Ali",
+            name: "",
             runs: 28,
             balls: 25,
             fours: 3,
@@ -286,16 +286,11 @@ const matchSlice = createSlice({
             );
 
             if (needStriker) resetBatsman(strikerBatsman, striker);
-
-
             if (needNonStriker) resetBatsman(nonStrikerBatsman, nonStriker);
-
-
             if (needBothBatsmen) {
                 resetBatsman(strikerBatsman, striker);
                 resetBatsman(nonStrikerBatsman, nonStriker);
             }
-
             if (needBowler) {
                 resetBowler(state.bowler.currentBowler, bowler);
             }
@@ -374,7 +369,31 @@ const matchSlice = createSlice({
             if (isWicket) state.innings.pendingNewBatsman = { ...state.innings.pendingNewBatsman, striker: true }
             if (isOverEnd) state.innings.pendingNewBowler = true
 
+        },
+
+        update_isDissmissedFlag(state, action) {
+            if (!action.payload) return;
+            const ballObject = action.payload;
+            if (!ballObject.isWicket) return;
+            const striker = [
+                ...state.match.teams.teamA.players,
+                ...state.match.teams.teamB.players,
+            ].find(p => p._id === ballObject.strikerId);
+            if (!striker) return;
+            striker.isDismissed = true;
+        },
+
+        update_isSelectedBatsmen_Flag(state, action) {
+            if (!action.payload) return;
+            const id = action.payload;
+            const selectedPlayer = [
+                ...state.match.teams.teamA.players,
+                ...state.match.teams.teamB.players,
+            ].find(p => p._id === id);
+            if (!selectedPlayer) return;
+            striker.isSelected = true;
         }
+
 
 
 
@@ -444,7 +463,9 @@ export const {
     update_overAndBallInOver,
     update_CRRandRRR,
     Update_Strike,
-    update_pendingPlayersFlag
+    update_pendingPlayersFlag,
+    update_isDissmissedFlag,
+    update_isSelectedBatsmen_Flag
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
@@ -470,6 +491,7 @@ function inject_isDismissedInPlayers(params) {
             players: params.teamA.players.map((player) => ({
                 ...player,
                 isDismissed: false,
+                isBatting: false,
             })),
         },
 
@@ -478,6 +500,7 @@ function inject_isDismissedInPlayers(params) {
             players: params.teamB.players.map((player) => ({
                 ...player,
                 isDismissed: false,
+                isBatting: false,
             })),
         },
     };

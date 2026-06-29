@@ -7,6 +7,7 @@ import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlaye
 import {
   deliverBall,
   update_CRRandRRR,
+  update_isDissmissedFlag,
   update_overAndBallInOver,
   update_pendingPlayersFlag,
   Update_Strike,
@@ -89,7 +90,11 @@ export default function LiveScoringPage() {
   const [selectedExtra, setSelectedExtra] = useState(null)
   const [matchState, setMatchState] = useState(initialMatch)
 
-  // ADD BALL HANDLER
+  useLayoutEffect(() => {
+    if (pendingNewBowler || pendingNewBatsman?.nonStriker || pendingNewBatsman?.striker) setshowPopup(true)
+    else if (!pendingNewBowler && !pendingNewBatsman?.nonStriker && !pendingNewBatsman?.striker)
+      setshowPopup(false)
+  }, [pendingNewBowler, pendingNewBatsman])
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
     const ballObject = {
@@ -124,6 +129,7 @@ export default function LiveScoringPage() {
     dispatch(update_CRRandRRR())
     dispatch(Update_Strike(ballObject))
     dispatch(update_pendingPlayersFlag(ballObject))
+    dispatch(update_isDissmissedFlag(ballObject))
 
     setSelectedExtra(null)
   }
@@ -140,32 +146,6 @@ export default function LiveScoringPage() {
       return isNaN(parsed) ? acc : acc + parsed
     }, 0)
   }, [matchState.recentBalls])
-
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-  useLayoutEffect(() => {
-    if (pendingNewBowler || pendingNewBatsman?.nonStriker || pendingNewBatsman?.striker) setshowPopup(true)
-    else if (!pendingNewBowler && !pendingNewBatsman?.nonStriker && !pendingNewBatsman?.striker)
-      setshowPopup(false)
-  }, [pendingNewBowler, pendingNewBatsman])
 
   return (
     <>
