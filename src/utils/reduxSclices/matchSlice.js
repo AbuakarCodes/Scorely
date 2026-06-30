@@ -96,19 +96,21 @@ const defaultState = {
             balls: "",
             fours: "",
             sixes: "",
-            strikeRate: "140.62",
-            isStriker: false,
+            strikeRate: "",
+            isStriker: true, // setting it true on purpose, as we are setting the striker batsmen on the basises
+            // of is striker flag, if its false then at first time we'll not be able to find "strikerBatsman" at "chnageBatsmen_OR_Bowler"
+            // so initialy math that flage true so the sleected striker place there    
         },
 
         batsmenB: {
             id: "",
             name: "",
-            runs: 28,
-            balls: 25,
-            fours: 3,
-            sixes: 1,
-            strikeRate: 112.0,
-            isStriker: true,
+            runs: 0,
+            balls: 0,
+            fours: 0,
+            sixes: 0,
+            strikeRate: 0,
+            isStriker: false,
         },
     },
 
@@ -253,8 +255,11 @@ const matchSlice = createSlice({
         },
 
         chnageBatsmen_OR_Bowler(state, action) {
+
             //  State Flags indicate what we need
             const { striker, nonStriker, bowler } = action.payload;
+
+
             // Thats the info for new players (id's ad name)
             const needBothBatsmen =
                 state.innings.pendingNewBatsman.striker &&
@@ -280,15 +285,17 @@ const matchSlice = createSlice({
                 batsman => batsman.isStriker
             );
 
+
             const nonStrikerBatsman = Object.values(state.batsmen).find(
                 batsman => !batsman.isStriker
             );
 
-            if (needStriker) resetBatsman(strikerBatsman, striker);
-            if (needNonStriker) resetBatsman(nonStrikerBatsman, nonStriker);
+
+            if (needStriker) resetBatsman(strikerBatsman, striker, { isStriker: true });
+            if (needNonStriker) resetBatsman(nonStrikerBatsman, nonStriker, { isStriker: false });
             if (needBothBatsmen) {
-                resetBatsman(strikerBatsman, striker);
-                resetBatsman(nonStrikerBatsman, nonStriker);
+                resetBatsman(strikerBatsman, striker, { isStriker: true });
+                resetBatsman(nonStrikerBatsman, nonStriker, { isStriker: false });
             }
             if (needBowler) {
                 resetBowler(state.bowler.currentBowler, bowler);
@@ -505,8 +512,11 @@ function inject_isDismissedInPlayers(params) {
     };
 }
 
-const resetBatsman = (batsman, player) => {
-    batsman.id = player.id;
+const resetBatsman = (batsman, player, strikerConfige) => {
+    // batsman = State object which shows batsman on UI (Object) 
+    // player = New player selected by user (Object)
+    // dont need to set striker flag there as that function is being used for setting striker and nonstriker
+    batsman.id = player?.id;
     batsman.name = player.name;
     batsman.runs = 0;
     batsman.balls = 0;

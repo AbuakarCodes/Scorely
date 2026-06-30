@@ -290,7 +290,7 @@ export default function LiveScoringPage() {
 
           {/* BOWLER */}
           {[currentBowler].map((bowler) => {
-            const { overs, runs, wickets, economy } = calBowlingFiguers(bowler?.id, balls)
+            const BowlingFiguers = calBowlingFiguers(bowler?.id, balls)
             return (
               <>
                 <section className="overflow-hidden rounded-xl border bg-white shadow-sm">
@@ -305,25 +305,25 @@ export default function LiveScoringPage() {
 
                   <div className="flex items-center px-4 py-4">
                     <div className="flex-1">
-                      <h3 className="font-bold">{bowler?.name}</h3>
+                      <h3 className="font-bold">{currentBowler?.name}</h3>
 
                       <p className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">
                         Fast • Over the wicket
                       </p>
                     </div>
 
-                    <span className="w-12 text-center font-bold">{overs}</span>
+                    <span className="w-12 text-center font-bold">{BowlingFiguers?.overs || 0}</span>
 
                     <span className="w-12 text-center">{0}</span>
 
-                    <span className="w-12 text-center">{runs}</span>
+                    <span className="w-12 text-center">{BowlingFiguers?.runs || 0}</span>
 
                     <span className="w-12 text-center font-black text-red-500">
-                      {wickets}
+                      {BowlingFiguers?.wickets || 0}
                     </span>
 
                     <span className="w-16 text-right font-bold text-primary">
-                      {economy}
+                      {BowlingFiguers?.economy || 0}
                     </span>
                   </div>
                 </section>
