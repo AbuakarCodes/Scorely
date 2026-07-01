@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
     darkMode: false,
-    defaultOvers: 15,
+    defaultOvers: 2,
     wicketsPerSide: 11,
     lastPlayerPlayed: false
 }
@@ -33,6 +33,8 @@ export const settingSlice = createSlice({
                 state.wicketsPerSide = action.payload
             }
         },
+
+
         toggleLastPlayerPlayed: (state) => {
             state.lastPlayerPlayed = !state.lastPlayerPlayed
         },

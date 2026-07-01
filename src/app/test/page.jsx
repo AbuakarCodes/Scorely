@@ -7,6 +7,7 @@ import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlaye
 import {
   deliverBall,
   update_CRRandRRR,
+  swap_sides,
   update_isDissmissedFlag,
   update_overAndBallInOver,
   update_pendingPlayersFlag,
@@ -16,6 +17,7 @@ import {
 } from "@/utils/reduxSclices/matchSlice"
 
 export default function LiveScoringPage() {
+  const runButtons = [0, 1, 2, 3, 4, 6]
   const dispatch = useDispatch()
 
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
@@ -26,69 +28,10 @@ export default function LiveScoringPage() {
   const { pendingNewBowler, pendingNewBatsman, balls } = innings
   const { currentBowler } = bowler
 
-  const initialMatch = {
-    match: {
-      teamA: teamA.name,
-      teamB: teamB.name,
-      innings: 1,
-      target: 185,
-    },
-
-    score: {
-      runs: 142,
-      wickets: 3,
-      overs: 15,
-      balls: 4,
-      crr: 9.06,
-      rrr: 10.12,
-    },
-
-    batsmen: [
-      {
-        id: 1,
-        name: "Steve dumb",
-        runs: 45,
-        balls: 32,
-        fours: 4,
-        sixes: 1,
-        strikeRate: 140.6,
-        striker: true,
-      },
-      {
-        id: 2,
-        name: "Alex Carey",
-        runs: 12,
-        balls: 8,
-        fours: 1,
-        sixes: 0,
-        strikeRate: 150,
-        striker: false,
-      },
-    ],
-
-    bowler: {
-      id: 1,
-      name: "Mark Wood",
-      overs: 3.4,
-      maidens: 0,
-      runs: 32,
-      wickets: 1,
-      economy: 8.73,
-    },
-
-    recentBalls: [],
-
-    partnership: {
-      runs: 28,
-      balls: 14,
-    },
-
-    lastWicket: "M. Marsh 22 (15)",
-  }
+  const { defaultOvers: TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || 0)
 
   const [showPopup, setshowPopup] = useState(false)
   const [selectedExtra, setSelectedExtra] = useState(null)
-  const [matchState, setMatchState] = useState(initialMatch)
 
   useLayoutEffect(() => {
     if (pendingNewBowler || pendingNewBatsman?.nonStriker || pendingNewBatsman?.striker) setshowPopup(true)
@@ -117,35 +60,29 @@ export default function LiveScoringPage() {
       extraType,
     }
 
-    // console.log("BALL OBJECT:", ballObject)
     dispatch(deliverBall(ballObject))
     dispatch(update_TotalRuns())
     dispatch(update_TotalWickets())
-    dispatch(
-      update_overAndBallInOver({
-        isLegalDelivery: ballObject.isLegalDelivery,
-      }),
-    )
+    dispatch(update_overAndBallInOver(ballObject?.isLegalDelivery))
     dispatch(update_CRRandRRR())
     dispatch(Update_Strike(ballObject))
-    dispatch(update_pendingPlayersFlag(ballObject))
+    dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
     dispatch(update_isDissmissedFlag(ballObject))
+    dispatch(swap_sides({ ballObject, TotalOvers }))
 
     setSelectedExtra(null)
   }
 
   // RUN BUTTONS
 
-  const runButtons = [0, 1, 2, 3, 4, 6]
-
   // THIS OVER RUNS
 
-  const thisOverRuns = useMemo(() => {
-    return matchState.recentBalls.reduce((acc, item) => {
-      const parsed = parseInt(item)
-      return isNaN(parsed) ? acc : acc + parsed
-    }, 0)
-  }, [matchState.recentBalls])
+  // const thisOverRuns = useMemo(() => {
+  //   return matchState.recentBalls.reduce((acc, item) => {
+  //     const parsed = parseInt(item)
+  //     return isNaN(parsed) ? acc : acc + parsed
+  //   }, 0)
+  // }, [matchState.recentBalls])
 
   return (
     <>
@@ -220,12 +157,12 @@ export default function LiveScoringPage() {
               <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Recent Balls</p>
 
               <p className="text-[10px] uppercase tracking-widest text-primary font-bold">
-                This Over: {thisOverRuns} runs
+                This Over: {"thisOverRuns"} runs
               </p>
             </div>
 
             <div className="flex gap-2 overflow-x-auto justify-center">
-              {matchState.recentBalls.map((ball, index) => {
+              {/* {matchState.recentBalls.map((ball, index) => {
                 const isWicket = ball === "W"
                 const isBoundary = ball === "4" || ball === "6"
 
@@ -245,7 +182,7 @@ export default function LiveScoringPage() {
                     {ball}
                   </div>
                 )
-              })}
+              })} */}
             </div>
           </section>
 

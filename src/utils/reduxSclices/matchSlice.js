@@ -65,7 +65,7 @@ const defaultState = {
     },
 
     innings: {
-        isInings: false,
+        // isInings: false,
         isFirstInings: false,
 
         battingTeamId: "",
@@ -155,73 +155,6 @@ const matchSlice = createSlice({
     initialState,
 
     reducers: {
-
-        // // ADD BALL
-        // addBall: (state, action) => {
-        //     const { runs = 0, wicket = false } = action.payload;
-
-        //     const innings = state.innings;
-
-        //     // function will return that object 
-        //     const ball = {
-        //         matchId: state.match.id,
-
-        //         inningsNumber: state.innings.isFirstInnings ? 1 : 2,
-
-        //         over: state.innings.score.overs,
-        //         ballInOver: state.innings.score.balls,
-
-        //         isLegalDelivery:
-        //             action.payload.extraType !== "Wide" &&
-        //             action.payload.extraType !== "NB",
-
-        //         strikerId: state.innings.strikerId,
-        //         nonStrikerId: state.innings.nonStrikerId,
-        //         bowlerId: state.innings.currentBowlerId,
-
-        //         runs: action.payload.runs || 0,
-
-        //         extraType: action.payload.extraType || null,
-        //         extraRuns: action.payload.extraRuns || 0,
-
-        //         isWicket: action.payload.wicket || false,
-        //     };
-
-        //     // state shange 
-        //     innings.balls.push(ball);
-
-
-        //     innings.score.runs += runs;
-
-        //     // legal delivery
-        //     innings.score.balls += 1;
-
-        //     // wicket
-        //     if (wicket) {
-        //         innings.score.wickets += 1;
-        //         innings.pendingNewBatsman = true;
-        //     }
-
-        //     // over completed
-        //     if (innings.score.balls === 5) {
-        //         innings.score.overs += 1;
-        //         innings.score.balls = 0;
-
-        //         swapStrike(state);
-
-        //         innings.pendingBowlerChange = true;
-        //     }
-
-        //     // strike rotation
-        //     if (runs % 2 === 1) {
-        //         swapStrike(state);
-        //     }
-        // },
-
-
-
-
-
 
         setMatch_id(state, action) {
             if (!action.payload) return
@@ -327,7 +260,7 @@ const matchSlice = createSlice({
             state.innings.score.wickets = calculatingWickets
         },
         update_overAndBallInOver(state, action) {
-            const { isLegalDelivery } = action.payload
+            const isLegalDelivery = action.payload
             const currentBall = state.innings.score.ballsInOver
 
             if (currentBall < 5 && isLegalDelivery) {
@@ -368,12 +301,20 @@ const matchSlice = createSlice({
 
         update_pendingPlayersFlag(state, action) {
             if (!action.payload) return
-            const ballObject = action.payload
+            const { ballObject, TotalOvers } = action.payload
+            const { over, isLegalDelivery, ballInOver } = ballObject
+            // parameters
+            const team = state?.match?.teams || []
+            const tossDecision = state?.match?.tossDecision || ""
+            const tossWinner = state.match.tossWinner
+            const isFirstInings = state.innings.isFirstInings
+
             const isWicket = ballObject.isWicket
             const isOverEnd = ballObject.isLegalDelivery ? ballObject.ballInOver === 5 : false
-
-            if (isWicket) state.innings.pendingNewBatsman = { ...state.innings.pendingNewBatsman, striker: true }
-            if (isOverEnd) state.innings.pendingNewBowler = true
+            const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
+            const arePlayersLeft = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
+            if (isWicket && arePlayersLeft != 0) state.innings.pendingNewBatsman = { ...state.innings.pendingNewBatsman, striker: true }
+            if (isOverEnd && !oversCompleted) state.innings.pendingNewBowler = true
 
         },
 
@@ -398,7 +339,27 @@ const matchSlice = createSlice({
             ].find(p => p._id === id);
             if (!selectedPlayer) return;
             striker.isSelected = true;
+        },
+
+        swap_sides(state, action) {
+            const { ballObject, TotalOvers } = action.payload;
+            const { over, isLegalDelivery, ballInOver } = ballObject
+            // parameters
+            const team = state?.match?.teams || []
+            const tossDecision = state?.match?.tossDecision || ""
+            const tossWinner = state.match.tossWinner
+            const isFirstInings = state.innings.isFirstInings
+
+
+            const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
+            const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
+
+
+            if (oversCompleted) console.log("chaneg Innings")
+            if (canContinueBat === 0) console.log("chaneg Innings everyone is out");
+
         }
+
 
 
 
@@ -471,7 +432,8 @@ export const {
     Update_Strike,
     update_pendingPlayersFlag,
     update_isDissmissedFlag,
-    update_isSelectedBatsmen_Flag
+    update_isSelectedBatsmen_Flag,
+    swap_sides
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
@@ -550,4 +512,86 @@ function swapStriker(batsmen) {
 
     batsmen[strikerKey].isStriker = false
     batsmen[nonStrikerKey].isStriker = true
+}
+
+function batting_bowlingTeam({ team, tossWinner, tossDecision, isFirstInings }) {
+
+    if (!team || !team.teamA || !team.teamB) {
+        return {
+            battingTeam: null,
+            bowlingTeam: null,
+        };
+    }
+
+    if (!tossWinner?.id) {
+        return {
+            battingTeam: null,
+            bowlingTeam: null,
+        };
+    }
+
+    if (tossDecision !== "bat" && tossDecision !== "bowl") {
+        return {
+            battingTeam: null,
+            bowlingTeam: null,
+        };
+    }
+
+    const { teamA, teamB } = team;
+
+
+    if (teamA.id !== tossWinner.id && teamB.id !== tossWinner.id) {
+        return {
+            battingTeam: null,
+            bowlingTeam: null,
+        };
+    }
+
+    const tossWinningTeam = teamA.id === tossWinner.id ? teamA : teamB;
+    const tossLostTeam = teamA.id === tossWinner.id ? teamB : teamA;
+
+    let battingTeam;
+    let bowlingTeam;
+
+    if (tossDecision === "bat") {
+        battingTeam = tossWinningTeam;
+        bowlingTeam = tossLostTeam;
+    } else {
+        battingTeam = tossLostTeam;
+        bowlingTeam = tossWinningTeam;
+    }
+
+    // Swap for second innings
+    if (!isFirstInings) {
+        [battingTeam, bowlingTeam] = [bowlingTeam, battingTeam];
+    }
+
+    return {
+        battingTeam,
+        bowlingTeam,
+    };
+}
+
+function hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver }) {
+    if (
+        over == null ||
+        TotalOvers == null ||
+        ballInOver == null ||
+        typeof isLegalDelivery !== "boolean"
+    ) return false;
+
+
+    return (
+        over + 1 === TotalOvers &&
+        isLegalDelivery &&
+        ballInOver === 5
+    );
+}
+
+function numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject }) {
+    const { battingTeam } = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })
+    const arePlayersLeft = battingTeam.players.filter(p => !p.isDismissed && p._id !== ballObject.strikerId && p._id !== ballObject.nonStrikerId).length
+
+    return arePlayersLeft
+
 }
