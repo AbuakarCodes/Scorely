@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux"
 import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlayer"
 import {
   deliverBall,
+  handelLastPlayer_isLastPlayerTrue,
   update_CRRandRRR,
   Update_innings,
   update_isDissmissedFlag,
@@ -39,7 +40,6 @@ export default function LiveScoringPage() {
       setshowPopup(false)
   }, [pendingNewBowler, pendingNewBatsman])
 
-  console.log({isFirstInings});
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
     const ballObject = {
@@ -67,10 +67,11 @@ export default function LiveScoringPage() {
     dispatch(update_TotalWickets())
     dispatch(update_overAndBallInOver(ballObject?.isLegalDelivery))
     dispatch(update_CRRandRRR())
-    dispatch(Update_Strike(ballObject))
+    dispatch(Update_Strike({ballObject, lastPlayerPlayed}))
     dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
     dispatch(update_isDissmissedFlag(ballObject))
     dispatch(Update_innings({ ballObject, TotalOvers, lastPlayerPlayed }))
+    dispatch(handelLastPlayer_isLastPlayerTrue({ ballObject, TotalOvers, lastPlayerPlayed }))
 
     setSelectedExtra(null)
   }

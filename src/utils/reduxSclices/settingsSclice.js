@@ -4,7 +4,7 @@ const initialState = {
     darkMode: false,
     defaultOvers: 2,
     wicketsPerSide: 11,
-    lastPlayerPlayed: false
+    lastPlayerPlayed: true
 }
 export const settingSlice = createSlice({
     name: 'settings',

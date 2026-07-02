@@ -189,10 +189,8 @@ const matchSlice = createSlice({
         },
 
         chnageBatsmen_OR_Bowler(state, action) {
-
             //  State Flags indicate what we need
             const { striker, nonStriker, bowler } = action.payload;
-
 
             // Thats the info for new players (id's ad name)
             const needBothBatsmen =
@@ -215,28 +213,36 @@ const matchSlice = createSlice({
             if (needNonStriker && !nonStriker?.id) return;
             if (needBowler && !bowler?.id) return;
 
-            const strikerBatsman = Object.values(state.batsmen).find(
-                batsman => batsman.isStriker
-            );
+            const { strikerBatsman, nonStrikerBatsman } = findStrikertNonStriker(state.batsmen)
 
-
-            const nonStrikerBatsman = Object.values(state.batsmen).find(
-                batsman => !batsman.isStriker
-            );
-
-
-            if (needStriker) resetBatsman(strikerBatsman, striker, { isStriker: true });
-            if (needNonStriker) resetBatsman(nonStrikerBatsman, nonStriker, { isStriker: false });
+            if (needStriker) resetBatsman(strikerBatsman, striker);
+            if (needNonStriker) resetBatsman(nonStrikerBatsman, nonStriker);
+            if (needBowler) resetBowler(state.bowler.currentBowler, bowler);
             if (needBothBatsmen) {
-                resetBatsman(strikerBatsman, striker, { isStriker: true });
-                resetBatsman(nonStrikerBatsman, nonStriker, { isStriker: false });
+                resetBatsman(strikerBatsman, striker);
+                resetBatsman(nonStrikerBatsman, nonStriker);
             }
-            if (needBowler) {
-                resetBowler(state.bowler.currentBowler, bowler);
-            }
-
 
             chnagePendingBatsman_Bowler_flag(state, false);
+        },
+        handelLastPlayer_isLastPlayerTrue(state, action) {
+            const { ballObject, lastPlayerPlayed } = action.payload
+
+            const team = state?.match?.teams || []
+            const tossDecision = state?.match?.tossDecision || ""
+            const tossWinner = state.match.tossWinner
+            const isFirstInings = state.innings.isFirstInings
+
+            const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
+            const { strikerBatsman, nonStrikerBatsman } = findStrikertNonStriker(state.batsmen)
+
+            if (lastPlayerPlayed && canContinueBat === 0) {
+                if (nonStrikerBatsman.id) {
+                    resetBatsman(strikerBatsman, nonStrikerBatsman)
+                    resetBatsman(nonStrikerBatsman)
+                }
+            }
+
         },
 
         deliverBall(state, action) {
@@ -283,7 +289,16 @@ const matchSlice = createSlice({
         Update_Strike(state, action) {
             if (!action.payload) return;
 
-            const ballObject = action.payload;
+            const team = state?.match?.teams || []
+            const tossDecision = state?.match?.tossDecision || ""
+            const tossWinner = state.match.tossWinner
+            const isFirstInings = state.innings.isFirstInings
+            const {ballObject, lastPlayerPlayed} = action.payload;
+
+            const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
+
+            // when only one player is on crease then there will be no one to switch strike with
+             if (lastPlayerPlayed && canContinueBat === 0) return
 
             const isLastBall = ballObject.isLegalDelivery && ballObject.ballInOver === 5;
             const isOddRuns = ballObject.runs % 2 !== 0;
@@ -459,7 +474,8 @@ export const {
     update_pendingPlayersFlag,
     update_isDissmissedFlag,
     update_isSelectedBatsmen_Flag,
-    Update_innings
+    Update_innings,
+    handelLastPlayer_isLastPlayerTrue
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
@@ -500,17 +516,17 @@ function inject_isDismissedInPlayers(params) {
     };
 }
 
-const resetBatsman = (batsman, player, strikerConfige) => {
-    // batsman = State object which shows batsman on UI (Object) 
+const resetBatsman = (batsman, player = {}) => {
+    // batsman = State object which shows batsman on UI (Object)
     // player = New player selected by user (Object)
-    // dont need to set striker flag there as that function is being used for setting striker and nonstriker
-    batsman.id = player?.id;
-    batsman.name = player.name;
-    batsman.runs = 0;
-    batsman.balls = 0;
-    batsman.fours = 0;
-    batsman.sixes = 0;
-    batsman.strikeRate = 0;
+    // dont need to set striker flag there, as that function is being used for setting striker and nonstriker
+    batsman.id = player.id ?? "";
+    batsman.name = player.name ?? "";
+    batsman.runs = player.runs ?? 0;
+    batsman.balls = player.balls ?? 0;
+    batsman.fours = player.fours ?? 0;
+    batsman.sixes = player.sixes ?? 0;
+    batsman.strikeRate = player.strikeRate ?? 0;
 };
 
 const resetBowler = (currentBowler, player) => {
@@ -630,7 +646,6 @@ function calulateTotalWickets(PlayedBalls) {
 }
 
 function chnageInnings_State(stateInnings, updateedState) {
-    console.log({ stateInnings, updateedState });
     if (!stateInnings || typeof updateedState != "boolean") return
     stateInnings.isFirstInings = updateedState
 }
@@ -640,4 +655,14 @@ function chnagePendingBatsman_Bowler_flag(state, decision) {
     state.innings.pendingNewBatsman.striker = decision;
     state.innings.pendingNewBatsman.nonStriker = decision;
     state.innings.pendingNewBowler = decision;
+}
+
+function findStrikertNonStriker(batsmen) {
+    if (!batsmen) return
+    const strikerBatsman = Object.values(batsmen).find(batsman => batsman.isStriker);
+    const nonStrikerBatsman = Object.values(batsmen).find(batsman => !batsman.isStriker);
+    return {
+        strikerBatsman,
+        nonStrikerBatsman
+    }
 }
