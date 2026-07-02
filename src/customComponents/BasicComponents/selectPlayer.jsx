@@ -19,6 +19,7 @@ export default function SelectParticipantsModal() {
     (state) => state.match?.innings?.pendingNewBatsman ?? { striker: null, nonStriker: null },
   )
   const pendingNewBowler = useSelector((state) => state.match?.innings?.pendingNewBowler ?? null)
+  const { isFirstInings } = useSelector((state) => state.match?.innings ?? null)
 
   const [search, setSearch] = useState("")
   const dispatch = useDispatch()
@@ -27,8 +28,9 @@ export default function SelectParticipantsModal() {
   const [OrderdTeams, setOrderdTeams] = useState([{ players: [] }, { players: [] }])
 
   useEffect(() => {
-    setOrderdTeams(orderingTeams(teamA, teamB, tossWinner, tossDecision))
-  }, [teamA, teamB])
+    setOrderdTeams(orderingTeams(teamA, teamB, tossWinner, tossDecision,isFirstInings))
+  }, [teamA, teamB, isFirstInings])
+  // innings if fists as it is if 2nd swap as well
 
   const needStriker = pendingNewBatsman?.striker
   const needBothBatsmen = pendingNewBatsman?.nonStriker && pendingNewBatsman?.striker
@@ -336,12 +338,17 @@ function PlayerCard({ player, isSelected, onClick, isBowler }) {
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 // Utility functions
 
-function orderingTeams(teamA, teamB, tossWinner, tossDecision) {
+function orderingTeams(teamA, teamB, tossWinner, tossDecision,isFirstInings) {
   const TosswinningTeam = [teamA, teamB].find((team) => team.id === tossWinner.id)
   const ToosLostTeam = [teamA, teamB].find((team) => team.id !== tossWinner.id)
 
-  if (tossDecision === "bat") return [TosswinningTeam, ToosLostTeam]
-  if (tossDecision === "bowl") return [ToosLostTeam, TosswinningTeam]
+  if (isFirstInings === true) {
+    if (tossDecision === "bat") return [TosswinningTeam, ToosLostTeam]
+    if (tossDecision === "bowl") return [ToosLostTeam, TosswinningTeam]
+  } else if (isFirstInings === false) {
+    if (tossDecision === "bat") return [ToosLostTeam, TosswinningTeam]
+    if (tossDecision === "bowl") return [TosswinningTeam, ToosLostTeam]
+  }
 
   return [{ Players: [] }, { Players: [] }]
 }
@@ -352,7 +359,7 @@ function filterPlayers(players_param, batsmen) {
   const players = [...players_param]
 
   const nonStriker = Object.values(batsmen).find((player) => !player.isStriker)
-  // filtring nonStriker because when a player got out it will not shown in selection 
+  // filtring nonStriker because when a player got out it will not shown in selection
   // as we are filtering it with isDissmissel propertie but
   // the nonStriker will keep appering so we filter it as well
   return players.filter((p) => !p.isDismissed && p._id !== nonStriker.id)

@@ -184,7 +184,8 @@ const matchSlice = createSlice({
 
         setInings(state, action) {
             if (!action.payload || typeof action.payload != "boolean") return
-            state.innings.isFirstInings = action.payload
+            const param = action.payload
+            chnageInnings_State(state.innings, param)
         },
 
         chnageBatsmen_OR_Bowler(state, action) {
@@ -234,9 +235,8 @@ const matchSlice = createSlice({
                 resetBowler(state.bowler.currentBowler, bowler);
             }
 
-            state.innings.pendingNewBatsman.striker = false;
-            state.innings.pendingNewBatsman.nonStriker = false;
-            state.innings.pendingNewBowler = false;
+
+            chnagePendingBatsman_Bowler_flag(state, false);
         },
 
         deliverBall(state, action) {
@@ -339,7 +339,12 @@ const matchSlice = createSlice({
             striker.isSelected = true;
         },
 
-        swap_sides(state, action) {
+        Update_innings(state, action) {
+            // we are just only dealing with changing innings from 1st to 2nd, 
+            // if innings is already 2nd then dont need to update it simple end the match 
+            const isFirstInings = state.innings.isFirstInings
+            if (isFirstInings === false) return
+
             const { ballObject, TotalOvers, lastPlayerPlayed } = action.payload;
             const { over, isLegalDelivery, ballInOver } = ballObject
             // parameters
@@ -347,7 +352,6 @@ const matchSlice = createSlice({
             const team = state?.match?.teams || []
             const tossDecision = state?.match?.tossDecision || ""
             const tossWinner = state.match.tossWinner
-            const isFirstInings = state.innings.isFirstInings
             // Requried variables
             const TotalWickets = calulateTotalWickets(balls)
             const NumberOfBatters = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam?.players?.length || 0
@@ -355,14 +359,26 @@ const matchSlice = createSlice({
             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
             const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
 
-
-            if (oversCompleted) console.log("chaneg Innings")
-
-            if (!lastPlayerPlayed) {
-                if (canContinueBat === 0) console.log("chaneg Innings everyone is out");
+            // Innings ends because allotted overs are completed
+            if (oversCompleted) {
+                chnageInnings_State(state.innings, false);
+                chnagePendingBatsman_Bowler_flag(state, true);
             }
+
+            // Innings ends when all batters are dismissed (last batter not allowed)
+            if (!lastPlayerPlayed) {
+                if (canContinueBat === 0) {
+                    chnageInnings_State(state.innings, false);
+                    chnagePendingBatsman_Bowler_flag(state, true);
+                }
+            }
+
+            // Innings ends when the last batter is dismissed
             else {
-                if (TotalWickets === NumberOfBatters) console.log("chaneg Innings everyone is out LPP");
+                if (TotalWickets === NumberOfBatters) {
+                    chnageInnings_State(state.innings, false);
+                    chnagePendingBatsman_Bowler_flag(state, true);
+                }
             }
 
 
@@ -443,7 +459,7 @@ export const {
     update_pendingPlayersFlag,
     update_isDissmissedFlag,
     update_isSelectedBatsmen_Flag,
-    swap_sides
+    Update_innings
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
@@ -613,3 +629,15 @@ function calulateTotalWickets(PlayedBalls) {
     return calculatingWickets
 }
 
+function chnageInnings_State(stateInnings, updateedState) {
+    console.log({ stateInnings, updateedState });
+    if (!stateInnings || typeof updateedState != "boolean") return
+    stateInnings.isFirstInings = updateedState
+}
+
+function chnagePendingBatsman_Bowler_flag(state, decision) {
+    if (!state?.innings || typeof decision != "boolean") return;
+    state.innings.pendingNewBatsman.striker = decision;
+    state.innings.pendingNewBatsman.nonStriker = decision;
+    state.innings.pendingNewBowler = decision;
+}

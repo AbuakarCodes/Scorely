@@ -7,7 +7,7 @@ import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlaye
 import {
   deliverBall,
   update_CRRandRRR,
-  swap_sides,
+  Update_innings,
   update_isDissmissedFlag,
   update_overAndBallInOver,
   update_pendingPlayersFlag,
@@ -25,7 +25,7 @@ export default function LiveScoringPage() {
   const { batsmen, bowler, innings, id } = useSelector((state) => state.match)
   const { batsmenA, batsmenB } = batsmen
   const { runs, wickets, over, ballsInOver, CRR, RRR } = innings?.score
-  const { pendingNewBowler, pendingNewBatsman, balls } = innings
+  const { pendingNewBowler, pendingNewBatsman, balls, isFirstInings } = innings
   const { currentBowler } = bowler
 
   const { defaultOvers: TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || 0)
@@ -38,6 +38,8 @@ export default function LiveScoringPage() {
     else if (!pendingNewBowler && !pendingNewBatsman?.nonStriker && !pendingNewBatsman?.striker)
       setshowPopup(false)
   }, [pendingNewBowler, pendingNewBatsman])
+
+  console.log({isFirstInings});
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
     const ballObject = {
@@ -68,7 +70,7 @@ export default function LiveScoringPage() {
     dispatch(Update_Strike(ballObject))
     dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
     dispatch(update_isDissmissedFlag(ballObject))
-    dispatch(swap_sides({ ballObject, TotalOvers, lastPlayerPlayed }))
+    dispatch(Update_innings({ ballObject, TotalOvers, lastPlayerPlayed }))
 
     setSelectedExtra(null)
   }
