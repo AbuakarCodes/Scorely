@@ -68,7 +68,7 @@ export default function LiveScoringPage() {
     dispatch(Update_Strike(ballObject))
     dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
     dispatch(update_isDissmissedFlag(ballObject))
-    dispatch(swap_sides({ ballObject, TotalOvers }))
+    dispatch(swap_sides({ ballObject, TotalOvers, lastPlayerPlayed }))
 
     setSelectedExtra(null)
   }

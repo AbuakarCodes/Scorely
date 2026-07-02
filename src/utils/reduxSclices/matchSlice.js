@@ -66,7 +66,7 @@ const defaultState = {
 
     innings: {
         // isInings: false,
-        isFirstInings: false,
+        isFirstInings: null, // null = match not started, true = 1st innings, false = 2nd innings
 
         battingTeamId: "",
         bowlingTeamId: "",
@@ -254,10 +254,8 @@ const matchSlice = createSlice({
         },
         update_TotalWickets(state) {
             const balls = state?.innings?.balls || []
-            const calculatingWickets = balls.reduce((wickets, ball) => {
-                return wickets + (ball.isWicket ? 1 : 0)
-            }, 0)
-            state.innings.score.wickets = calculatingWickets
+            const TotalWickets = calulateTotalWickets(balls)
+            state.innings.score.wickets = !isNaN(TotalWickets) ? TotalWickets : 0
         },
         update_overAndBallInOver(state, action) {
             const isLegalDelivery = action.payload
@@ -342,21 +340,33 @@ const matchSlice = createSlice({
         },
 
         swap_sides(state, action) {
-            const { ballObject, TotalOvers } = action.payload;
+            const { ballObject, TotalOvers, lastPlayerPlayed } = action.payload;
             const { over, isLegalDelivery, ballInOver } = ballObject
             // parameters
+            const balls = state?.innings?.balls || []
             const team = state?.match?.teams || []
             const tossDecision = state?.match?.tossDecision || ""
             const tossWinner = state.match.tossWinner
             const isFirstInings = state.innings.isFirstInings
-
+            // Requried variables
+            const TotalWickets = calulateTotalWickets(balls)
+            const NumberOfBatters = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam?.players?.length || 0
 
             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
             const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
 
 
             if (oversCompleted) console.log("chaneg Innings")
-            if (canContinueBat === 0) console.log("chaneg Innings everyone is out");
+
+            if (!lastPlayerPlayed) {
+                if (canContinueBat === 0) console.log("chaneg Innings everyone is out");
+            }
+            else {
+                if (TotalWickets === NumberOfBatters) console.log("chaneg Innings everyone is out LPP");
+            }
+
+
+
 
         }
 
@@ -562,7 +572,7 @@ function batting_bowlingTeam({ team, tossWinner, tossDecision, isFirstInings }) 
     }
 
     // Swap for second innings
-    if (!isFirstInings) {
+    if (isFirstInings === false) {
         [battingTeam, bowlingTeam] = [bowlingTeam, battingTeam];
     }
 
@@ -590,8 +600,16 @@ function hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver }) {
 
 function numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject }) {
     const { battingTeam } = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })
-    const arePlayersLeft = battingTeam.players.filter(p => !p.isDismissed && p._id !== ballObject.strikerId && p._id !== ballObject.nonStrikerId).length
-
-    return arePlayersLeft
-
+    const remaningPlayers = battingTeam.players.filter(p => !p.isDismissed && p._id !== ballObject.strikerId && p._id !== ballObject.nonStrikerId).length
+    return remaningPlayers
 }
+
+function calulateTotalWickets(PlayedBalls) {
+    if (!PlayedBalls || !Array.isArray(PlayedBalls)) return
+    const balls = PlayedBalls
+    const calculatingWickets = balls.reduce((wickets, ball) => {
+        return wickets + (ball.isWicket ? 1 : 0)
+    }, 0)
+    return calculatingWickets
+}
+
