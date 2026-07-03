@@ -7,6 +7,7 @@ import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlaye
 import {
   deliverBall,
   handelLastPlayer_isLastPlayerTrue,
+  match_Decision,
   update_CRRandRRR,
   Update_innings,
   update_isDissmissedFlag,
@@ -74,6 +75,7 @@ export default function LiveScoringPage() {
     dispatch(update_isDissmissedFlag(ballObject))
     dispatch(Update_innings({ ballObject, TotalOvers, lastPlayerPlayed }))
     dispatch(handelLastPlayer_isLastPlayerTrue({ ballObject, TotalOvers, lastPlayerPlayed }))
+    dispatch(match_Decision({ TotalOvers, ballObject, lastPlayerPlayed }))
 
     setSelectedExtra(null)
   }

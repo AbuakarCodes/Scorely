@@ -47,7 +47,7 @@ const defaultState = {
 
         tossWinner: { id: "", name: "" },
         tossDecision: "bat",
-        matchWinner: "",
+        matchWinner: { id: "", name: "" },
 
         teams: {
             teamA: {
@@ -375,7 +375,7 @@ const matchSlice = createSlice({
         Update_innings(state, action) {
             // we are just only dealing with changing innings from 1st to 2nd, 
             // if innings is already 2nd then dont need to update it simple end the match 
-            const isFirstInings = state.innings.isFirstInings
+            const isFirstInings = state?.innings?.isFirstInings
             if (isFirstInings === false) return
 
             const { ballObject, TotalOvers, lastPlayerPlayed } = action.payload;
@@ -401,7 +401,7 @@ const matchSlice = createSlice({
 
             // Innings ends when all batters are dismissed (last batter not allowed)
             if (!lastPlayerPlayed) {
-                if (canContinueBat === 0 && isWicket ) {
+                if (canContinueBat === 0 && isWicket) {
                     chnageInnings_State(state.innings, false);
                     chnagePendingBatsman_Bowler_flag(state, true);
                 }
@@ -422,6 +422,7 @@ const matchSlice = createSlice({
 
         Update_UI_afterInnings(state, action) {
             const { TotalOvers } = action.payload;
+            if (!TotalOvers) return
             const { score } = state.innings;
 
             const target = score.runs + 1;
@@ -441,7 +442,53 @@ const matchSlice = createSlice({
                 TotalOvers,
             });
 
+        },
+
+        match_Decision(state, action) {
+            const isFirstInings = state?.innings?.isFirstInings
+            if (isFirstInings != false) return
+
+            const { TotalOvers, ballObject, lastPlayerPlayed } = action.payload;
+
+            if (!TotalOvers || !ballObject || lastPlayerPlayed === "undefined") return
+
+            const { over, isLegalDelivery, ballInOver } = ballObject
+
+            const target = state?.innings?.score?.target
+            const runs = state?.innings?.score?.runs
+            const balls = state?.innings?.balls || []
+            const team = state?.match?.teams || []
+            const tossDecision = state?.match?.tossDecision || ""
+            const tossWinner = state.match.tossWinner
+            let matchWinnerTeam = { id: "", name: "" }
+
+            const TotalWickets = calulateTotalWickets(balls)
+            const NumberOfBatters = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam?.players?.length || 0
+
+            const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
+            const allWicketsDown = lastPlayerPlayed
+                ? NumberOfBatters - TotalWickets === 0
+                : NumberOfBatters - TotalWickets === TotalWickets - 1;
+
+            if (runs >= target) {
+                // "Batting Team Wins"
+                matchWinnerTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam ?? { id: "", name: "" }
+            }
+            else if (runs === target - 1 && (allWicketsDown || oversCompleted)) {
+                // Tie
+                matchWinnerTeam = { id: "", name: "" }
+            }
+            else if (runs < target - 1 && (allWicketsDown || oversCompleted)) {
+                // "Bowling Team Wins"
+                matchWinnerTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.bowlingTeam ?? { id: "", name: "" }
+            }
+            
+            
+            state.match.matchWinner.id = matchWinnerTeam.id
+            state.match.matchWinner.name = matchWinnerTeam.name
+
         }
+
 
 
 
@@ -518,6 +565,7 @@ export const {
     Update_innings,
     handelLastPlayer_isLastPlayerTrue,
     Update_UI_afterInnings,
+    match_Decision
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
@@ -724,8 +772,8 @@ function calculateRRR({ target, currentRuns, over, ballsInOver, TotalOvers }) {
     const runsRequired = target - currentRuns
     const ballsRemaining = TotalOvers * 6 - (over * 6 + ballsInOver)
 
-    if (ballsRemaining <= 0)     return 0
+    if (ballsRemaining <= 0) return 0
 
-    const runrate = ((runsRequired * 6) / ballsRemaining).toFixed(2) 
+    const runrate = ((runsRequired * 6) / ballsRemaining).toFixed(2)
     return runrate
 }
