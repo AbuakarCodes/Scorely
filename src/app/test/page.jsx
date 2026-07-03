@@ -30,7 +30,7 @@ export default function LiveScoringPage() {
   const { pendingNewBowler, pendingNewBatsman, balls, isFirstInings } = innings
   const { currentBowler } = bowler
 
-  const {  TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || 0)
+  const { TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || 0)
   const [showPopup, setshowPopup] = useState(false)
   const [selectedExtra, setSelectedExtra] = useState(null)
 
@@ -41,7 +41,7 @@ export default function LiveScoringPage() {
   }, [pendingNewBowler, pendingNewBatsman])
 
   useLayoutEffect(() => {
-    if (isFirstInings === false) dispatch(  Update_UI_afterInnings({TotalOvers})  )
+    if (isFirstInings === false) dispatch(Update_UI_afterInnings({ TotalOvers }))
   }, [isFirstInings])
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
@@ -68,7 +68,7 @@ export default function LiveScoringPage() {
     dispatch(update_TotalRuns())
     dispatch(update_TotalWickets())
     dispatch(update_overAndBallInOver(ballObject?.isLegalDelivery))
-    dispatch(update_CRRandRRR({TotalOvers}))
+    dispatch(update_CRRandRRR({ TotalOvers }))
     dispatch(Update_Strike({ ballObject, lastPlayerPlayed }))
     dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
     dispatch(update_isDissmissedFlag(ballObject))
@@ -166,28 +166,40 @@ export default function LiveScoringPage() {
               </p>
             </div>
 
-            <div className="flex gap-2 overflow-x-auto justify-center">
-              {/* {matchState.recentBalls.map((ball, index) => {
-                const isWicket = ball === "W"
-                const isBoundary = ball === "4" || ball === "6"
+            <div className="flex no-scrollbar gap-2 overflow-x-auto justify-center">
+              {balls.map((ball, index) => {
+                const display = ball.isWicket
+                  ? "W"
+                  : ball.extraType === "wide"
+                    ? `${ball.extraRuns}Wd`
+                    : ball.extraType === "noball"
+                      ? `${ball.runs + ball.extraRuns}Nb`
+                      : ball.extraType === "bye"
+                        ? `${ball.extraRuns}B`
+                        : ball.extraType === "legbye"
+                          ? `${ball.extraRuns}Lb`
+                          : ball.runs
+
+                const isWicket = ball.isWicket
+                const isBoundary = ball.runs === 4 || ball.runs === 6
 
                 return (
                   <div
                     key={index}
-                    className={`min-w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                    ${
-                      isWicket
-                        ? "bg-red-500 text-white"
-                        : isBoundary
-                          ? "bg-primary text-white"
-                          : "bg-slate-100 text-slate-700"
-                    }
-                  `}
+                    className={`min-w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold
+        ${
+          isWicket
+            ? "bg-red-500 text-white"
+            : isBoundary
+              ? "bg-primary text-white"
+              : "bg-slate-100 text-slate-700"
+        }
+      `}
                   >
-                    {ball}
+                    {display}
                   </div>
                 )
-              })} */}
+              })}
             </div>
           </section>
 
@@ -439,4 +451,3 @@ function calculateEconomy(runsConceded, legalBalls) {
   if (legalBalls === 0) return 0
   return ((runsConceded * 6) / legalBalls).toFixed(2)
 }
-
