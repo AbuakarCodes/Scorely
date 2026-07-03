@@ -79,7 +79,8 @@ const defaultState = {
             over: 0,
             ballsInOver: 0,
             CRR: 0,
-            RRR: 0
+            RRR: 0,
+            target: 0
         },
 
         balls: [],
@@ -124,7 +125,7 @@ const defaultState = {
             runsOnThatBall: 0,
             Econ: 0,
             TotalWickets: 0,
-            TotalOver: 0,
+            TotalOvers: 0,
             TotalRunsConceded: 0
         }
     },
@@ -253,19 +254,22 @@ const matchSlice = createSlice({
 
         update_TotalRuns(state) {
             const balls = state?.innings?.balls || []
-            const calculatedRuns = balls.reduce((total, ball) => {
+            const Filteredballs = perInningBalls(balls, state.innings)
+            const calculatedRuns = Filteredballs.reduce((total, ball) => {
                 return total + ball.runs + ball.extraRuns;
             }, 0);
             state.innings.score.runs = calculatedRuns
         },
         update_TotalWickets(state) {
             const balls = state?.innings?.balls || []
-            const TotalWickets = calulateTotalWickets(balls)
+            const Filteredballs = perInningBalls(balls, state.innings)
+            const TotalWickets = calulateTotalWickets(Filteredballs)
+
             state.innings.score.wickets = !isNaN(TotalWickets) ? TotalWickets : 0
         },
         update_overAndBallInOver(state, action) {
             const isLegalDelivery = action.payload
-            const currentBall = state.innings.score.ballsInOver
+            const currentBall = state?.innings?.score?.ballsInOver || 0
 
             if (currentBall < 5 && isLegalDelivery) {
                 state.innings.score.ballsInOver++
@@ -276,15 +280,29 @@ const matchSlice = createSlice({
                 state.innings.score.ballsInOver = 0
             }
         },
-        update_CRRandRRR(state) {
+        update_CRRandRRR(state, action) {
             const balls = state.innings?.balls || []
-            const legalDeliveries = balls.filter(b => b.isLegalDelivery).length
+            const Filteredballs = perInningBalls(balls, state.innings)
+
+            const isFirstInings = state.innings.isFirstInings
+            const { TotalOvers } = action.payload
+            const target = state.innings.score.target
+            const currentRuns = state.innings.score.runs
+            const over = state.innings.score.over
+            const ballsInOver = state.innings.score.ballsInOver
+
+
+            const legalDeliveries = Filteredballs.filter(b => b.isLegalDelivery).length
             const runs = state.innings?.score?.runs || 0
 
-            state.innings.score.CRR =
-                legalDeliveries === 0
-                    ? "0.00"
-                    : ((runs * 6) / legalDeliveries).toFixed(2)
+            const CRR = legalDeliveries === 0 ? "0.00" : ((runs * 6) / legalDeliveries).toFixed(2)
+            const RRR = isFirstInings === false ? calculateRRR({ target, currentRuns, over, ballsInOver, TotalOvers }) : 0
+
+            state.innings.score.CRR = CRR
+            state.innings.score.RRR = RRR
+
+            // 
+
         },
         Update_Strike(state, action) {
             if (!action.payload) return;
@@ -293,12 +311,12 @@ const matchSlice = createSlice({
             const tossDecision = state?.match?.tossDecision || ""
             const tossWinner = state.match.tossWinner
             const isFirstInings = state.innings.isFirstInings
-            const {ballObject, lastPlayerPlayed} = action.payload;
+            const { ballObject, lastPlayerPlayed } = action.payload;
 
             const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
 
             // when only one player is on crease then there will be no one to switch strike with
-             if (lastPlayerPlayed && canContinueBat === 0) return
+            if (lastPlayerPlayed && canContinueBat === 0) return
 
             const isLastBall = ballObject.isLegalDelivery && ballObject.ballInOver === 5;
             const isOddRuns = ballObject.runs % 2 !== 0;
@@ -399,8 +417,30 @@ const matchSlice = createSlice({
 
 
 
-        }
+        },
 
+        Update_UI_afterInnings(state, action) {
+            const { TotalOvers } = action.payload;
+            const { score } = state.innings;
+
+            const target = score.runs + 1;
+
+            score.target = target;
+            score.runs = 0;
+            score.wickets = 0;
+            score.over = 0;
+            score.ballsInOver = 0;
+            score.CRR = 0;
+
+            score.RRR = calculateRRR({
+                target,
+                currentRuns: score.runs,
+                over: score.over,
+                ballsInOver: score.ballsInOver,
+                TotalOvers,
+            });
+
+        }
 
 
 
@@ -475,7 +515,8 @@ export const {
     update_isDissmissedFlag,
     update_isSelectedBatsmen_Flag,
     Update_innings,
-    handelLastPlayer_isLastPlayerTrue
+    handelLastPlayer_isLastPlayerTrue,
+    Update_UI_afterInnings,
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
@@ -537,7 +578,7 @@ const resetBowler = (currentBowler, player) => {
     currentBowler.runsOnThatBall = 0;
     currentBowler.Econ = 0;
     currentBowler.TotalWickets = 0;
-    currentBowler.TotalOver = 0;
+    currentBowler.TotalOvers = 0;
     currentBowler.TotalRunsConceded = 0;
 };
 
@@ -665,4 +706,25 @@ function findStrikertNonStriker(batsmen) {
         strikerBatsman,
         nonStrikerBatsman
     }
+}
+
+function perInningBalls(balls, innings) {
+    if (!balls || innings === undefined || !Array.isArray(balls)) return
+    const inningsNumber = innings?.isFirstInings === null ? 0 : innings?.isFirstInings ? 1 : 2
+
+    return balls.filter(b => b.inningsNumber === inningsNumber)
+}
+
+
+
+function calculateRRR({ target, currentRuns, over, ballsInOver, TotalOvers }) {
+    if (target == null || currentRuns == null || over == null || ballsInOver == null || TotalOvers == null) return 0
+
+    const runsRequired = target - currentRuns
+    const ballsRemaining = TotalOvers * 6 - (over * 6 + ballsInOver)
+
+    if (ballsRemaining <= 0)     return 0
+
+    const runrate = ((runsRequired * 6) / ballsRemaining).toFixed(2) 
+    return runrate
 }

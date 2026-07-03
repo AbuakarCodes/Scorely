@@ -15,6 +15,7 @@ import {
   Update_Strike,
   update_TotalRuns,
   update_TotalWickets,
+  Update_UI_afterInnings,
 } from "@/utils/reduxSclices/matchSlice"
 
 export default function LiveScoringPage() {
@@ -25,12 +26,11 @@ export default function LiveScoringPage() {
 
   const { batsmen, bowler, innings, id } = useSelector((state) => state.match)
   const { batsmenA, batsmenB } = batsmen
-  const { runs, wickets, over, ballsInOver, CRR, RRR } = innings?.score
+  const { runs, wickets, over, ballsInOver, CRR, RRR, target } = innings?.score
   const { pendingNewBowler, pendingNewBatsman, balls, isFirstInings } = innings
   const { currentBowler } = bowler
 
-  const { defaultOvers: TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || 0)
-
+  const {  TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || 0)
   const [showPopup, setshowPopup] = useState(false)
   const [selectedExtra, setSelectedExtra] = useState(null)
 
@@ -40,11 +40,14 @@ export default function LiveScoringPage() {
       setshowPopup(false)
   }, [pendingNewBowler, pendingNewBatsman])
 
+  useLayoutEffect(() => {
+    if (isFirstInings === false) dispatch(  Update_UI_afterInnings({TotalOvers})  )
+  }, [isFirstInings])
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
     const ballObject = {
       matchId: id,
-      inningsNumber: 1,
+      inningsNumber: isFirstInings === null ? 0 : isFirstInings ? 1 : 2,
       over: over,
       ballInOver: ballsInOver,
       isLegalDelivery: !extraType || (extraType !== "wide" && extraType !== "noball"),
@@ -61,13 +64,12 @@ export default function LiveScoringPage() {
         (extraType === "bye" || extraType === "legbye" ? runs : 0),
       extraType,
     }
-
     dispatch(deliverBall(ballObject))
     dispatch(update_TotalRuns())
     dispatch(update_TotalWickets())
     dispatch(update_overAndBallInOver(ballObject?.isLegalDelivery))
-    dispatch(update_CRRandRRR())
-    dispatch(Update_Strike({ballObject, lastPlayerPlayed}))
+    dispatch(update_CRRandRRR({TotalOvers}))
+    dispatch(Update_Strike({ ballObject, lastPlayerPlayed }))
     dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
     dispatch(update_isDissmissedFlag(ballObject))
     dispatch(Update_innings({ ballObject, TotalOvers, lastPlayerPlayed }))
@@ -120,7 +122,7 @@ export default function LiveScoringPage() {
 
               <div className="text-right">
                 <p className="text-[10px] uppercase font-bold opacity-70">
-                  Target: {innings.isFirstInings === false || innings.isFirstInings === null ? "N/A" : "123"}
+                  Target: {innings.isFirstInings === true || innings.isFirstInings === null ? 0 : target}
                 </p>
 
                 <div className="mt-1 flex gap-4 text-sm font-bold">
@@ -131,7 +133,7 @@ export default function LiveScoringPage() {
                   <p>
                     RRR{" "}
                     <span className="opacity-70">
-                      {innings.isFirstInings === false || innings.isFirstInings === null ? "N/A" : RRR}
+                      {innings.isFirstInings === true || innings.isFirstInings === null ? "N/A" : RRR}
                     </span>
                   </p>
                 </div>
@@ -437,3 +439,4 @@ function calculateEconomy(runsConceded, legalBalls) {
   if (legalBalls === 0) return 0
   return ((runsConceded * 6) / legalBalls).toFixed(2)
 }
+
