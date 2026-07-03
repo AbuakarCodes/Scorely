@@ -233,11 +233,11 @@ const matchSlice = createSlice({
             const tossDecision = state?.match?.tossDecision || ""
             const tossWinner = state.match.tossWinner
             const isFirstInings = state.innings.isFirstInings
-
+            const isWicket = ballObject.isWicket
             const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
             const { strikerBatsman, nonStrikerBatsman } = findStrikertNonStriker(state.batsmen)
 
-            if (lastPlayerPlayed && canContinueBat === 0) {
+            if (lastPlayerPlayed && canContinueBat === 0 && isWicket) {
                 if (nonStrikerBatsman.id) {
                     resetBatsman(strikerBatsman, nonStrikerBatsman)
                     resetBatsman(nonStrikerBatsman)
@@ -388,6 +388,7 @@ const matchSlice = createSlice({
             // Requried variables
             const TotalWickets = calulateTotalWickets(balls)
             const NumberOfBatters = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam?.players?.length || 0
+            const isWicket = ballObject.isWicket
 
             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
             const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
@@ -400,7 +401,7 @@ const matchSlice = createSlice({
 
             // Innings ends when all batters are dismissed (last batter not allowed)
             if (!lastPlayerPlayed) {
-                if (canContinueBat === 0) {
+                if (canContinueBat === 0 && isWicket ) {
                     chnageInnings_State(state.innings, false);
                     chnagePendingBatsman_Bowler_flag(state, true);
                 }

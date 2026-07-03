@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
     darkMode: false,
-    TotalOvers: 2,
+    TotalOvers: 20,
     wicketsPerSide: 11,
     lastPlayerPlayed: true
 }
