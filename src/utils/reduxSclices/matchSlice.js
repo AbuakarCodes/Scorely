@@ -277,8 +277,7 @@ const matchSlice = createSlice({
             const  {isLegalDelivery, ballInOver, over} = ballObject 
 
              const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
-                
-            //  if (oversCompleted) return
+             if (oversCompleted) return
              
             if (ballInOver < 5 && isLegalDelivery) {
                 state.innings.score.ballsInOver++
@@ -697,13 +696,8 @@ function batting_bowlingTeam({ team, tossWinner, tossDecision, isFirstInings }) 
 function hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver }) {
     if (over == null || TotalOvers == null || ballInOver == null || typeof isLegalDelivery !== "boolean") return false;
 
-    // console.log({ over:over + 1, TotalOvers, isLegalDelivery, ballInOver });
-    // console.log({ fst: over + 1 >= TotalOvers, Snd: isLegalDelivery, Third: ballInOver === 5 });
-
     const isOverGrater = over + 1 > TotalOvers
     const isOverEqualToTotalOver =  over + 1 === TotalOvers && isLegalDelivery && ballInOver === 5
-
-    // console.log({isOverEqualToTotalOver , isOverGrater});
 
     if (isOverEqualToTotalOver || isOverGrater) return true
     else false
