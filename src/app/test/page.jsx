@@ -16,7 +16,6 @@ import {
   Update_Strike,
   update_TotalRuns,
   update_TotalWickets,
-  Update_UI_afterInnings,
 } from "@/utils/reduxSclices/matchSlice"
 
 export default function LiveScoringPage() {
@@ -26,6 +25,7 @@ export default function LiveScoringPage() {
   const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
 
   const { batsmen, bowler, innings, id } = useSelector((state) => state.match)
+  const { matchWinner } = useSelector((state) => state?.match?.match)
   const { batsmenA, batsmenB } = batsmen
   const { runs, wickets, over, ballsInOver, CRR, RRR, target } = innings?.score
   const { pendingNewBowler, pendingNewBatsman, balls, isFirstInings } = innings
@@ -41,9 +41,9 @@ export default function LiveScoringPage() {
       setshowPopup(false)
   }, [pendingNewBowler, pendingNewBatsman])
 
-  useLayoutEffect(() => {
-    if (isFirstInings === false) dispatch(Update_UI_afterInnings({ TotalOvers }))
-  }, [isFirstInings])
+  useEffect(() => {
+    if (matchWinner.id) console.log(matchWinner.name)
+  }, [matchWinner])
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
     const ballObject = {
@@ -65,10 +65,10 @@ export default function LiveScoringPage() {
         (extraType === "bye" || extraType === "legbye" ? runs : 0),
       extraType,
     }
-    dispatch(deliverBall(ballObject))
+    dispatch(deliverBall({ ballObject, TotalOvers }))
     dispatch(update_TotalRuns())
     dispatch(update_TotalWickets())
-    dispatch(update_overAndBallInOver(ballObject?.isLegalDelivery))
+    dispatch(update_overAndBallInOver({ ballObject, TotalOvers }))
     dispatch(update_CRRandRRR({ TotalOvers }))
     dispatch(Update_Strike({ ballObject, lastPlayerPlayed }))
     dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
@@ -90,6 +90,13 @@ export default function LiveScoringPage() {
   //     return isNaN(parsed) ? acc : acc + parsed
   //   }, 0)
   // }, [matchState.recentBalls])
+
+  const extraButtons = [
+    { label: "Wide", extraState: "wide" },
+    { label: "NB", extraState: "noball" },
+    { label: "Bye", extraState: "bye" },
+    { label: "LBye", extraState: "legbye" },
+  ]
 
   return (
     <>
@@ -114,17 +121,23 @@ export default function LiveScoringPage() {
                   <div className="mt-1 flex items-center gap-2">
                     <div className="size-2 rounded-full bg-red-500 animate-pulse" />
 
-                    <span className="text-[10px] font-bold uppercase tracking-wider">
-                      Live • {innings.isFirstInings === null ? "" : innings.isFirstInings ? "1" : "2"}st
-                      Innings
+                    <span className="text-sm font-bold flex gap-x-0.5  tracking-wider">
+                      LIVE •
+                      <span className="text-[#7BF1A8]">
+                        {innings.isFirstInings === null ? "" : innings.isFirstInings ? "1st" : "2nd"}
+                      </span>
+                      INNINGS
                     </span>
                   </div>
                 </div>
               </div>
 
               <div className="text-right">
-                <p className="text-[10px] uppercase font-bold opacity-70">
-                  Target: {innings.isFirstInings === true || innings.isFirstInings === null ? 0 : target}
+                <p className="text-sm uppercase font-bold ">
+                  Target{" "}
+                  <span className="text-[#7BF1A8]">
+                    {innings.isFirstInings === true || innings.isFirstInings === null ? 0 : target}
+                  </span>
                 </p>
 
                 <div className="mt-1 flex gap-4 text-sm font-bold">
@@ -134,8 +147,12 @@ export default function LiveScoringPage() {
 
                   <p>
                     RRR{" "}
-                    <span className="opacity-70">
-                      {innings.isFirstInings === true || innings.isFirstInings === null ? "N/A" : RRR}
+                    <span className=" text-[#7BF1A8]">
+                      {innings.isFirstInings === true || innings.isFirstInings === null
+                        ? 0
+                        : RRR > 0
+                          ? RRR
+                          : 0}
                     </span>
                   </p>
                 </div>
@@ -293,46 +310,33 @@ export default function LiveScoringPage() {
           {/* ACTIONS */}
           <div className="mb-3  grid grid-cols-6 gap-2">
             <button
+              disabled={matchWinner?.id}
               onClick={() =>
                 addBall({
                   runs: 0,
                   type: "wicket",
                 })
               }
-              className="h-12 bg-[#FB2C36] rounded-xl  text-xs font-black text-white"
+              className="h-12 disabled:opacity-50 bg-[#FB2C36] rounded-xl  text-xs font-black text-white"
             >
               WKT
             </button>
 
-            <button
-              onClick={() => setSelectedExtra("wide")}
-              className="h-12 rounded-xl border bg-white text-xs font-bold"
-            >
-              Wide
-            </button>
+            {extraButtons.map((button) => (
+              <button
+                key={button.extraState}
+                disabled={matchWinner?.id}
+                onClick={() => setSelectedExtra(button.extraState)}
+                className="h-12 disabled:opacity-50 rounded-xl border bg-white text-xs font-bold"
+              >
+                {button.label}
+              </button>
+            ))}
 
             <button
-              onClick={() => setSelectedExtra("noball")}
-              className="h-12 rounded-xl border bg-white text-xs font-bold"
+              disabled={matchWinner?.id}
+              className="flex h-12 disabled:opacity-50 items-center justify-center rounded-xl bg-primary text-white"
             >
-              NB
-            </button>
-
-            <button
-              onClick={() => setSelectedExtra("bye")}
-              className="h-12 rounded-xl border bg-white text-xs font-bold"
-            >
-              Bye
-            </button>
-
-            <button
-              onClick={() => setSelectedExtra("legbye")}
-              className="h-12 rounded-xl border bg-white text-xs font-bold"
-            >
-              LBye
-            </button>
-
-            <button className="flex h-12 items-center justify-center rounded-xl bg-primary text-white">
               <RotateCcw className="size-5" />
             </button>
           </div>
@@ -341,6 +345,7 @@ export default function LiveScoringPage() {
           <div className="grid grid-cols-6 gap-2">
             {runButtons.map((run) => (
               <button
+                disabled={matchWinner?.id}
                 key={run}
                 onClick={() =>
                   addBall({
@@ -349,7 +354,7 @@ export default function LiveScoringPage() {
                   })
                 }
                 className={`
-                h-14 rounded-xl text-2xl font-black transition active:scale-95
+                disabled:opacity-50 h-14 rounded-xl text-2xl font-black transition active:scale-95
                 ${run === 4 || run === 6 ? "bg-primary text-white" : "bg-primary/10 text-primary"}
               `}
               >

@@ -47,7 +47,7 @@ const defaultState = {
 
         tossWinner: { id: "", name: "" },
         tossDecision: "bat",
-        matchWinner: { id: "", name: "" },
+        matchWinner: { id: null, name: null },
 
         teams: {
             teamA: {
@@ -248,8 +248,13 @@ const matchSlice = createSlice({
 
         deliverBall(state, action) {
             if (!action.payload) return
-            const ballObject = action.payload
-            state.innings.balls.push(ballObject)
+            const { ballObject, TotalOvers } = action.payload
+            if (!ballObject || TotalOvers === "undefined") return
+            const { over, isLegalDelivery, ballInOver } = ballObject
+
+            const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
+            
+            if (!oversCompleted) state.innings.balls.push(ballObject)
         },
 
         update_TotalRuns(state) {
@@ -268,14 +273,18 @@ const matchSlice = createSlice({
             state.innings.score.wickets = !isNaN(TotalWickets) ? TotalWickets : 0
         },
         update_overAndBallInOver(state, action) {
-            const isLegalDelivery = action.payload
-            const currentBall = state?.innings?.score?.ballsInOver || 0
+            const {ballObject, TotalOvers} = action.payload
+            const  {isLegalDelivery, ballInOver, over} = ballObject 
 
-            if (currentBall < 5 && isLegalDelivery) {
+             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
+                
+            //  if (oversCompleted) return
+             
+            if (ballInOver < 5 && isLegalDelivery) {
                 state.innings.score.ballsInOver++
             }
 
-            if (currentBall === 5 && isLegalDelivery) {
+            if (ballInOver === 5 && isLegalDelivery) {
                 state.innings.score.over++
                 state.innings.score.ballsInOver = 0
             }
@@ -397,6 +406,7 @@ const matchSlice = createSlice({
             if (oversCompleted) {
                 chnageInnings_State(state.innings, false);
                 chnagePendingBatsman_Bowler_flag(state, true);
+                Update_UI_afterInnings({ innings: state.innings, TotalOvers })
             }
 
             // Innings ends when all batters are dismissed (last batter not allowed)
@@ -404,6 +414,7 @@ const matchSlice = createSlice({
                 if (canContinueBat === 0 && isWicket) {
                     chnageInnings_State(state.innings, false);
                     chnagePendingBatsman_Bowler_flag(state, true);
+                    Update_UI_afterInnings({ innings: state.innings, TotalOvers })
                 }
             }
 
@@ -412,37 +423,12 @@ const matchSlice = createSlice({
                 if (TotalWickets === NumberOfBatters) {
                     chnageInnings_State(state.innings, false);
                     chnagePendingBatsman_Bowler_flag(state, true);
+                    Update_UI_afterInnings({ innings: state.innings, TotalOvers })
                 }
             }
-
-
-
-
         },
 
-        Update_UI_afterInnings(state, action) {
-            const { TotalOvers } = action.payload;
-            if (!TotalOvers) return
-            const { score } = state.innings;
 
-            const target = score.runs + 1;
-
-            score.target = target;
-            score.runs = 0;
-            score.wickets = 0;
-            score.over = 0;
-            score.ballsInOver = 0;
-            score.CRR = 0;
-
-            score.RRR = calculateRRR({
-                target,
-                currentRuns: score.runs,
-                over: score.over,
-                ballsInOver: score.ballsInOver,
-                TotalOvers,
-            });
-
-        },
 
         match_Decision(state, action) {
             const isFirstInings = state?.innings?.isFirstInings
@@ -460,7 +446,9 @@ const matchSlice = createSlice({
             const team = state?.match?.teams || []
             const tossDecision = state?.match?.tossDecision || ""
             const tossWinner = state.match.tossWinner
-            let matchWinnerTeam = { id: "", name: "" }
+            // only comapre the results when the second innings started, other wise its started compareing zero score
+            // with target and bowler wins without even started the 2nd innings
+            const isSecondInningsStarted = balls.some(b => b?.inningsNumber === 2)
 
             const TotalWickets = calulateTotalWickets(balls)
             const NumberOfBatters = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam?.players?.length || 0
@@ -470,22 +458,25 @@ const matchSlice = createSlice({
                 ? NumberOfBatters - TotalWickets === 0
                 : NumberOfBatters - TotalWickets === TotalWickets - 1;
 
-            if (runs >= target) {
+            if (runs >= target && isSecondInningsStarted) {
                 // "Batting Team Wins"
-                matchWinnerTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam ?? { id: "", name: "" }
+                const battingTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam ?? { id: "", name: "" }
+                state.match.matchWinner.id = battingTeam.id
+                state.match.matchWinner.name = battingTeam.name
             }
-            else if (runs === target - 1 && (allWicketsDown || oversCompleted)) {
+            else if (runs === target - 1 && (allWicketsDown || oversCompleted) && isSecondInningsStarted) {
                 // Tie
-                matchWinnerTeam = { id: "", name: "" }
+                state.match.matchWinner.id = "Tie"
+                state.match.matchWinner.name = null
             }
-            else if (runs < target - 1 && (allWicketsDown || oversCompleted)) {
+            else if (runs < target - 1 && (allWicketsDown || oversCompleted) && isSecondInningsStarted) {
                 // "Bowling Team Wins"
-                matchWinnerTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.bowlingTeam ?? { id: "", name: "" }
+                const bowlingTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.bowlingTeam ?? { id: "", name: "" }
+                state.match.matchWinner.id = bowlingTeam.id
+                state.match.matchWinner.name = bowlingTeam.name
             }
-            
-            
-            state.match.matchWinner.id = matchWinnerTeam.id
-            state.match.matchWinner.name = matchWinnerTeam.name
+
+
 
         }
 
@@ -564,7 +555,6 @@ export const {
     update_isSelectedBatsmen_Flag,
     Update_innings,
     handelLastPlayer_isLastPlayerTrue,
-    Update_UI_afterInnings,
     match_Decision
 } = matchSlice.actions;
 
@@ -705,19 +695,20 @@ function batting_bowlingTeam({ team, tossWinner, tossDecision, isFirstInings }) 
 }
 
 function hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver }) {
-    if (
-        over == null ||
-        TotalOvers == null ||
-        ballInOver == null ||
-        typeof isLegalDelivery !== "boolean"
-    ) return false;
+    if (over == null || TotalOvers == null || ballInOver == null || typeof isLegalDelivery !== "boolean") return false;
 
+    // console.log({ over:over + 1, TotalOvers, isLegalDelivery, ballInOver });
+    // console.log({ fst: over + 1 >= TotalOvers, Snd: isLegalDelivery, Third: ballInOver === 5 });
 
-    return (
-        over + 1 === TotalOvers &&
-        isLegalDelivery &&
-        ballInOver === 5
-    );
+    const isOverGrater = over + 1 > TotalOvers
+    const isOverEqualToTotalOver =  over + 1 === TotalOvers && isLegalDelivery && ballInOver === 5
+
+    // console.log({isOverEqualToTotalOver , isOverGrater});
+
+    if (isOverEqualToTotalOver || isOverGrater) return true
+    else false
+    
+
 }
 
 function numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject }) {
@@ -776,4 +767,28 @@ function calculateRRR({ target, currentRuns, over, ballsInOver, TotalOvers }) {
 
     const runrate = ((runsRequired * 6) / ballsRemaining).toFixed(2)
     return runrate
+}
+
+function Update_UI_afterInnings({ innings, TotalOvers }) {
+    const { score } = innings;
+
+    // score // totalOvers
+
+    const target = score.runs + 1;
+
+    score.target = target;
+    score.runs = 0;
+    score.wickets = 0;
+    score.over = 0;
+    score.ballsInOver = 0;
+    score.CRR = 0;
+
+    score.RRR = calculateRRR({
+        target,
+        currentRuns: score.runs,
+        over: score.over,
+        ballsInOver: score.ballsInOver,
+        TotalOvers,
+    });
+
 }
