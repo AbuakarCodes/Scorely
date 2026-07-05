@@ -2,34 +2,24 @@
 
 import React, { useEffect } from "react"
 import { Trophy, Star, Flame, Activity, Clock, Users, BarChart3, X } from "lucide-react"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
+import { resetMatch } from "@/utils/reduxSclices/matchSlice"
+import { useRouter } from "next/navigation";
 
 // --- MAIN WRAPPER COMPONENT ---
-export default function MatchDecisionPopUP({ isOpen = true, onClose }) {
+export default function MatchDecisionPopUP({ setshowPopup }) {
+  const dispatch = useDispatch()
+  const router = useRouter()
   const { balls } = useSelector((state) => state?.match?.innings || [])
   const { matchWinner } = useSelector((state) => state?.match?.match)
   const { teams } = useSelector((state) => state.match.match)
-  const data = computeMatchSummary({ balls, teams })
-  console.log(data)
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape" && onClose) {
-        onClose()
-      }
-    }
+  const matchSummary = computeMatchSummary({ balls, teams, winningTeam_id: matchWinner?.id })
 
-    if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown)
-      document.body.style.overflow = "hidden"
-    }
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown)
-      document.body.style.overflow = "unset"
-    }
-  }, [isOpen, onClose])
-
-  if (!isOpen) return null
+  function ClosePopUP() {
+    router.push("/")
+    setshowPopup((prev) => ({ ...prev, matchDecision: false }))
+    dispatch(resetMatch())
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-[#191c1e]/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -42,33 +32,19 @@ export default function MatchDecisionPopUP({ isOpen = true, onClose }) {
       {/* Main Glassmorphic Panel */}
       <main className="bg-white/90 backdrop-blur-[24px] max-w-4xl w-full rounded-2xl overflow-hidden border border-[#bfc9c3] shadow-2xl relative animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
         <button
-          onClick={onClose}
+          onClick={() => {
+            ClosePopUP()
+          }}
           className="absolute top-4 right-4 text-[#404944] hover:text-[#003527] p-2 rounded-full hover:bg-[#eceef0] transition-colors z-20"
           aria-label="Close modal"
         >
           <X className="h-6 w-6" />
         </button>
 
-        {/* Scrollable Container with Hidden Scrollbars */}
-        <div
-          className="p-8 md:p-12 overflow-y-auto w-full"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          <style jsx global>{`
-            ::-webkit-scrollbar {
-              display: none;
-            }
-          `}</style>
-
+        <div className="p-8 md:p-12 overflow-y-auto w-full no-scrollbar">
           <ModalHeader winMessage={`${matchWinner?.name || ""} won `} />
-
-          <ScorecardsSection data={data} />
-
-          <StatsGrid />
-
-          <AdditionalStatsRow />
-
-          <ModalFooter onClose={onClose} />
+          <ScorecardsSection matchSummary={matchSummary} />
+          <ModalFooter ClosePopUP={ClosePopUP} setshowPopup={setshowPopup} dispatch={dispatch} />
         </div>
       </main>
     </div>
@@ -92,130 +68,56 @@ function ModalHeader({ winMessage }) {
   )
 }
 
-function ScorecardsSection({data}) {
-  const { scorecards, lostTeam, wonTeam } = data
+function ScorecardsSection({ matchSummary }) {
+  const { teamA, teamB } = matchSummary
   return (
     <div className="grid md:grid-cols-2 gap-6 mb-12">
-      {/* Team A (Winner) */}
-      <article className="bg-[#ffffff] border-2 border-[#22C55E] rounded-2xl p-6 shadow-[0_0_20px_rgba(34,197,94,0.1)] relative overflow-hidden group">
-        <div className="absolute top-0 right-0 bg-[#22C55E] text-white px-4 py-1 rounded-bl-xl font-bold text-xs uppercase tracking-wider">
-          Winner
-        </div>
-        <div className="flex justify-between items-end">
-          <div>
-            <h3 className="text-[#404944] font-semibold text-sm mb-1">Team A</h3>
-            <p className="text-[#003527] font-black text-2xl tracking-tight">{`${wonTeam?.name || ""}`}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-[#003527] font-black text-4xl [text-shadow:0_0_15px_rgba(34,197,94,0.3)]">
-               {`${scorecards[wonTeam?.id]?.runs || 0}/  ${scorecards[wonTeam?.id]?.wickets || 0}`}
-            </p>
-            <p className="text-[#22C55E] font-bold text-sm tracking-wide"> {`${scorecards[wonTeam?.id]?.oversPlayed}`} Overs</p>
-          </div>
-        </div>
-      </article>
+      {[teamA, teamB].map((team, index) => (
+        <article
+          key={team.id}
+          className={`${
+            team.wasWon
+              ? "bg-[#ffffff] border-2 border-[#22C55E] shadow-[0_0_20px_rgba(34,197,94,0.1)] relative overflow-hidden"
+              : "bg-[#f2f4f6] border border-[#bfc9c3]"
+          } rounded-2xl p-6 group`}
+        >
+          {team.wasWon && (
+            <div className="absolute top-0 right-0 bg-[#22C55E] text-white px-4 py-1 rounded-bl-xl font-bold text-xs uppercase tracking-wider">
+              Winner
+            </div>
+          )}
 
-      {/* Team B */}
-      <article className="bg-[#f2f4f6] border border-[#bfc9c3] rounded-2xl p-6 group">
-      <div className="flex justify-between items-end">
-          <div>
-            <h3 className="text-[#404944] font-semibold text-sm mb-1">Team A</h3>
-            <p className="text-[#003527] font-black text-2xl tracking-tight">{`${lostTeam?.name || 0}`}</p>
+          <div className="flex justify-between items-end">
+            <div>
+              <h3 className="text-[#404944] font-semibold text-sm mb-1">Team {index === 0 ? "A" : "B"}</h3>
+
+              <p className="text-[#003527] font-black text-2xl tracking-tight">{team.name}</p>
+            </div>
+
+            <div className="text-right">
+              <p className="text-[#003527] font-black text-4xl [text-shadow:0_0_15px_rgba(34,197,94,0.3)]">
+                {team.runs}/{team.fallenWickets}
+              </p>
+
+              <p className="text-[#22C55E] font-bold text-sm tracking-wide">{team.playedOvers} Overs</p>
+            </div>
           </div>
-          <div className="text-right">
-            <p className="text-[#003527] font-black text-4xl [text-shadow:0_0_15px_rgba(34,197,94,0.3)]">
-               {`${scorecards[lostTeam?.id]?.runs || 0}/${scorecards[lostTeam?.id]?.wickets || 0}`}
-            </p>
-            <p className="text-[#22C55E] font-bold text-sm tracking-wide"> {`${scorecards[lostTeam?.id]?.oversPlayed}`} Overs</p>
-          </div>
-        </div>  
-      </article>
+        </article>
+      ))}
     </div>
   )
 }
 
-function StatsGrid() {
-  const hoverCardStyle =
-    "bg-[#eceef0] rounded-xl p-5 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-y-[-2px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-[#bfc9c3]/30"
-  const labelStyle = "text-[#404944] text-[10px] font-bold uppercase tracking-widest mb-1"
-
-  return (
-    <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-      <div className={hoverCardStyle}>
-        <Star className="text-[#EAB308] fill-[#EAB308] h-6 w-6 mb-3" />
-        <p className={labelStyle}>Player of Match</p>
-        <p className="text-[#003527] font-bold text-lg leading-tight">Babar Azam</p>
-      </div>
-
-      <div className={hoverCardStyle}>
-        <Flame className="text-[#22C55E] h-6 w-6 mb-3" />
-        <p className={labelStyle}>Top Scorer</p>
-        <p className="text-[#003527] font-bold text-lg leading-tight">M. Rizwan (71)</p>
-      </div>
-
-      <div className={hoverCardStyle}>
-        <Activity className="text-[#545f73] h-6 w-6 mb-3" />
-        <p className={labelStyle}>Best Bowler</p>
-        <p className="text-[#003527] font-bold text-lg leading-tight">S. Afridi (3/22)</p>
-      </div>
-
-      <div className={hoverCardStyle}>
-        <Clock className="text-[#191c1e] h-6 w-6 mb-3" />
-        <p className={labelStyle}>Duration</p>
-        <p className="text-[#003527] font-bold text-lg leading-tight">3h 45m</p>
-      </div>
-    </section>
-  )
-}
-
-function AdditionalStatsRow() {
-  const titleLabelStyle = "text-[#404944] text-[10px] font-bold uppercase tracking-widest"
-
-  return (
-    <section className="bg-[#e6e8ea]/40 rounded-2xl p-6 border border-[#bfc9c3]/50 mb-12">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="bg-[#22C55E]/10 p-3 rounded-full">
-            <Users className="text-[#22C55E] h-5 w-5" />
-          </div>
-          <div>
-            <p className={titleLabelStyle}>Highest Partnership</p>
-            <p className="text-[#003527] font-bold text-xl">
-              82 Runs <span className="text-sm font-normal text-[#404944] ml-2">(Rizwan &amp; Babar)</span>
-            </p>
-          </div>
-        </div>
-
-        <div className="h-px md:h-12 w-full md:w-px bg-[#bfc9c3]"></div>
-
-        <div className="flex items-center gap-4">
-          <div className="bg-[#EAB308]/10 p-3 rounded-full">
-            <BarChart3 className="text-[#EAB308] h-5 w-5" />
-          </div>
-          <div>
-            <p className={titleLabelStyle}>Boundaries</p>
-            <p className="text-[#003527] font-bold text-xl">
-              18 <span className="text-xs text-[#404944] font-medium">Fours</span> / 9{" "}
-              <span className="text-xs text-[#404944] font-medium">Sixes</span>
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function ModalFooter({ onClose }) {
+function ModalFooter({ ClosePopUP, setshowPopup, dispatch }) {
   return (
     <footer className="flex flex-col md:flex-row gap-4 items-center justify-center">
-      <button className="w-full md:w-auto px-10 py-4 bg-primary text-[#ffffff] font-black uppercase tracking-widest text-sm rounded-lg transition-all active:scale-95 shadow-lg shadow-[#003527]/20 hover:bg-primary/90">
-        View Scorecard
-      </button>
       <button className="w-full md:w-auto px-10 py-4 bg-white border-2 border-[#bfc9c3] hover:border-[#003527] text-[#003527] font-bold uppercase tracking-widest text-sm rounded-lg transition-all active:scale-95">
         New Match
       </button>
       <button
-        onClick={onClose}
+        onClick={() => {
+          ClosePopUP()
+        }}
         className="w-full md:w-auto px-10 py-4 text-[#404944] hover:text-[#003527] font-bold uppercase tracking-widest text-xs transition-colors"
       >
         Close
@@ -225,22 +127,23 @@ function ModalFooter({ onClose }) {
 }
 
 // Utility functions
-function computeMatchSummary({ balls, teams }) {
-
+function computeMatchSummary({ balls, teams, winningTeam_id }) {
   if (!Array.isArray(balls)) {
     throw new Error("balls must be an array")
   }
 
   const initCard = (team) => ({
-    team: { id: team.id, name: team.name },
+    id: team.id,
+    name: team.name,
+
+    wasWon: winningTeam_id === null ? null : winningTeam_id === team.id,
 
     runs: 0,
-    wickets: 0,
+    fallenWickets: 0,
 
-    legalBalls: 0,
     overs: 0,
-
-    oversPlayed: "0.0",
+    ballsInOver: 0,
+    playedOvers: "0.0",
 
     fallOfWickets: [],
   })
@@ -252,61 +155,42 @@ function computeMatchSummary({ balls, teams }) {
 
   for (const ball of balls) {
     const battingId = ball.battingTeam?.id
+
     if (!battingId || !scorecards[battingId]) continue
 
     const card = scorecards[battingId]
 
-    const runs = (ball.runs || 0) + (ball.extraRuns || 0)
-    card.runs += runs
+    // Total runs
+    card.runs += (ball.runs || 0) + (ball.extraRuns || 0)
 
-    // over / ball tracking
+    // Overs
     if (ball.isLegalDelivery) {
-      card.legalBalls += 1
+      card.ballsInOver++
 
-      if (card.legalBalls === 6) {
-        card.overs += 1
-        card.legalBalls = 0
+      if (card.ballsInOver === 6) {
+        card.overs++
+        card.ballsInOver = 0
       }
     }
 
-    card.oversPlayed = `${card.overs}.${card.legalBalls}`
+    card.playedOvers = `${card.overs}.${card.ballsInOver}`
 
-    // wicket
+    // Wickets
     if (ball.isWicket) {
-      card.wickets += 1
+      card.fallenWickets++
 
       card.fallOfWickets.push({
-        wicketNumber: card.wickets,
+        wicketNumber: card.fallenWickets,
         scoreAtFall: card.runs,
-        over: card.oversPlayed,
-        bowler: ball.bowlingTeam
-          ? {
-              id: ball.bowlingTeam.id,
-              name: ball.bowlingTeam.name,
-            }
-          : null,
+        over: card.playedOvers,
         strikerId: ball.strikerId,
+        bowlerId: ball.bowlerId,
       })
     }
   }
 
-  const teamA = scorecards[teams.teamA.id]
-  const teamB = scorecards[teams.teamB.id]
-
-  let wonTeam = null
-  let lostTeam = null
-
-  if (teamA.runs > teamB.runs) {
-    wonTeam = { id: teamA.team.id, name: teamA.team.name }
-    lostTeam = { id: teamB.team.id, name: teamB.team.name }
-  } else if (teamB.runs > teamA.runs) {
-    wonTeam = { id: teamB.team.id, name: teamB.team.name }
-    lostTeam = { id: teamA.team.id, name: teamA.team.name }
-  }
-
   return {
-    wonTeam,
-    lostTeam,
-    scorecards,
+    teamA: scorecards[teams.teamA.id],
+    teamB: scorecards[teams.teamB.id],
   }
 }

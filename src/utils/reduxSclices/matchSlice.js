@@ -390,8 +390,10 @@ const matchSlice = createSlice({
             const tossDecision = state?.match?.tossDecision || ""
             const tossWinner = state.match.tossWinner
             // Requried variables
-            const TotalWickets = calulateTotalWickets(balls)
-            const NumberOfBatters = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam?.players?.length || 0
+            const battingTeamPlayers = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam?.players || []
+            const secondInningsWickets = getDismissedBattersCount(battingTeamPlayers)
+
+
             const isWicket = ballObject.isWicket
 
             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
@@ -416,7 +418,7 @@ const matchSlice = createSlice({
 
             // Innings ends when the last batter is dismissed
             else {
-                if (TotalWickets === NumberOfBatters) {
+                if (secondInningsWickets === battingTeamPlayers.length) {
                     chnageInnings_State(state.innings, false);
                     chnagePendingBatsman_Bowler_flag(state, true);
                     Update_UI_afterInnings({ innings: state.innings, TotalOvers })
@@ -446,13 +448,14 @@ const matchSlice = createSlice({
             // with target and bowler wins without even started the 2nd innings
             const isSecondInningsStarted = balls.some(b => b?.inningsNumber === 2)
 
-            const TotalWickets = calulateTotalWickets(balls)
-            const NumberOfBatters = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam?.players?.length || 0
+            const battingTeamPlayers = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam?.players || []
+            const secondInningsWickets = getDismissedBattersCount(battingTeamPlayers)
 
             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
-            const allWicketsDown = lastPlayerPlayed
-                ? NumberOfBatters - TotalWickets === 0
-                : NumberOfBatters - TotalWickets === TotalWickets - 1;
+            const teamAllWicketsDown = lastPlayerPlayed
+                ? battingTeamPlayers.length - secondInningsWickets === 0
+                : battingTeamPlayers.length - secondInningsWickets === secondInningsWickets - 1;
+
 
             if (!isSecondInningsStarted) return
 
@@ -460,9 +463,8 @@ const matchSlice = createSlice({
                 const battingTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam ?? { id: "", name: "" };
                 state.match.matchWinner.id = battingTeam.id;
                 state.match.matchWinner.name = battingTeam.name;
-                console.log("Batting Team Wins");
             }
-            else if (allWicketsDown || oversCompleted) {
+            else if (teamAllWicketsDown || oversCompleted) {
                 if (runs === target - 1) {
                     state.match.matchWinner.id = "Tie";
                     state.match.matchWinner.name = null;
@@ -790,3 +792,8 @@ function Update_UI_afterInnings({ innings, TotalOvers }) {
 
 }
 
+
+function getDismissedBattersCount(players) {
+    if (!Array.isArray(players)) return
+    return players.filter(player => player.isDismissed).length;
+}

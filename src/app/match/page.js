@@ -49,7 +49,6 @@ export default function LiveScoringPage() {
 
   useEffect(() => {
     if (matchWinner.id) {
-      console.log(matchWinner.id ,matchWinner.name);
       setshowPopup((prev) => ({ ...prev, matchDecision: true }))
       // reoving match data from LS
       // dispatch(resetMatch())
@@ -97,8 +96,8 @@ export default function LiveScoringPage() {
 
   return (
     <>
-      {showPopup.playerSelection && <PlayerSelectionModal />}
-      {showPopup.matchDecision && <MatchDecisionPopUP />}
+      {showPopup.matchDecision && <MatchDecisionPopUP setshowPopup={setshowPopup} />}
+      {showPopup.playerSelection && <PlayerSelectionModal  />}
 
       <div className="min-h-screen bg-slate-50 pb-52">
         <Header
