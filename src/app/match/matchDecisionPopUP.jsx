@@ -1,43 +1,38 @@
-"use client";
+"use client"
 
-import React, { useEffect } from "react";
-import { 
-  Trophy, 
-  Star, 
-  Flame, 
-  Activity, 
-  Clock, 
-  Users, 
-  BarChart3,
-  X
-} from "lucide-react";
+import React, { useEffect } from "react"
+import { Trophy, Star, Flame, Activity, Clock, Users, BarChart3, X } from "lucide-react"
+import { useSelector } from "react-redux"
 
 // --- MAIN WRAPPER COMPONENT ---
 export default function MatchDecisionPopUP({ isOpen = true, onClose }) {
-  
+  const { balls } = useSelector((state) => state?.match?.innings || [])
+  const { matchWinner } = useSelector((state) => state?.match?.match)
+
+  console.log(balls,matchWinner);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape" && onClose) {
-        onClose();
+        onClose()
       }
-    };
+    }
 
     if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = "hidden"
     }
-    
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = "unset"
+    }
+  }, [isOpen, onClose])
+
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-[#191c1e]/40 backdrop-blur-sm animate-in fade-in duration-200">
-      
       {/* Glow Effects Layer */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#003527]/10 blur-[120px] rounded-full"></div>
@@ -46,8 +41,7 @@ export default function MatchDecisionPopUP({ isOpen = true, onClose }) {
 
       {/* Main Glassmorphic Panel */}
       <main className="bg-white/90 backdrop-blur-[24px] max-w-4xl w-full rounded-2xl overflow-hidden border border-[#bfc9c3] shadow-2xl relative animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
-        
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 text-[#404944] hover:text-[#003527] p-2 rounded-full hover:bg-[#eceef0] transition-colors z-20"
           aria-label="Close modal"
@@ -56,28 +50,29 @@ export default function MatchDecisionPopUP({ isOpen = true, onClose }) {
         </button>
 
         {/* Scrollable Container with Hidden Scrollbars */}
-        <div 
-          className="p-8 md:p-12 overflow-y-auto w-full" 
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        <div
+          className="p-8 md:p-12 overflow-y-auto w-full"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           <style jsx global>{`
-            ::-webkit-scrollbar { display: none; }
+            ::-webkit-scrollbar {
+              display: none;
+            }
           `}</style>
-          
-          <ModalHeader winMessage="Pakistan won" />
-          
-          <ScorecardsSection />
-          
-          <StatsGrid />
-          
-          <AdditionalStatsRow />
-          
-          <ModalFooter onClose={onClose} />
 
+          <ModalHeader winMessage={`${matchWinner?.name || ""} won `}  />
+
+          <ScorecardsSection />
+
+          <StatsGrid />
+
+          <AdditionalStatsRow />
+
+          <ModalFooter onClose={onClose} />
         </div>
       </main>
     </div>
-  );
+  )
 }
 
 // --- SUB-COMPONENTS (DEFINED OUTSIDE MAIN FUNCTION) ---
@@ -89,14 +84,12 @@ function ModalHeader({ winMessage }) {
         <div className="absolute inset-0 bg-[#EAB308] blur-3xl opacity-10 scale-150"></div>
         <Trophy className="text-[#EAB308] h-20 w-20 md:h-24 md:w-24 drop-shadow-[0_0_10px_rgba(234,179,8,0.3)] fill-[#EAB308] mx-auto" />
       </div>
-      <p className="text-[#404944] font-bold tracking-[0.2em] uppercase text-xs mb-2">
-        Match Finished
-      </p>
+      <p className="text-[#404944] font-bold tracking-[0.2em] uppercase text-xs mb-2">Match Finished</p>
       <h1 className="font-black text-4xl md:text-6xl tracking-tight text-[#003527] mb-4 leading-tight">
         {winMessage}
       </h1>
     </header>
-  );
+  )
 }
 
 function ScorecardsSection() {
@@ -135,13 +128,14 @@ function ScorecardsSection() {
         </div>
       </article>
     </div>
-  );
+  )
 }
 
 function StatsGrid() {
-  const hoverCardStyle = "bg-[#eceef0] rounded-xl p-5 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-y-[-2px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-[#bfc9c3]/30";
-  const labelStyle = "text-[#404944] text-[10px] font-bold uppercase tracking-widest mb-1";
-  
+  const hoverCardStyle =
+    "bg-[#eceef0] rounded-xl p-5 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-y-[-2px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-[#bfc9c3]/30"
+  const labelStyle = "text-[#404944] text-[10px] font-bold uppercase tracking-widest mb-1"
+
   return (
     <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
       <div className={hoverCardStyle}>
@@ -168,16 +162,15 @@ function StatsGrid() {
         <p className="text-[#003527] font-bold text-lg leading-tight">3h 45m</p>
       </div>
     </section>
-  );
+  )
 }
 
 function AdditionalStatsRow() {
-  const titleLabelStyle = "text-[#404944] text-[10px] font-bold uppercase tracking-widest";
-  
+  const titleLabelStyle = "text-[#404944] text-[10px] font-bold uppercase tracking-widest"
+
   return (
     <section className="bg-[#e6e8ea]/40 rounded-2xl p-6 border border-[#bfc9c3]/50 mb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        
         <div className="flex items-center gap-4">
           <div className="bg-[#22C55E]/10 p-3 rounded-full">
             <Users className="text-[#22C55E] h-5 w-5" />
@@ -191,7 +184,7 @@ function AdditionalStatsRow() {
         </div>
 
         <div className="h-px md:h-12 w-full md:w-px bg-[#bfc9c3]"></div>
-        
+
         <div className="flex items-center gap-4">
           <div className="bg-[#EAB308]/10 p-3 rounded-full">
             <BarChart3 className="text-[#EAB308] h-5 w-5" />
@@ -199,14 +192,14 @@ function AdditionalStatsRow() {
           <div>
             <p className={titleLabelStyle}>Boundaries</p>
             <p className="text-[#003527] font-bold text-xl">
-              18 <span className="text-xs text-[#404944] font-medium">Fours</span> / 9 <span className="text-xs text-[#404944] font-medium">Sixes</span>
+              18 <span className="text-xs text-[#404944] font-medium">Fours</span> / 9{" "}
+              <span className="text-xs text-[#404944] font-medium">Sixes</span>
             </p>
           </div>
         </div>
-
       </div>
     </section>
-  );
+  )
 }
 
 function ModalFooter({ onClose }) {
@@ -218,12 +211,12 @@ function ModalFooter({ onClose }) {
       <button className="w-full md:w-auto px-10 py-4 bg-white border-2 border-[#bfc9c3] hover:border-[#003527] text-[#003527] font-bold uppercase tracking-widest text-sm rounded-lg transition-all active:scale-95">
         New Match
       </button>
-      <button 
+      <button
         onClick={onClose}
         className="w-full md:w-auto px-10 py-4 text-[#404944] hover:text-[#003527] font-bold uppercase tracking-widest text-xs transition-colors"
       >
         Close
       </button>
     </footer>
-  );
+  )
 }

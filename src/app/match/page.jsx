@@ -37,7 +37,7 @@ export default function LiveScoringPage() {
   const { currentBowler } = bowler
 
   const { TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || 0)
-  const [showPopup, setshowPopup] = useState({ playerSelection: false, matchDecision: false })
+  const [showPopup, setshowPopup] = useState({ playerSelection: false, matchDecision: true })
   const [selectedExtra, setSelectedExtra] = useState(null)
 
   useLayoutEffect(() => {
