@@ -1,7 +1,7 @@
 import axios from "axios";
 import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit";
 
-
+let count = 0
 
 export const fetchTeamPlayers_off = createAsyncThunk(
     "match/fetchTeamPlayers",
@@ -248,13 +248,25 @@ const matchSlice = createSlice({
 
         deliverBall(state, action) {
             if (!action.payload) return
+            const { ballObject } = action.payload
+            state.innings.balls.push(ballObject)
+        },
+
+        update_overAndBallInOver(state, action) {
             const { ballObject, TotalOvers } = action.payload
-            if (!ballObject || TotalOvers === "undefined") return
-            const { over, isLegalDelivery, ballInOver } = ballObject
+            const { isLegalDelivery, ballInOver, over } = ballObject
 
             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
-            
-            if (!oversCompleted) state.innings.balls.push(ballObject)
+            if (oversCompleted) return
+
+            if (ballInOver < 5 && isLegalDelivery) {
+                state.innings.score.ballsInOver++
+            }
+
+            if (ballInOver === 5 && isLegalDelivery) {
+                state.innings.score.over++
+                state.innings.score.ballsInOver = 0
+            }
         },
 
         update_TotalRuns(state) {
@@ -272,22 +284,7 @@ const matchSlice = createSlice({
 
             state.innings.score.wickets = !isNaN(TotalWickets) ? TotalWickets : 0
         },
-        update_overAndBallInOver(state, action) {
-            const {ballObject, TotalOvers} = action.payload
-            const  {isLegalDelivery, ballInOver, over} = ballObject 
 
-             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
-             if (oversCompleted) return
-             
-            if (ballInOver < 5 && isLegalDelivery) {
-                state.innings.score.ballsInOver++
-            }
-
-            if (ballInOver === 5 && isLegalDelivery) {
-                state.innings.score.over++
-                state.innings.score.ballsInOver = 0
-            }
-        },
         update_CRRandRRR(state, action) {
             const balls = state.innings?.balls || []
             const Filteredballs = perInningBalls(balls, state.innings)
@@ -401,6 +398,7 @@ const matchSlice = createSlice({
             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
             const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
 
+
             // Innings ends because allotted overs are completed
             if (oversCompleted) {
                 chnageInnings_State(state.innings, false);
@@ -457,22 +455,26 @@ const matchSlice = createSlice({
                 ? NumberOfBatters - TotalWickets === 0
                 : NumberOfBatters - TotalWickets === TotalWickets - 1;
 
-            if (runs >= target && isSecondInningsStarted) {
+            if (!isSecondInningsStarted) return
+
+            if (runs >= target) {
                 // "Batting Team Wins"
                 const battingTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam ?? { id: "", name: "" }
                 state.match.matchWinner.id = battingTeam.id
                 state.match.matchWinner.name = battingTeam.name
+                console.log("bat W");
             }
-            else if (runs === target - 1 && (allWicketsDown || oversCompleted) && isSecondInningsStarted) {
+            else if (runs === target - 1 && allWicketsDown || oversCompleted) {
                 // Tie
                 state.match.matchWinner.id = "Tie"
                 state.match.matchWinner.name = null
             }
-            else if (runs < target - 1 && (allWicketsDown || oversCompleted) && isSecondInningsStarted) {
+            else if (runs < target - 1 && allWicketsDown || oversCompleted) {
                 // "Bowling Team Wins"
                 const bowlingTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.bowlingTeam ?? { id: "", name: "" }
                 state.match.matchWinner.id = bowlingTeam.id
                 state.match.matchWinner.name = bowlingTeam.name
+                console.log("Bowl W");
             }
 
 
@@ -697,11 +699,11 @@ function hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver }) {
     if (over == null || TotalOvers == null || ballInOver == null || typeof isLegalDelivery !== "boolean") return false;
 
     const isOverGrater = over + 1 > TotalOvers
-    const isOverEqualToTotalOver =  over + 1 === TotalOvers && isLegalDelivery && ballInOver === 5
+    const isOverEqualToTotalOver = over + 1 === TotalOvers && isLegalDelivery && ballInOver === 5
 
     if (isOverEqualToTotalOver || isOverGrater) return true
-    else false
-    
+    else return false
+
 
 }
 

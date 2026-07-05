@@ -65,7 +65,7 @@ export default function LiveScoringPage() {
         (extraType === "bye" || extraType === "legbye" ? runs : 0),
       extraType,
     }
-    dispatch(deliverBall({ ballObject, TotalOvers }))
+    dispatch(deliverBall({ ballObject }))
     dispatch(update_TotalRuns())
     dispatch(update_TotalWickets())
     dispatch(update_overAndBallInOver({ ballObject, TotalOvers }))
@@ -103,73 +103,19 @@ export default function LiveScoringPage() {
       {showPopup && <PlayerSelectionModal />}
 
       <div className="min-h-screen bg-slate-50 pb-52">
-        {/* HEADER */}
-
-        <header className="sticky top-0 z-5 bg-primary text-white shadow-xl">
-          <div className="px-4 py-5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <button className="mt-1">
-                  <ArrowLeft className="size-5" />
-                </button>
-
-                <div>
-                  <h1 className="text-xl font-bold">
-                    {teamA.name} vs {teamB.name}
-                  </h1>
-
-                  <div className="mt-1 flex items-center gap-2">
-                    <div className="size-2 rounded-full bg-red-500 animate-pulse" />
-
-                    <span className="text-sm font-bold flex gap-x-0.5  tracking-wider">
-                      LIVE •
-                      <span className="text-[#7BF1A8]">
-                        {innings.isFirstInings === null ? "" : innings.isFirstInings ? "1st" : "2nd"}
-                      </span>
-                      INNINGS
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <p className="text-sm uppercase font-bold ">
-                  Target{" "}
-                  <span className="text-[#7BF1A8]">
-                    {innings.isFirstInings === true || innings.isFirstInings === null ? 0 : target}
-                  </span>
-                </p>
-
-                <div className="mt-1 flex gap-4 text-sm font-bold">
-                  <p>
-                    CRR <span className="text-green-300">{CRR}</span>
-                  </p>
-
-                  <p>
-                    RRR{" "}
-                    <span className=" text-[#7BF1A8]">
-                      {innings.isFirstInings === true || innings.isFirstInings === null
-                        ? 0
-                        : RRR > 0
-                          ? RRR
-                          : 0}
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-5 flex items-end gap-3">
-              <h2 className="text-5xl font-black italic tracking-tight">
-                {runs}/{wickets}
-              </h2>
-
-              <p className="pb-1 text-lg opacity-80">
-                {over}.{ballsInOver} Overs
-              </p>
-            </div>
-          </div>
-        </header>
+      
+        <Header
+          teamA={teamA}
+          teamB={teamB}
+          innings={innings}
+          target={target}
+          CRR={CRR}
+          RRR={RRR}
+          runs={runs}
+          wickets={wickets}
+          over={over}
+          ballsInOver={ballsInOver}
+        />
 
         {/* MAIN */}
 
@@ -381,6 +327,74 @@ export default function LiveScoringPage() {
     </>
   )
 }
+
+// UI componenets 
+function Header({ teamA, teamB, innings, target, CRR, RRR, runs, wickets, over, ballsInOver, onBack }) {
+  return (
+    <header className="sticky top-0 z-5 bg-primary text-white shadow-xl">
+      <div className="px-4 py-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <button className="mt-1" >
+              <ArrowLeft className="size-5" />
+            </button>
+
+            <div>
+              <h1 className="text-xl font-bold">
+                {teamA.name} vs {teamB.name}
+              </h1>
+
+              <div className="mt-1 flex items-center gap-2">
+                <div className="size-2 rounded-full bg-red-500 animate-pulse" />
+
+                <span className="text-sm font-bold flex gap-x-0.5 tracking-wider">
+                  LIVE •
+                  <span className="text-[#7BF1A8]">
+                    {innings.isFirstInings === null ? "" : innings.isFirstInings ? "1st" : "2nd"}
+                  </span>
+                  INNINGS
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-right">
+            <p className="text-sm uppercase font-bold">
+              Target{" "}
+              <span className="text-[#7BF1A8]">
+                {innings.isFirstInings === true || innings.isFirstInings === null ? 0 : target}
+              </span>
+            </p>
+
+            <div className="mt-1 flex gap-4 text-sm font-bold">
+              <p>
+                CRR <span className="text-green-300">{CRR}</span>
+              </p>
+
+              <p>
+                RRR{" "}
+                <span className="text-[#7BF1A8]">
+                  {innings.isFirstInings === true || innings.isFirstInings === null ? 0 : RRR > 0 ? RRR : 0}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 flex items-end gap-3">
+          <h2 className="text-5xl font-black italic tracking-tight">
+            {runs}/{wickets}
+          </h2>
+
+          <p className="pb-1 text-lg opacity-80">
+            {over}.{ballsInOver} Overs
+          </p>
+        </div>
+      </div>
+    </header>
+  )
+}
+
 
 //  Utility Functions
 function getBatsmanIdByRole(batsmen, role) {
