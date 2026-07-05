@@ -45,3 +45,4 @@ export const settingSlice = createSlice({
 export const { toggleTheme, changeDefaultOvers, changeWicketsPerSide, toggleLastPlayerPlayed } = settingSlice.actions
 
 export default settingSlice.reducer
+

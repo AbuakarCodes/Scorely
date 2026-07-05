@@ -37,7 +37,7 @@ export default function LiveScoringPage() {
   const { currentBowler } = bowler
 
   const { TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || 0)
-  const [showPopup, setshowPopup] = useState({ playerSelection: false, matchDecision: true })
+  const [showPopup, setshowPopup] = useState({ playerSelection: false, matchDecision: false })
   const [selectedExtra, setSelectedExtra] = useState(null)
 
   useLayoutEffect(() => {
@@ -49,9 +49,10 @@ export default function LiveScoringPage() {
 
   useEffect(() => {
     if (matchWinner.id) {
+      console.log(matchWinner.id ,matchWinner.name);
       setshowPopup((prev) => ({ ...prev, matchDecision: true }))
       // reoving match data from LS
-      dispatch(resetMatch())
+      // dispatch(resetMatch())
     }
   }, [matchWinner])
 
@@ -96,8 +97,8 @@ export default function LiveScoringPage() {
 
   return (
     <>
-      {showPopup.matchDecision && <MatchDecisionPopUP />}
       {showPopup.playerSelection && <PlayerSelectionModal />}
+      {showPopup.matchDecision && <MatchDecisionPopUP />}
 
       <div className="min-h-screen bg-slate-50 pb-52">
         <Header

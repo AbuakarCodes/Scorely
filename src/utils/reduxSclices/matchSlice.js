@@ -457,23 +457,21 @@ const matchSlice = createSlice({
             if (!isSecondInningsStarted) return
 
             if (runs >= target) {
-                // "Batting Team Wins"
-                const battingTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam ?? { id: "", name: "" }
-                state.match.matchWinner.id = battingTeam.id
-                state.match.matchWinner.name = battingTeam.name
-                console.log("bat W");
+                const battingTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.battingTeam ?? { id: "", name: "" };
+                state.match.matchWinner.id = battingTeam.id;
+                state.match.matchWinner.name = battingTeam.name;
+                console.log("Batting Team Wins");
             }
-            else if (runs === target - 1 && allWicketsDown || oversCompleted) {
-                // Tie
-                state.match.matchWinner.id = "Tie"
-                state.match.matchWinner.name = null
-            }
-            else if (runs < target - 1 && allWicketsDown || oversCompleted) {
-                // "Bowling Team Wins"
-                const bowlingTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.bowlingTeam ?? { id: "", name: "" }
-                state.match.matchWinner.id = bowlingTeam.id
-                state.match.matchWinner.name = bowlingTeam.name
-                console.log("Bowl W");
+            else if (allWicketsDown || oversCompleted) {
+                if (runs === target - 1) {
+                    state.match.matchWinner.id = "Tie";
+                    state.match.matchWinner.name = null;
+                }
+                else if (runs < target - 1) {
+                    const bowlingTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })?.bowlingTeam ?? { id: "", name: "" };
+                    state.match.matchWinner.id = bowlingTeam.id;
+                    state.match.matchWinner.name = bowlingTeam.name;
+                }
             }
 
 
@@ -690,7 +688,7 @@ export function batting_bowlingTeam({ team, tossWinner, tossDecision, isFirstIni
     if (isFirstInings === false) {
         [battingTeam, bowlingTeam] = [bowlingTeam, battingTeam];
     }
-    
+
     return {
 
         battingTeam,
@@ -791,3 +789,4 @@ function Update_UI_afterInnings({ innings, TotalOvers }) {
     });
 
 }
+

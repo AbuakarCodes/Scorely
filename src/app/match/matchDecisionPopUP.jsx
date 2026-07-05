@@ -8,9 +8,9 @@ import { useSelector } from "react-redux"
 export default function MatchDecisionPopUP({ isOpen = true, onClose }) {
   const { balls } = useSelector((state) => state?.match?.innings || [])
   const { matchWinner } = useSelector((state) => state?.match?.match)
-
-  console.log(balls,matchWinner);
-
+  const { teams } = useSelector((state) => state.match.match)
+  const data = computeMatchSummary({ balls, teams })
+  console.log(data)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape" && onClose) {
@@ -60,9 +60,9 @@ export default function MatchDecisionPopUP({ isOpen = true, onClose }) {
             }
           `}</style>
 
-          <ModalHeader winMessage={`${matchWinner?.name || ""} won `}  />
+          <ModalHeader winMessage={`${matchWinner?.name || ""} won `} />
 
-          <ScorecardsSection />
+          <ScorecardsSection data={data} />
 
           <StatsGrid />
 
@@ -92,7 +92,8 @@ function ModalHeader({ winMessage }) {
   )
 }
 
-function ScorecardsSection() {
+function ScorecardsSection({data}) {
+  const { scorecards, lostTeam, wonTeam } = data
   return (
     <div className="grid md:grid-cols-2 gap-6 mb-12">
       {/* Team A (Winner) */}
@@ -103,29 +104,31 @@ function ScorecardsSection() {
         <div className="flex justify-between items-end">
           <div>
             <h3 className="text-[#404944] font-semibold text-sm mb-1">Team A</h3>
-            <p className="text-[#003527] font-black text-2xl tracking-tight">Pakistan</p>
+            <p className="text-[#003527] font-black text-2xl tracking-tight">{`${wonTeam?.name || ""}`}</p>
           </div>
           <div className="text-right">
             <p className="text-[#003527] font-black text-4xl [text-shadow:0_0_15px_rgba(34,197,94,0.3)]">
-              179/4
+               {`${scorecards[wonTeam?.id]?.runs || 0}/  ${scorecards[wonTeam?.id]?.wickets || 0}`}
             </p>
-            <p className="text-[#22C55E] font-bold text-sm tracking-wide">18.5 Overs</p>
+            <p className="text-[#22C55E] font-bold text-sm tracking-wide"> {`${scorecards[wonTeam?.id]?.oversPlayed}`} Overs</p>
           </div>
         </div>
       </article>
 
       {/* Team B */}
       <article className="bg-[#f2f4f6] border border-[#bfc9c3] rounded-2xl p-6 group">
-        <div className="flex justify-between items-end">
+      <div className="flex justify-between items-end">
           <div>
-            <h3 className="text-[#404944] font-semibold text-sm mb-1">Team B</h3>
-            <p className="text-[#191c1e] font-black text-2xl tracking-tight">India</p>
+            <h3 className="text-[#404944] font-semibold text-sm mb-1">Team A</h3>
+            <p className="text-[#003527] font-black text-2xl tracking-tight">{`${lostTeam?.name || 0}`}</p>
           </div>
           <div className="text-right">
-            <p className="text-[#191c1e] font-black text-4xl opacity-80">178/6</p>
-            <p className="text-[#404944] font-medium text-sm">20.0 Overs</p>
+            <p className="text-[#003527] font-black text-4xl [text-shadow:0_0_15px_rgba(34,197,94,0.3)]">
+               {`${scorecards[lostTeam?.id]?.runs || 0}/${scorecards[lostTeam?.id]?.wickets || 0}`}
+            </p>
+            <p className="text-[#22C55E] font-bold text-sm tracking-wide"> {`${scorecards[lostTeam?.id]?.oversPlayed}`} Overs</p>
           </div>
-        </div>
+        </div>  
       </article>
     </div>
   )
@@ -219,4 +222,91 @@ function ModalFooter({ onClose }) {
       </button>
     </footer>
   )
+}
+
+// Utility functions
+function computeMatchSummary({ balls, teams }) {
+
+  if (!Array.isArray(balls)) {
+    throw new Error("balls must be an array")
+  }
+
+  const initCard = (team) => ({
+    team: { id: team.id, name: team.name },
+
+    runs: 0,
+    wickets: 0,
+
+    legalBalls: 0,
+    overs: 0,
+
+    oversPlayed: "0.0",
+
+    fallOfWickets: [],
+  })
+
+  const scorecards = {
+    [teams.teamA.id]: initCard(teams.teamA),
+    [teams.teamB.id]: initCard(teams.teamB),
+  }
+
+  for (const ball of balls) {
+    const battingId = ball.battingTeam?.id
+    if (!battingId || !scorecards[battingId]) continue
+
+    const card = scorecards[battingId]
+
+    const runs = (ball.runs || 0) + (ball.extraRuns || 0)
+    card.runs += runs
+
+    // over / ball tracking
+    if (ball.isLegalDelivery) {
+      card.legalBalls += 1
+
+      if (card.legalBalls === 6) {
+        card.overs += 1
+        card.legalBalls = 0
+      }
+    }
+
+    card.oversPlayed = `${card.overs}.${card.legalBalls}`
+
+    // wicket
+    if (ball.isWicket) {
+      card.wickets += 1
+
+      card.fallOfWickets.push({
+        wicketNumber: card.wickets,
+        scoreAtFall: card.runs,
+        over: card.oversPlayed,
+        bowler: ball.bowlingTeam
+          ? {
+              id: ball.bowlingTeam.id,
+              name: ball.bowlingTeam.name,
+            }
+          : null,
+        strikerId: ball.strikerId,
+      })
+    }
+  }
+
+  const teamA = scorecards[teams.teamA.id]
+  const teamB = scorecards[teams.teamB.id]
+
+  let wonTeam = null
+  let lostTeam = null
+
+  if (teamA.runs > teamB.runs) {
+    wonTeam = { id: teamA.team.id, name: teamA.team.name }
+    lostTeam = { id: teamB.team.id, name: teamB.team.name }
+  } else if (teamB.runs > teamA.runs) {
+    wonTeam = { id: teamB.team.id, name: teamB.team.name }
+    lostTeam = { id: teamA.team.id, name: teamA.team.name }
+  }
+
+  return {
+    wonTeam,
+    lostTeam,
+    scorecards,
+  }
 }
