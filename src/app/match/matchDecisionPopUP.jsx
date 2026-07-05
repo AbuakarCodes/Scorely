@@ -3,8 +3,8 @@
 import React, { useEffect } from "react"
 import { Trophy, Star, Flame, Activity, Clock, Users, BarChart3, X } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
-import { resetMatch } from "@/utils/reduxSclices/matchSlice"
-import { useRouter } from "next/navigation";
+import { resetMatch, startInnings_fn } from "@/utils/reduxSclices/matchSlice"
+import { useRouter } from "next/navigation"
 
 // --- MAIN WRAPPER COMPONENT ---
 export default function MatchDecisionPopUP({ setshowPopup }) {
@@ -19,6 +19,12 @@ export default function MatchDecisionPopUP({ setshowPopup }) {
     router.push("/")
     setshowPopup((prev) => ({ ...prev, matchDecision: false }))
     dispatch(resetMatch())
+  }
+
+  function startNewMatch() {
+    dispatch(resetMatch())
+    dispatch(startInnings_fn())
+    router.push("/selectTeamToStartMatch")
   }
 
   return (
@@ -44,7 +50,7 @@ export default function MatchDecisionPopUP({ setshowPopup }) {
         <div className="p-8 md:p-12 overflow-y-auto w-full no-scrollbar">
           <ModalHeader winMessage={`${matchWinner?.name || ""} won `} />
           <ScorecardsSection matchSummary={matchSummary} />
-          <ModalFooter ClosePopUP={ClosePopUP} setshowPopup={setshowPopup} dispatch={dispatch} />
+          <ModalFooter ClosePopUP={ClosePopUP} startNewMatch={startNewMatch} />
         </div>
       </main>
     </div>
@@ -108,10 +114,10 @@ function ScorecardsSection({ matchSummary }) {
   )
 }
 
-function ModalFooter({ ClosePopUP, setshowPopup, dispatch }) {
+function ModalFooter({ ClosePopUP, startNewMatch }) {
   return (
     <footer className="flex flex-col md:flex-row gap-4 items-center justify-center">
-      <button className="w-full md:w-auto px-10 py-4 bg-white border-2 border-[#bfc9c3] hover:border-[#003527] text-[#003527] font-bold uppercase tracking-widest text-sm rounded-lg transition-all active:scale-95">
+      <button onClick={()=>{startNewMatch()}} className="w-full md:w-auto px-10 py-4 bg-white border-2 border-[#bfc9c3] hover:border-[#003527] text-[#003527] font-bold uppercase tracking-widest text-sm rounded-lg transition-all active:scale-95">
         New Match
       </button>
       <button
