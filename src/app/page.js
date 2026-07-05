@@ -35,7 +35,7 @@ export default function Home() {
 
   useEffect(() => {
     if (popup?.startPrevMatch === true) {
-      router.push("/test")
+      router.push("/match")
     } else if (popup?.startPrevMatch === false) {
       // removing prevmatch state
       dispatch(resetMatch())

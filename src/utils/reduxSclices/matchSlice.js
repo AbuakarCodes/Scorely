@@ -65,7 +65,6 @@ const defaultState = {
     },
 
     innings: {
-        // isInings: false,
         isFirstInings: null, // null = match not started, true = 1st innings, false = 2nd innings
 
         battingTeamId: "",
@@ -637,7 +636,9 @@ function swapStriker(batsmen) {
     batsmen[nonStrikerKey].isStriker = true
 }
 
-function batting_bowlingTeam({ team, tossWinner, tossDecision, isFirstInings }) {
+export function batting_bowlingTeam({ team, tossWinner, tossDecision, isFirstInings }) {
+
+    // console.log(current(team.teamA));
 
     if (!team || !team.teamA || !team.teamB) {
         return {
@@ -664,6 +665,7 @@ function batting_bowlingTeam({ team, tossWinner, tossDecision, isFirstInings }) 
 
 
     if (teamA.id !== tossWinner.id && teamB.id !== tossWinner.id) {
+        console.log("4");
         return {
             battingTeam: null,
             bowlingTeam: null,
@@ -688,8 +690,9 @@ function batting_bowlingTeam({ team, tossWinner, tossDecision, isFirstInings }) 
     if (isFirstInings === false) {
         [battingTeam, bowlingTeam] = [bowlingTeam, battingTeam];
     }
-
+    
     return {
+
         battingTeam,
         bowlingTeam,
     };

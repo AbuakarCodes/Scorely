@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation"
 
 import { fetchTeamPlayers, startInnings_fn, setMatch_id } from "@/utils/reduxSclices/matchSlice"
 import PageLoader from "@/customComponents/loaders/pageLoader"
-import { resetMatch } from "../test/test"
+import { resetMatch } from "@/utils/reduxSclices/matchSlice" 
 
 export default function SelectTeamsPage() {
   const dispatch = useDispatch()

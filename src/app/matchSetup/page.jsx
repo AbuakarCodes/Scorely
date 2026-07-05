@@ -187,7 +187,7 @@ function Teams({ teams }) {
 function StartMatchSection({ router, dispatch }) {
   function startMatch_handler(e) {
     dispatch(setInings(true))
-    router.push("/test")
+    router.push("/match")
   }
   return (
     <div className="fixed bottom-0 left-1/2 w-full max-w-2xl -translate-x-1/2 border-t bg-background p-4">

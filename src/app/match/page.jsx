@@ -3,11 +3,13 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { ArrowLeft, RotateCcw, Star, RefreshCcw } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
-import PlayerSelectionModal from "@/customComponents/BasicComponents/selectPlayer"
+import PlayerSelectionModal from "@/app/match/selectPlayer"
 import {
+  batting_bowlingTeam,
   deliverBall,
   handelLastPlayer_isLastPlayerTrue,
   match_Decision,
+  resetMatch,
   update_CRRandRRR,
   Update_innings,
   update_isDissmissedFlag,
@@ -17,12 +19,15 @@ import {
   update_TotalRuns,
   update_TotalWickets,
 } from "@/utils/reduxSclices/matchSlice"
+import { extraButtons, runButtons } from "./constants"
+import MatchDecisionPopUP from "./matchDecisionPopUP"
+import RecentBalls, { Header } from "./components/components"
 
 export default function LiveScoringPage() {
-  const runButtons = [0, 1, 2, 3, 4, 6]
   const dispatch = useDispatch()
 
-  const { teamA, teamB, loading } = useSelector((state) => state.match.match.teams)
+  const { teams, tossWinner, tossDecision } = useSelector((state) => state.match.match)
+  const { teamA, teamB } = teams
 
   const { batsmen, bowler, innings, id } = useSelector((state) => state.match)
   const { matchWinner } = useSelector((state) => state?.match?.match)
@@ -32,22 +37,29 @@ export default function LiveScoringPage() {
   const { currentBowler } = bowler
 
   const { TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || 0)
-  const [showPopup, setshowPopup] = useState(false)
+  const [showPopup, setshowPopup] = useState({ playerSelection: false, matchDecision: false })
   const [selectedExtra, setSelectedExtra] = useState(null)
 
   useLayoutEffect(() => {
-    if (pendingNewBowler || pendingNewBatsman?.nonStriker || pendingNewBatsman?.striker) setshowPopup(true)
+    if (pendingNewBowler || pendingNewBatsman?.nonStriker || pendingNewBatsman?.striker)
+      setshowPopup((prev) => ({ ...prev, playerSelection: true }))
     else if (!pendingNewBowler && !pendingNewBatsman?.nonStriker && !pendingNewBatsman?.striker)
-      setshowPopup(false)
+      setshowPopup((prev) => ({ ...prev, playerSelection: false }))
   }, [pendingNewBowler, pendingNewBatsman])
 
   useEffect(() => {
-    if (matchWinner.id) console.log(matchWinner.name)
+    if (matchWinner.id) {
+      setshowPopup((prev) => ({ ...prev, matchDecision: true }))
+      // reoving match data from LS
+      dispatch(resetMatch())
+    }
   }, [matchWinner])
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
     const ballObject = {
       matchId: id,
+      battingTeam: getTeam({ teams, tossWinner, tossDecision, isFirstInings }, "bat"),
+      bowlingTeam: getTeam({ teams, tossWinner, tossDecision, isFirstInings }, "bowl"),
       inningsNumber: isFirstInings === null ? 0 : isFirstInings ? 1 : 2,
       over: over,
       ballInOver: ballsInOver,
@@ -78,32 +90,16 @@ export default function LiveScoringPage() {
     dispatch(match_Decision({ TotalOvers, ballObject, lastPlayerPlayed }))
 
     setSelectedExtra(null)
+
+    // console.log(getBattingTeam({ teams, tossWinner, tossDecision, isFirstInings }))
   }
-
-  // RUN BUTTONS
-
-  // THIS OVER RUNS
-
-  // const thisOverRuns = useMemo(() => {
-  //   return matchState.recentBalls.reduce((acc, item) => {
-  //     const parsed = parseInt(item)
-  //     return isNaN(parsed) ? acc : acc + parsed
-  //   }, 0)
-  // }, [matchState.recentBalls])
-
-  const extraButtons = [
-    { label: "Wide", extraState: "wide" },
-    { label: "NB", extraState: "noball" },
-    { label: "Bye", extraState: "bye" },
-    { label: "LBye", extraState: "legbye" },
-  ]
 
   return (
     <>
-      {showPopup && <PlayerSelectionModal />}
+      {showPopup.matchDecision && <MatchDecisionPopUP />}
+      {showPopup.playerSelection && <PlayerSelectionModal />}
 
       <div className="min-h-screen bg-slate-50 pb-52">
-      
         <Header
           teamA={teamA}
           teamB={teamB}
@@ -120,53 +116,7 @@ export default function LiveScoringPage() {
         {/* MAIN */}
 
         <main className="mx-auto max-w-4xl px-4 py-5 space-y-4">
-          {/* RECENT BALLS */}
-
-          <section className="rounded-2xl border bg-white p-4 shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Recent Balls</p>
-
-              <p className="text-[10px] uppercase tracking-widest text-primary font-bold">
-                This Over: {"thisOverRuns"} runs
-              </p>
-            </div>
-
-            <div className="flex no-scrollbar gap-2 overflow-x-auto justify-center">
-              {balls.map((ball, index) => {
-                const display = ball.isWicket
-                  ? "W"
-                  : ball.extraType === "wide"
-                    ? `${ball.extraRuns}Wd`
-                    : ball.extraType === "noball"
-                      ? `${ball.runs + ball.extraRuns}Nb`
-                      : ball.extraType === "bye"
-                        ? `${ball.extraRuns}B`
-                        : ball.extraType === "legbye"
-                          ? `${ball.extraRuns}Lb`
-                          : ball.runs
-
-                const isWicket = ball.isWicket
-                const isBoundary = ball.runs === 4 || ball.runs === 6
-
-                return (
-                  <div
-                    key={index}
-                    className={`min-w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold
-        ${
-          isWicket
-            ? "bg-red-500 text-white"
-            : isBoundary
-              ? "bg-primary text-white"
-              : "bg-slate-100 text-slate-700"
-        }
-      `}
-                  >
-                    {display}
-                  </div>
-                )
-              })}
-            </div>
-          </section>
+          <RecentBalls balls={balls} thisOverRuns={0} />
 
           {/* BATSMEN */}
           {[batsmenA, batsmenB].map((player) => {
@@ -328,74 +278,6 @@ export default function LiveScoringPage() {
   )
 }
 
-// UI componenets 
-function Header({ teamA, teamB, innings, target, CRR, RRR, runs, wickets, over, ballsInOver, onBack }) {
-  return (
-    <header className="sticky top-0 z-5 bg-primary text-white shadow-xl">
-      <div className="px-4 py-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <button className="mt-1" >
-              <ArrowLeft className="size-5" />
-            </button>
-
-            <div>
-              <h1 className="text-xl font-bold">
-                {teamA.name} vs {teamB.name}
-              </h1>
-
-              <div className="mt-1 flex items-center gap-2">
-                <div className="size-2 rounded-full bg-red-500 animate-pulse" />
-
-                <span className="text-sm font-bold flex gap-x-0.5 tracking-wider">
-                  LIVE •
-                  <span className="text-[#7BF1A8]">
-                    {innings.isFirstInings === null ? "" : innings.isFirstInings ? "1st" : "2nd"}
-                  </span>
-                  INNINGS
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-right">
-            <p className="text-sm uppercase font-bold">
-              Target{" "}
-              <span className="text-[#7BF1A8]">
-                {innings.isFirstInings === true || innings.isFirstInings === null ? 0 : target}
-              </span>
-            </p>
-
-            <div className="mt-1 flex gap-4 text-sm font-bold">
-              <p>
-                CRR <span className="text-green-300">{CRR}</span>
-              </p>
-
-              <p>
-                RRR{" "}
-                <span className="text-[#7BF1A8]">
-                  {innings.isFirstInings === true || innings.isFirstInings === null ? 0 : RRR > 0 ? RRR : 0}
-                </span>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-5 flex items-end gap-3">
-          <h2 className="text-5xl font-black italic tracking-tight">
-            {runs}/{wickets}
-          </h2>
-
-          <p className="pb-1 text-lg opacity-80">
-            {over}.{ballsInOver} Overs
-          </p>
-        </div>
-      </div>
-    </header>
-  )
-}
-
-
 //  Utility Functions
 function getBatsmanIdByRole(batsmen, role) {
   for (const key in batsmen) {
@@ -471,4 +353,32 @@ function ballsToOvers(balls) {
 function calculateEconomy(runsConceded, legalBalls) {
   if (legalBalls === 0) return 0
   return ((runsConceded * 6) / legalBalls).toFixed(2)
+}
+
+function getTeam({ teams, tossWinner, tossDecision, isFirstInings }, forceRole) {
+  // forceRole its optional, undefined forceRole = "bat"
+  if (!teams || !teams.teamA || !teams.teamB) return
+  if (!tossWinner) return
+
+  if (!tossDecision || !["bat", "bowl"].includes(tossDecision)) return
+
+  if (typeof isFirstInings !== "boolean") return
+
+  const result = batting_bowlingTeam({
+    team: teams,
+    tossWinner,
+    tossDecision,
+    isFirstInings,
+  })
+
+  if (!result?.battingTeam || !result?.bowlingTeam) return
+  // Decide role (override OR computed)
+  const role = forceRole || "bat"
+
+  const selectedTeam = role === "bat" ? result.battingTeam : result.bowlingTeam
+
+  return {
+    id: selectedTeam.id,
+    name: selectedTeam.name,
+  }
 }
