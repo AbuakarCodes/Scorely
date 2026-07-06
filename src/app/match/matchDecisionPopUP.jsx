@@ -22,9 +22,9 @@ export default function MatchDecisionPopUP({ setshowPopup }) {
   }
 
   function startNewMatch() {
+    router.push("/selectTeamToStartMatch")
     dispatch(resetMatch())
     dispatch(startInnings_fn())
-    router.push("/selectTeamToStartMatch")
   }
 
   return (

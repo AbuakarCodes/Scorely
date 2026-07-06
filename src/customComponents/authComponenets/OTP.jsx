@@ -157,7 +157,7 @@ export default function OtpVerification({ form, otp_id, setshowOTP, resendOTP })
         email,
         password,
       })
-
+      
       return response.data
     } catch (error) {
       throw error.response?.data?.message || "Something went wrong"
