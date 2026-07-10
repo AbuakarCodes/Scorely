@@ -41,6 +41,11 @@ export default function LiveScoringPage() {
   const [selectedExtra, setSelectedExtra] = useState(null)
 
   useLayoutEffect(() => {
+    const NumberOfBatters = getTeam({ teams, tossWinner, tossDecision, isFirstInings }, "bat").players.length
+    dispatch(update_pendingPlayersFlag({ NumberOfBatters }))
+  }, [])
+
+  useLayoutEffect(() => {
     if (pendingNewBowler || pendingNewBatsman?.nonStriker || pendingNewBatsman?.striker)
       setshowPopup((prev) => ({ ...prev, playerSelection: true }))
     else if (!pendingNewBowler && !pendingNewBatsman?.nonStriker && !pendingNewBatsman?.striker)
@@ -50,8 +55,6 @@ export default function LiveScoringPage() {
   useEffect(() => {
     if (matchWinner.id) {
       setshowPopup((prev) => ({ ...prev, matchDecision: true }))
-      // reoving match data from LS
-      // dispatch(resetMatch())
     }
   }, [matchWinner])
 
@@ -77,27 +80,37 @@ export default function LiveScoringPage() {
         (extraType === "bye" || extraType === "legbye" ? runs : 0),
       extraType,
     }
+    // dispatch(deliverBall({ ballObject }))
+    // dispatch(update_TotalRuns())
+    // dispatch(update_TotalWickets())
+    // dispatch(update_overAndBallInOver({ ballObject, TotalOvers }))
+    // dispatch(update_CRRandRRR({ TotalOvers }))
+    // dispatch(Update_Strike({ ballObject, lastPlayerPlayed }))
+    // dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
+    // dispatch(Update_innings({ ballObject, TotalOvers, lastPlayerPlayed }))
+    // dispatch(update_isDissmissedFlag(ballObject))
+    // dispatch(handelLastPlayer_isLastPlayerTrue({ ballObject, TotalOvers, lastPlayerPlayed }))
+    // dispatch(match_Decision({ TotalOvers, ballObject, lastPlayerPlayed })) 
+
     dispatch(deliverBall({ ballObject }))
+    dispatch(update_isDissmissedFlag(ballObject))   // ← moved up, right after the ball is recorded
     dispatch(update_TotalRuns())
     dispatch(update_TotalWickets())
     dispatch(update_overAndBallInOver({ ballObject, TotalOvers }))
     dispatch(update_CRRandRRR({ TotalOvers }))
     dispatch(Update_Strike({ ballObject, lastPlayerPlayed }))
-    dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
-    dispatch(update_isDissmissedFlag(ballObject))
     dispatch(Update_innings({ ballObject, TotalOvers, lastPlayerPlayed }))
+    dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
     dispatch(handelLastPlayer_isLastPlayerTrue({ ballObject, TotalOvers, lastPlayerPlayed }))
     dispatch(match_Decision({ TotalOvers, ballObject, lastPlayerPlayed }))
 
     setSelectedExtra(null)
-
-    // console.log(getBattingTeam({ teams, tossWinner, tossDecision, isFirstInings }))
   }
 
   return (
     <>
       {showPopup.matchDecision && <MatchDecisionPopUP setshowPopup={setshowPopup} />}
-      {showPopup.playerSelection && <PlayerSelectionModal  />}
+      {showPopup.playerSelection && <PlayerSelectionModal />}
 
       <div className="min-h-screen bg-slate-50 pb-52">
         <Header
@@ -374,11 +387,11 @@ function getTeam({ teams, tossWinner, tossDecision, isFirstInings }, forceRole) 
   if (!result?.battingTeam || !result?.bowlingTeam) return
   // Decide role (override OR computed)
   const role = forceRole || "bat"
-
   const selectedTeam = role === "bat" ? result.battingTeam : result.bowlingTeam
 
   return {
-    id: selectedTeam.id,
-    name: selectedTeam.name,
+    id: selectedTeam?.id,
+    name: selectedTeam?.name,
+    players: selectedTeam?.players || []
   }
 }
