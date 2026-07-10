@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation"
 
 import { fetchTeamPlayers, startInnings_fn, setMatch_id } from "@/utils/reduxSclices/matchSlice"
 import PageLoader from "@/customComponents/loaders/pageLoader"
-import { resetMatch } from "@/utils/reduxSclices/matchSlice" 
+import { resetMatch } from "@/utils/reduxSclices/matchSlice"
 
 export default function SelectTeamsPage() {
   const dispatch = useDispatch()
@@ -86,9 +86,9 @@ export default function SelectTeamsPage() {
     <>
       {playersLoading && <PageLoader />}
 
-      <div className="min-h-screen bg-background pb-32">
+      <div className="h-screen flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
+        <header className="sticky h-[5rem] top-0 z-50 border-b bg-background/95 backdrop-blur shrink-0">
           <div className="mx-auto flex h-16 max-w-md items-center justify-between px-4">
             <div className="flex items-center gap-3">
               <Button
@@ -105,9 +105,9 @@ export default function SelectTeamsPage() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-md px-4 pt-5 bg-yellow-50 h-10">
+        <main className="mx-auto max-w-md px-4 pt-5 flex-1 flex flex-col overflow-hidden w-full">
           {/* Status */}
-          <Card className="mb-6 border-none bg-primary  shadow-md  text-white">
+          <Card className="mb-6 border-none bg-primary  shadow-md  text-white shrink-0">
             <div className="flex items-center justify-between p-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider opacity-80">Selection Status</p>
@@ -134,7 +134,7 @@ export default function SelectTeamsPage() {
           </Card>
 
           {/* Search */}
-          <div className="relative mb-6">
+          <div className="relative mb-6 shrink-0">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
             <Input
@@ -147,7 +147,7 @@ export default function SelectTeamsPage() {
 
           {/* Teams */}
 
-          <div className="space-y-3">
+          <div className="space-y-3  no-scrollbar scroll-smooth flex-1 overflow-y-auto pb-32">
             {loading ? (
               "teams Loading"
             ) : filteredTeams.length === 0 ? (
@@ -170,20 +170,20 @@ export default function SelectTeamsPage() {
                     <div className="flex items-center gap-4">
                       {/* Team Logo */}
                       <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
-                        {team.logo ? (
-                          <img src={team.logo} alt={team.name} className="h-full w-full object-cover" />
+                        {team?.avatar ? (
+                          <img src={team?.avatar} alt={team?.name} className="h-full w-full object-cover" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-lg font-bold">
-                            {team.name?.charAt(0)}
+                            {team?.name?.charAt(0)}
                           </div>
                         )}
                       </div>
 
                       {/* Team Info */}
                       <div className="flex-1 overflow-hidden">
-                        <h3 className="truncate font-bold">{team.name}</h3>
+                        <h3 className="truncate font-bold">{team?.name || ""}</h3>
 
-                        <p className="text-sm text-muted-foreground">{team.players?.length || 0} Players</p>
+                        <p className="text-sm text-muted-foreground">{team?.playersCount || ""} Players</p>
                       </div>
 
                       {/* Checkbox */}
@@ -204,7 +204,7 @@ export default function SelectTeamsPage() {
         </main>
 
         {/* Proceed Button */}
-        <div className="fixed bottom-6 left-0 right-0 z-40 px-4">
+        <div className="  fixed bottom-6 left-0 right-0 z-40 px-4">
           <div className="mx-auto max-w-md">
             <Button
               onClick={handleProceed}
