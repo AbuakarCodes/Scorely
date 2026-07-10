@@ -11,7 +11,7 @@ import {
   match_Decision,
   resetMatch,
   update_CRRandRRR,
-  Update_innings,
+  switchSides,
   update_isDissmissedFlag,
   update_overAndBallInOver,
   update_pendingPlayersFlag,
@@ -32,7 +32,7 @@ export default function LiveScoringPage() {
   const { batsmen, bowler, innings, id } = useSelector((state) => state.match)
   const { matchWinner } = useSelector((state) => state?.match?.match)
   const { batsmenA, batsmenB } = batsmen
-  const { runs, wickets, over, ballsInOver, CRR, RRR, target } = innings?.score
+  const { runs, wickets, over, ballsInOver, CRR, RRR, runsLeft, target } = innings?.score
   const { pendingNewBowler, pendingNewBatsman, balls, isFirstInings } = innings
   const { currentBowler } = bowler
 
@@ -87,7 +87,7 @@ export default function LiveScoringPage() {
     // dispatch(update_CRRandRRR({ TotalOvers }))
     // dispatch(Update_Strike({ ballObject, lastPlayerPlayed }))
     // dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
-    // dispatch(Update_innings({ ballObject, TotalOvers, lastPlayerPlayed }))
+    // dispatch(switchSides({ ballObject, TotalOvers, lastPlayerPlayed }))
     // dispatch(update_isDissmissedFlag(ballObject))
     // dispatch(handelLastPlayer_isLastPlayerTrue({ ballObject, TotalOvers, lastPlayerPlayed }))
     // dispatch(match_Decision({ TotalOvers, ballObject, lastPlayerPlayed })) 
@@ -99,7 +99,7 @@ export default function LiveScoringPage() {
     dispatch(update_overAndBallInOver({ ballObject, TotalOvers }))
     dispatch(update_CRRandRRR({ TotalOvers }))
     dispatch(Update_Strike({ ballObject, lastPlayerPlayed }))
-    dispatch(Update_innings({ ballObject, TotalOvers, lastPlayerPlayed }))
+    dispatch(switchSides({ ballObject, TotalOvers, lastPlayerPlayed }))
     dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
     dispatch(handelLastPlayer_isLastPlayerTrue({ ballObject, TotalOvers, lastPlayerPlayed }))
     dispatch(match_Decision({ TotalOvers, ballObject, lastPlayerPlayed }))
@@ -120,6 +120,7 @@ export default function LiveScoringPage() {
           target={target}
           CRR={CRR}
           RRR={RRR}
+          RL={runsLeft}
           runs={runs}
           wickets={wickets}
           over={over}

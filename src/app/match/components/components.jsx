@@ -61,6 +61,7 @@ export function Header({
   target,
   CRR,
   RRR,
+  RL,
   runs,
   wickets,
   over,
@@ -68,6 +69,7 @@ export function Header({
   onBack,
 }) {
   return (
+
     <header className="sticky top-0 z-5 bg-primary text-white shadow-xl">
       <div className="px-4 py-5">
         <div className="flex items-start justify-between gap-4">
@@ -112,6 +114,13 @@ export function Header({
                 RRR{" "}
                 <span className="text-[#7BF1A8]">
                   {innings.isFirstInings === true || innings.isFirstInings === null ? 0 : RRR > 0 ? RRR : 0}
+                </span>
+              </p>
+
+              <p>
+                RL{" "}
+                <span className="text-[#7BF1A8]">
+                  {innings.isFirstInings === true || innings.isFirstInings === null ? 0 : RL > 0 ? RL : 0}
                 </span>
               </p>
             </div>

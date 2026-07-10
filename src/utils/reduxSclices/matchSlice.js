@@ -79,7 +79,8 @@ const defaultState = {
             ballsInOver: 0,
             CRR: 0,
             RRR: 0,
-            target: 0
+            target: 0,
+            runsLeft: 0
         },
 
         balls: [],
@@ -223,6 +224,7 @@ const matchSlice = createSlice({
                 resetBatsman(nonStrikerBatsman, nonStriker);
             }
 
+            // hiding the player selection popup
             chnagePendingBatsman_Bowler_flag(state, {
                 striker: false,
                 nonstriker: false,
@@ -337,10 +339,10 @@ const matchSlice = createSlice({
 
             const CRR = legalDeliveries === 0 ? "0.00" : ((runs * 6) / legalDeliveries).toFixed(2)
             const RRR = isFirstInings === false ? calculateRRR({ target, currentRuns, over, ballsInOver, TotalOvers }) : 0
-
+            const runsLeft = isFirstInings === false ? target - runs : 0
             state.innings.score.CRR = CRR
             state.innings.score.RRR = RRR
-
+            state.innings.score.runsLeft = runsLeft
             // 
 
         },
@@ -394,7 +396,7 @@ const matchSlice = createSlice({
             striker.isSelected = true;
         },
 
-        Update_innings(state, action) {
+        switchSides(state, action) {
             // we are just only dealing with changing innings from 1st to 2nd, 
             // if innings is already 2nd then dont need to update it simple end the match 
             const isFirstInings = state?.innings?.isFirstInings
@@ -487,26 +489,21 @@ const matchSlice = createSlice({
                 ? battingTeamPlayers.length - secondInningsWickets === 0
                 : battingTeamPlayers.length - secondInningsWickets === secondInningsWickets - 1;
 
-              
+
 
             if (!isSecondInningsStarted) return
-            console.log({balls,runs,target,team,tossDecision,tossWinner});
 
             if (runs >= target) {
-                console.log("batter");
                 const battingTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings: state?.innings?.isFirstInings })?.battingTeam ?? { id: "", name: "" };
-                console.log({battingTeam:current(battingTeam)});
                 state.match.matchWinner.id = battingTeam.id;
                 state.match.matchWinner.name = battingTeam.name;
             }
             else if (teamAllWicketsDown || oversCompleted) {
                 if (runs === target - 1) {
-                console.log("Tied");
                     state.match.matchWinner.id = "Tie";
                     state.match.matchWinner.name = null;
                 }
                 else if (runs < target - 1) {
-                console.log("Bowler");
                     const bowlingTeam = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings: state?.innings?.isFirstInings })?.bowlingTeam ?? { id: "", name: "" };
                     state.match.matchWinner.id = bowlingTeam.id;
                     state.match.matchWinner.name = bowlingTeam.name;
@@ -590,7 +587,7 @@ export const {
     update_pendingPlayersFlag,
     update_isDissmissedFlag,
     update_isSelectedBatsmen_Flag,
-    Update_innings,
+    switchSides,
     handelLastPlayer_isLastPlayerTrue,
     match_Decision
 } = matchSlice.actions;
@@ -814,10 +811,8 @@ function calculateRRR({ target, currentRuns, over, ballsInOver, TotalOvers }) {
 function Update_UI_afterInnings({ innings, TotalOvers }) {
     const { score } = innings;
 
-    // score // totalOvers
 
     const target = score.runs + 1;
-
     score.target = target;
     score.runs = 0;
     score.wickets = 0;
@@ -832,6 +827,8 @@ function Update_UI_afterInnings({ innings, TotalOvers }) {
         ballsInOver: score.ballsInOver,
         TotalOvers,
     });
+
+    
 
 }
 

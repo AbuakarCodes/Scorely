@@ -15,8 +15,6 @@ export default function MatchDecisionPopUP({ setshowPopup }) {
   const { teams } = useSelector((state) => state.match.match)
   const matchSummary = computeMatchSummary({ balls, teams, winningTeam_id: matchWinner?.id })
 
-  console.log({matchWinner});
-
   function ClosePopUP() {
     router.push("/")
     setshowPopup((prev) => ({ ...prev, matchDecision: false }))

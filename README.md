@@ -203,7 +203,7 @@ update_isDissmissedFlag()
 
 ↓
 
-Update_innings()
+switchSides()
 
 ↓
 
@@ -337,7 +337,7 @@ player.isDismissed = true
 
 ---
 
-## 9. Update_innings()
+## 9. switchSides()
 
 Checks whether first innings has finished.
 
