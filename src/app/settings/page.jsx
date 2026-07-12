@@ -11,12 +11,16 @@ import { toggleTheme, changeDefaultOvers, changeWicketsPerSide, toggleLastPlayer
 
 export default function SettingsPage() {
   const dispatch = useDispatch()
-  const { darkMode, defaultOvers, wicketsPerSide, lastPlayerPlayed } = useSelector(s => s.settings)
+  const { darkMode, TotalOvers,  lastPlayerPlayed } = useSelector(state => state?.settings||{})
+  console.log({TotalOvers});
 
   useEffect(() => {
     document.body.classList.toggle("dark", darkMode)
   }, [darkMode])
 
+  function defaultOvers_handler(e) {
+    
+  }
   
 
   return (
@@ -66,52 +70,29 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center gap-1.5 bg-primary/5 rounded-lg p-1">
                 <button
-                  onClick={() => dispatch(changeDefaultOvers(defaultOvers - 1))}
-                  disabled={defaultOvers <= 1}
+                  onClick={() => dispatch(changeDefaultOvers(TotalOvers-1))}
+                  // disabled={TotalOvers <= 1}
                   className="w-8 h-8 flex items-center justify-center rounded-md bg-white dark:bg-slate-800 shadow-sm text-primary font-bold text-base hover:bg-primary/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >−</button>
                 <input
                   type="number"
-                  value={defaultOvers}
-                  onChange={(e) => { const p = parseInt(e.target.value, 10); if (!isNaN(p)) dispatch(changeDefaultOvers(p)); }}
+                  value={TotalOvers}
+                  // onChange={(e) => { const p = parseInt(e.target.value, 10); if (!isNaN(p)) dispatch(changeDefaultOvers(p)); }}
                   min={1} max={50}
                   className="w-12 text-center font-bold text-sm tabular-nums bg-transparent border-none focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <button
-                  onClick={() => dispatch(changeDefaultOvers(defaultOvers + 1))}
-                  disabled={defaultOvers >= 50}
+                  onClick={() => dispatch(changeDefaultOvers(TotalOvers + 1))}
+                  // disabled={TotalOvers >= 50}
                   className="w-8 h-8 flex items-center justify-center rounded-md bg-primary text-white shadow-sm font-bold text-base hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
                 >+</button>
               </div>
             </div>
 
-            {/* Wickets per Side */}
-            <div className="flex items-center justify-between p-4 border-b border-primary/5">
-              <div className="flex items-center gap-3">
-                <AlignJustify className="w-5 h-5 text-primary shrink-0" strokeWidth={1.8} />
-                <p className="font-medium text-sm">Wickets per Side</p>
-              </div>
-              <div className="flex items-center gap-1.5 bg-primary/5 rounded-lg p-1">
-                <button
-                  onClick={() => dispatch(changeWicketsPerSide(wicketsPerSide - 1))}
-                  disabled={wicketsPerSide <= 1}
-                  className="w-8 h-8 flex items-center justify-center rounded-md bg-white dark:bg-slate-800 shadow-sm text-primary font-bold text-base hover:bg-primary/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                >−</button>
-                <input
-                  type="number"
-                  value={wicketsPerSide}
-                  onChange={(e) => { const p = parseInt(e.target.value, 10); if (!isNaN(p)) dispatch(changeWicketsPerSide(p)); }}
-                  min={1} max={11}
-                  className="w-12 text-center font-bold text-sm tabular-nums bg-transparent border-none focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-                <button
-                  onClick={() => dispatch(changeWicketsPerSide(wicketsPerSide + 1))}
-                  disabled={wicketsPerSide >= 11}
-                  className="w-8 h-8 flex items-center justify-center rounded-md bg-primary text-white shadow-sm font-bold text-base hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
-                >+</button>
-              </div>
-            </div>
 
+
+
+   
             {/* Last Player Played */}
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center gap-3">
