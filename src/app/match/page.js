@@ -140,7 +140,7 @@ export default function LiveScoringPage() {
         {/* MAIN */}
 
         <main className="mx-auto max-w-4xl px-4 py-5 space-y-4">
-          <RecentBalls balls={balls} runsInOver={runsInOver} />
+          <RecentBalls balls={balls} runsInOver={runsInOver} over={over} />
 
           {/* BATSMEN */}
           {[batsmenA, batsmenB].map((player) => {
