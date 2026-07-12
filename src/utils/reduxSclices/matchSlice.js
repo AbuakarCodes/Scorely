@@ -78,7 +78,9 @@ const defaultState = {
             CRR: 0,
             RRR: 0,
             target: 0,
-            runsLeft: 0
+            runsLeft: 0,
+            runsInOver: 0,
+
         },
 
         balls: [],
@@ -302,6 +304,7 @@ const matchSlice = createSlice({
             if (ballInOver === 5 && isLegalDelivery) {
                 state.innings.score.over++
                 state.innings.score.ballsInOver = 0
+                UpdateRunsInOver({runs:0,state})
             }
         },
 
@@ -345,6 +348,14 @@ const matchSlice = createSlice({
             // 
 
         },
+
+        update_RunsInCurrentOver(state, action) {
+            const { over } = state?.innings?.score || {};
+            const filterCurrentOverBalls = state?.innings?.balls?.filter(ball => ball.over === over)
+            const runsInOver = filterCurrentOverBalls.reduce((total, ball) => total + ball.runs + ball.extraRuns, 0);
+            UpdateRunsInOver({runs:runsInOver, state});
+        },
+
         Update_Strike(state, action) {
             if (!action.payload) return;
 
@@ -581,6 +592,7 @@ export const {
     update_TotalWickets,
     update_overAndBallInOver,
     update_CRRandRRR,
+    update_RunsInCurrentOver,
     Update_Strike,
     update_pendingPlayersFlag,
     update_isDissmissedFlag,
@@ -810,7 +822,6 @@ function calculateRRR({ target, currentRuns, over, ballsInOver, TotalOvers }) {
 function Update_UI_afterInnings({ innings, TotalOvers }) {
     const { score } = innings;
 
-
     const target = score.runs + 1;
     score.target = target;
     score.runs = 0;
@@ -818,6 +829,7 @@ function Update_UI_afterInnings({ innings, TotalOvers }) {
     score.over = 0;
     score.ballsInOver = 0;
     score.CRR = 0;
+    state.innings.score.runsInOver = 0
 
     score.RRR = calculateRRR({
         target,
@@ -826,13 +838,15 @@ function Update_UI_afterInnings({ innings, TotalOvers }) {
         ballsInOver: score.ballsInOver,
         TotalOvers,
     });
-
-
-
 }
 
 
 function getDismissedBattersCount(players) {
     if (!Array.isArray(players)) return
     return players.filter(player => player.isDismissed).length;
+}
+
+function UpdateRunsInOver({runs,state}) {
+    if (isNaN(runs)) return
+    state.innings.score.runsInOver = runs
 }

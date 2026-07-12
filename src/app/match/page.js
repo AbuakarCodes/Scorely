@@ -19,24 +19,24 @@ import {
   update_TotalRuns,
   update_TotalWickets,
   Undo,
+  update_RunsInCurrentOver,
 } from "@/utils/reduxSclices/matchSlice"
 import { extraButtons, runButtons } from "./utils/constants"
 import MatchDecisionPopUP from "./utils/matchDecisionPopUP"
 import RecentBalls, { Header } from "./components/components"
 import { match_snapShot, removePrevBall_snapshot } from "./utils/snapShot"
-import { GGGGGGG } from "@/TEST"
 export default function LiveScoringPage() {
   const dispatch = useDispatch()
 
   const matchState = useSelector((state) => state.match)
 
-  const { teams, tossWinner, tossDecision } = useSelector((state) => state.match.match)
+  const { teams, tossWinner, tossDecision } = useSelector((state) => state?.match?.match||{})
   const { teamA, teamB } = teams
 
-  const { batsmen, bowler, innings, id } = useSelector((state) => state.match)
-  const { matchWinner } = useSelector((state) => state?.match?.match)
+  const { batsmen, bowler, innings, id } = useSelector((state) => state?.match || {})
+  const { matchWinner } = useSelector((state) => state?.match?.match || {})
   const { batsmenA, batsmenB } = batsmen
-  const { runs, wickets, over, ballsInOver, CRR, RRR, runsLeft, target } = innings?.score
+  const { runs, wickets, over, ballsInOver, CRR, RRR, runsLeft,target, runsInOver } = innings?.score || {}
   const { pendingNewBowler, pendingNewBatsman, balls, isFirstInings } = innings
   const { currentBowler } = bowler
 
@@ -62,7 +62,7 @@ export default function LiveScoringPage() {
     }
   }, [matchWinner])
 
-  
+
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
     match_snapShot({ matchState })
@@ -95,6 +95,7 @@ export default function LiveScoringPage() {
     dispatch(update_TotalRuns())
     dispatch(update_TotalWickets())
     dispatch(update_overAndBallInOver({ ballObject, TotalOvers }))
+    dispatch(update_RunsInCurrentOver())
     dispatch(update_CRRandRRR({ TotalOvers }))
     dispatch(Update_Strike({ ballObject, lastPlayerPlayed }))
     dispatch(switchSides({ ballObject, TotalOvers, lastPlayerPlayed }))
@@ -139,7 +140,7 @@ export default function LiveScoringPage() {
         {/* MAIN */}
 
         <main className="mx-auto max-w-4xl px-4 py-5 space-y-4">
-          <RecentBalls balls={balls} thisOverRuns={0} />
+          <RecentBalls balls={balls} runsInOver={runsInOver} />
 
           {/* BATSMEN */}
           {[batsmenA, batsmenB].map((player) => {

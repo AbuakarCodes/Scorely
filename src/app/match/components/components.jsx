@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react"
 import React from "react"
 
-export default function RecentBalls({ balls = [], thisOverRuns = 0 }) {
+export default function RecentBalls({ balls = [], runsInOver = 0 }) {
   return (
     <section className="rounded-2xl border bg-white p-4 shadow-sm">
       {/* Header Info */}
@@ -9,7 +9,7 @@ export default function RecentBalls({ balls = [], thisOverRuns = 0 }) {
         <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Recent Balls</p>
 
         <p className="text-[10px] uppercase tracking-widest text-primary font-bold">
-          This Over: {thisOverRuns} runs
+          This Over: {runsInOver} runs
         </p>
       </div>
 
@@ -66,7 +66,6 @@ export function Header({
   wickets,
   over,
   ballsInOver,
-  onBack,
 }) {
   return (
 
