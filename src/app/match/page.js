@@ -40,7 +40,7 @@ export default function LiveScoringPage() {
   const { pendingNewBowler, pendingNewBatsman, balls, isFirstInings } = innings
   const { currentBowler } = bowler
 
-  const { TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || 0)
+  const { TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || {})
   const [showPopup, setshowPopup] = useState({ playerSelection: false, matchDecision: false })
   const [selectedExtra, setSelectedExtra] = useState(null)
 

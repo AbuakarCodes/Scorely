@@ -10,10 +10,16 @@ export const settingSlice = createSlice({
     name: 'settings',
     initialState,
     reducers: {
-
-        changeDefaultOvers: (state, action) => {
+     
+        changeTotaltOvers: (state, action) => {
             if (action.payload >= 1 && action.payload <= 50) {
                 state.TotalOvers = action.payload
+            }
+        },
+
+        changeWicketsPerSide: (state, action) => {
+            if (action.payload <= 11) {
+                state.wicketsPerSide = action.payload
             }
         },
 
@@ -24,6 +30,6 @@ export const settingSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { toggleTheme, toggleLastPlayerPlayed } = settingSlice.actions
+export const {  changeTotaltOvers, toggleLastPlayerPlayed } = settingSlice.actions
 
 export default settingSlice.reducer

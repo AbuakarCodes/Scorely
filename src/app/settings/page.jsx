@@ -7,20 +7,15 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useSelector, useDispatch } from 'react-redux'
-import { toggleTheme, changeDefaultOvers, changeWicketsPerSide, toggleLastPlayerPlayed } from "../../utils/reduxSclices/settingsSclice"
+import {  changeTotaltOvers,  toggleLastPlayerPlayed } from "../../utils/reduxSclices/settingsSclice"
 
 export default function SettingsPage() {
   const dispatch = useDispatch()
   const { darkMode, TotalOvers,  lastPlayerPlayed } = useSelector(state => state?.settings||{})
-  console.log({TotalOvers});
 
   useEffect(() => {
     document.body.classList.toggle("dark", darkMode)
   }, [darkMode])
-
-  function defaultOvers_handler(e) {
-    
-  }
   
 
   return (
@@ -52,7 +47,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-muted-foreground mt-0.5">Toggle dark interface</p>
                 </div>
               </div>
-              <Switch checked={darkMode} onCheckedChange={() => dispatch(toggleTheme())} />
+              <Switch checked={darkMode} onCheckedChange={() => {}} />
             </div>
           </div>
         </section>
@@ -70,19 +65,19 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center gap-1.5 bg-primary/5 rounded-lg p-1">
                 <button
-                  onClick={() => dispatch(changeDefaultOvers(TotalOvers-1))}
+                  onClick={() => dispatch(changeTotaltOvers(TotalOvers))}
                   // disabled={TotalOvers <= 1}
                   className="w-8 h-8 flex items-center justify-center rounded-md bg-white dark:bg-slate-800 shadow-sm text-primary font-bold text-base hover:bg-primary/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >−</button>
                 <input
                   type="number"
                   value={TotalOvers}
-                  // onChange={(e) => { const p = parseInt(e.target.value, 10); if (!isNaN(p)) dispatch(changeDefaultOvers(p)); }}
+                  onChange={(e) => { const p = parseInt(e.target.value, 10); if (!isNaN(p)) dispatch(changeTotaltOvers(p)); }}
                   min={1} max={50}
                   className="w-12 text-center font-bold text-sm tabular-nums bg-transparent border-none focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <button
-                  onClick={() => dispatch(changeDefaultOvers(TotalOvers + 1))}
+                  onClick={() => dispatch(changeTotaltOvers(TotalOvers + 1))}
                   // disabled={TotalOvers >= 50}
                   className="w-8 h-8 flex items-center justify-center rounded-md bg-primary text-white shadow-sm font-bold text-base hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
                 >+</button>

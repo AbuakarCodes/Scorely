@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Trophy, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -21,6 +22,7 @@ export default function MatchSetupPage() {
   const { balls } = useSelector((state) => state?.match?.innings)
   const { batsmenA, batsmenB } = useSelector((state) => state?.match?.batsmen)
   const { bowler } = useSelector((state) => state?.match?.bowler)
+  const { TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || {})
 
   const teams = [reduxTeams?.teamA, reduxTeams?.teamB]
 
@@ -60,7 +62,7 @@ export default function MatchSetupPage() {
               <TossWinner teams={teams} tossWinner_handler={tossWinner_handler} />
               <TossDecision tossDecision_handler={tossDecision_handler} />
             </section>
-            <MatchSettings />
+            <MatchSettings TotalOvers={TotalOvers} />
           </main>
           <StartMatchSection router={router} dispatch={dispatch} />
         </div>
@@ -126,21 +128,17 @@ export default function MatchSetupPage() {
     )
   }
 
-  function MatchSettings() {
+  function MatchSettings({ TotalOvers }) {
     return (
       <section className="px-4">
         <Card className="border-primary/10 bg-muted/40 p-4">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-sm font-bold">Match Settings</h3>
-
-            <Button variant="link" className="h-auto p-0 text-xs">
-              Edit Settings
-            </Button>
           </div>
 
           <div className="grid grid-cols-2 gap-y-3 text-sm">
             <span className="text-muted-foreground">Overs</span>
-            <span className="text-right font-medium">20 Overs</span>
+            <span className="text-right font-medium">{TotalOvers} Overs</span>
 
             <span className="text-muted-foreground">Ball Type</span>
             <span className="text-right font-medium">Leather (Red)</span>
