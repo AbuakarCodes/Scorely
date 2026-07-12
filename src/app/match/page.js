@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { ArrowLeft, RotateCcw, Star, RefreshCcw } from "lucide-react"
+import { ArrowLeft, RotateCcw, Star, RefreshCcw, CloudCog } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
-import PlayerSelectionModal from "@/app/match/selectPlayer"
+import PlayerSelectionModal from "@/app/match/utils/selectPlayer"
 import {
   batting_bowlingTeam,
   deliverBall,
@@ -18,13 +18,17 @@ import {
   Update_Strike,
   update_TotalRuns,
   update_TotalWickets,
+  Undo,
 } from "@/utils/reduxSclices/matchSlice"
-import { extraButtons, runButtons } from "./constants"
-import MatchDecisionPopUP from "./matchDecisionPopUP"
+import { extraButtons, runButtons } from "./utils/constants"
+import MatchDecisionPopUP from "./utils/matchDecisionPopUP"
 import RecentBalls, { Header } from "./components/components"
-
+import { match_snapShot, removePrevBall_snapshot } from "./utils/snapShot"
+import { GGGGGGG } from "@/TEST"
 export default function LiveScoringPage() {
   const dispatch = useDispatch()
+
+  const matchState = useSelector((state) => state.match)
 
   const { teams, tossWinner, tossDecision } = useSelector((state) => state.match.match)
   const { teamA, teamB } = teams
@@ -58,9 +62,14 @@ export default function LiveScoringPage() {
     }
   }, [matchWinner])
 
+  
+
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
+    match_snapShot({ matchState })
+
     const ballObject = {
       matchId: id,
+      ballId: crypto.randomUUID(),
       battingTeam: getTeam({ teams, tossWinner, tossDecision, isFirstInings }, "bat"),
       bowlingTeam: getTeam({ teams, tossWinner, tossDecision, isFirstInings }, "bowl"),
       inningsNumber: isFirstInings === null ? 0 : isFirstInings ? 1 : 2,
@@ -80,20 +89,9 @@ export default function LiveScoringPage() {
         (extraType === "bye" || extraType === "legbye" ? runs : 0),
       extraType,
     }
-    // dispatch(deliverBall({ ballObject }))
-    // dispatch(update_TotalRuns())
-    // dispatch(update_TotalWickets())
-    // dispatch(update_overAndBallInOver({ ballObject, TotalOvers }))
-    // dispatch(update_CRRandRRR({ TotalOvers }))
-    // dispatch(Update_Strike({ ballObject, lastPlayerPlayed }))
-    // dispatch(update_pendingPlayersFlag({ ballObject, TotalOvers }))
-    // dispatch(switchSides({ ballObject, TotalOvers, lastPlayerPlayed }))
-    // dispatch(update_isDissmissedFlag(ballObject))
-    // dispatch(handelLastPlayer_isLastPlayerTrue({ ballObject, TotalOvers, lastPlayerPlayed }))
-    // dispatch(match_Decision({ TotalOvers, ballObject, lastPlayerPlayed })) 
 
     dispatch(deliverBall({ ballObject }))
-    dispatch(update_isDissmissedFlag(ballObject))   // ← moved up, right after the ball is recorded
+    dispatch(update_isDissmissedFlag(ballObject))
     dispatch(update_TotalRuns())
     dispatch(update_TotalWickets())
     dispatch(update_overAndBallInOver({ ballObject, TotalOvers }))
@@ -105,6 +103,17 @@ export default function LiveScoringPage() {
     dispatch(match_Decision({ TotalOvers, ballObject, lastPlayerPlayed }))
 
     setSelectedExtra(null)
+
+  }
+
+  function unDo_handler() {
+    // get the match state whic we got from snapShot
+    // chnage the intire match state as it was befor the current ball
+    // remove the current ball from snap shot as we always need previous ball so we can reflect previous ball
+    if (balls.length === 0) return
+    const prevBall_matchState = getPrevBallMatchState()
+    dispatch(Undo(prevBall_matchState))
+    removePrevBall_snapshot()
   }
 
   return (
@@ -244,6 +253,7 @@ export default function LiveScoringPage() {
             ))}
 
             <button
+              onClick={(e) => { unDo_handler(e) }}
               disabled={matchWinner?.id}
               className="flex h-12 disabled:opacity-50 items-center justify-center rounded-xl bg-primary text-white"
             >
@@ -286,6 +296,8 @@ export default function LiveScoringPage() {
               </button>
             </div>
           )}
+
+
         </div>
       </div>
     </>
@@ -395,4 +407,9 @@ function getTeam({ teams, tossWinner, tossDecision, isFirstInings }, forceRole) 
     name: selectedTeam?.name,
     players: selectedTeam?.players || []
   }
+}
+
+function getPrevBallMatchState() {
+  const PrevBallMatchState = JSON.parse(localStorage.getItem("snapShot"))
+  return PrevBallMatchState[PrevBallMatchState.length - 1]
 }

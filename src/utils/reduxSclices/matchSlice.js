@@ -1,7 +1,7 @@
 import axios from "axios";
 import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit";
 
-let count = 0
+
 
 export const fetchTeamPlayers_off = createAsyncThunk(
     "match/fetchTeamPlayers",
@@ -34,8 +34,6 @@ export const fetchTeamPlayers = createAsyncThunk(
         }
     }
 );
-
-
 
 
 
@@ -180,6 +178,7 @@ const matchSlice = createSlice({
         },
         resetMatch(state) {
             localStorage.removeItem("match");
+            localStorage.removeItem("snapShot")
             return defaultState;
         },
 
@@ -247,15 +246,15 @@ const matchSlice = createSlice({
             // That part updates the flag after somone out's or over completed
             if (!action.payload) return
             const { ballObject, TotalOvers } = action.payload
-            const { over, isLegalDelivery, ballInOver } = ballObject
+            const { over, isLegalDelivery, ballInOver } = ballObject || {}
             // parameters
             const team = state?.match?.teams || []
             const tossDecision = state?.match?.tossDecision || ""
-            const tossWinner = state.match.tossWinner
+            const tossWinner = state?.match?.tossWinner
             const isFirstInings = state.innings.isFirstInings
 
-            const isWicket = ballObject.isWicket
-            const isOverEnd = ballObject.isLegalDelivery ? ballObject.ballInOver === 5 : false
+            const isWicket = ballObject?.isWicket
+            const isOverEnd = ballObject?.isLegalDelivery ? ballObject.ballInOver === 5 : false
             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
             const arePlayersLeft = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
             if (isWicket && arePlayersLeft != 0) state.innings.pendingNewBatsman = { ...state.innings.pendingNewBatsman, striker: true }
@@ -264,18 +263,18 @@ const matchSlice = createSlice({
         },
 
         handelLastPlayer_isLastPlayerTrue(state, action) {
-            const { ballObject, lastPlayerPlayed } = action.payload
+            const { ballObject, lastPlayerPlayed } = action.payload || {}
 
             const team = state?.match?.teams || []
             const tossDecision = state?.match?.tossDecision || ""
-            const tossWinner = state.match.tossWinner
-            const isFirstInings = state.innings.isFirstInings
-            const isWicket = ballObject.isWicket
+            const tossWinner = state?.match?.tossWinner
+            const isFirstInings = state?.innings?.isFirstInings
+            const isWicket = ballObject?.isWicket
             const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
-            const { strikerBatsman, nonStrikerBatsman } = findStrikertNonStriker(state.batsmen)
+            const { strikerBatsman, nonStrikerBatsman } = findStrikertNonStriker(state?.batsmen)
 
             if (lastPlayerPlayed && canContinueBat === 0 && isWicket) {
-                if (nonStrikerBatsman.id) {
+                if (nonStrikerBatsman?.id) {
                     resetBatsman(strikerBatsman, nonStrikerBatsman)
                     resetBatsman(nonStrikerBatsman)
                 }
@@ -509,13 +508,12 @@ const matchSlice = createSlice({
                     state.match.matchWinner.name = bowlingTeam.name;
                 }
             }
+        },
 
-
-
-        }
-
-
-
+        Undo(state, action) {
+            const prevBall_matchState = action.payload || {}
+            return prevBall_matchState
+        },
 
 
 
@@ -589,7 +587,8 @@ export const {
     update_isSelectedBatsmen_Flag,
     switchSides,
     handelLastPlayer_isLastPlayerTrue,
-    match_Decision
+    match_Decision,
+    Undo,
 } = matchSlice.actions;
 
 export default matchSlice.reducer;
@@ -744,7 +743,7 @@ function hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver }) {
 
 function numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject }) {
     const { battingTeam } = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })
-    const remaningPlayers = battingTeam.players.filter(p => !p.isDismissed && p._id !== ballObject.strikerId && p._id !== ballObject.nonStrikerId).length
+    const remaningPlayers = battingTeam?.players?.filter(p => !p?.isDismissed && p?._id !== ballObject?.strikerId && p?._id !== ballObject?.nonStrikerId).length
     return remaningPlayers
 }
 
@@ -828,7 +827,7 @@ function Update_UI_afterInnings({ innings, TotalOvers }) {
         TotalOvers,
     });
 
-    
+
 
 }
 
