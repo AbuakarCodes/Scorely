@@ -97,7 +97,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-muted-foreground mt-0.5">Track the last player who batted</p>
                 </div>
               </div>
-              <Switch checked={lastPlayerPlayed} onCheckedChange={() => dispatch(toggleLastPlayerPlayed())} />
+              <Switch checked={lastPlayerPlayed} onCheckedChange={() => dispatch(toggleLastPlayerPlayed(!lastPlayerPlayed))} />
             </div>
 
           </div>

@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation"
 import { fetchTeamPlayers, startInnings_fn, setMatch_id } from "@/utils/reduxSclices/matchSlice"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import { resetMatch } from "@/utils/reduxSclices/matchSlice"
+import { toggleLastPlayerPlayed } from "@/utils/reduxSclices/settingsSclice"
 
 export default function SelectTeamsPage() {
   const dispatch = useDispatch()
@@ -72,12 +73,17 @@ export default function SelectTeamsPage() {
 
     const selectedTeamsData = teams.filter((team) => selectedTeams.includes(team._id))
 
-    await dispatch(
+    const selectedTeamWithPlayers = await dispatch(
       fetchTeamPlayers({
         teamAId: selectedTeamsData[0]._id,
         teamBId: selectedTeamsData[1]._id,
       }),
     )
+
+    const eachTeamPlayers = [selectedTeamWithPlayers.payload.teamA, selectedTeamWithPlayers.payload.teamB]
+    const hasAnyTeamOnePlayer = eachTeamPlayers.some((t) => t.players.length === 1)
+
+    if (hasAnyTeamOnePlayer) dispatch(toggleLastPlayerPlayed(true))
 
     router.push("/matchSetup")
   }
