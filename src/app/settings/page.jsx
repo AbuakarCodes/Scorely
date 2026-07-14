@@ -65,7 +65,7 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center gap-1.5 bg-primary/5 rounded-lg p-1">
                 <button
-                  onClick={() => dispatch(changeTotaltOvers(TotalOvers))}
+                  onClick={() => dispatch(changeTotaltOvers(TotalOvers-1))}
                   // disabled={TotalOvers <= 1}
                   className="w-8 h-8 flex items-center justify-center rounded-md bg-white dark:bg-slate-800 shadow-sm text-primary font-bold text-base hover:bg-primary/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >−</button>

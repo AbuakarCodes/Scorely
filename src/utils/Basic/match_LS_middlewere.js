@@ -1,4 +1,4 @@
-export const persistMatchMiddleware =
+export const persisAppMiddleware =
    store => next => action => {
       next(action);
       const state = store.getState();

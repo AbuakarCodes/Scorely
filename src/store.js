@@ -3,7 +3,7 @@ import settingsSclice from "./utils/reduxSclices/settingsSclice"
 import playerReducer from "./utils/reduxSclices/playerSlice"
 import teamReducer from "./utils/reduxSclices/teamSlice"
 import matchSlice from "./utils/reduxSclices/matchSlice"
-import { persistMatchMiddleware } from "./utils/Basic/match_LS_middlewere"
+import { persisAppMiddleware } from "./utils/Basic/match_LS_middlewere"
 export const store = configureStore({
   reducer: {
     settings: settingsSclice,
@@ -12,5 +12,5 @@ export const store = configureStore({
      match:matchSlice
   },
    middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(persistMatchMiddleware),
+        getDefaultMiddleware().concat(persisAppMiddleware),
 })

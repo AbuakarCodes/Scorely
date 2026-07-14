@@ -6,7 +6,7 @@ const defaultState = {
     lastPlayerPlayed: false
 }
 
-const initialState = loadSettingsState() || defaultState 
+const initialState = loadSettingsState() || defaultState
 
 export const settingSlice = createSlice({
     name: 'settings',

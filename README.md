@@ -433,7 +433,7 @@ The match state is automatically saved after every successful Redux action.
 Middleware:
 
 ```js
-persistMatchMiddleware
+persisAppMiddleware
 ```
 
 Flow:
