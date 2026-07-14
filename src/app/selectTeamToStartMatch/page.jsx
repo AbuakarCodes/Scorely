@@ -94,7 +94,7 @@ export default function SelectTeamsPage() {
               <Button
                 className={"text-black "}
                 onClick={() => {
-                  router.back()
+                  router.push("/")
                 }}
               >
                 <ArrowLeft className="size-5" />

@@ -203,7 +203,7 @@ function Header({ router }) {
         <Button size="icon" variant="ghost" className="rounded-full">
           <Button
             onClick={() => {
-              router.back()
+              router.push("/selectTeamToStartMatch")
             }}
           >
             <ArrowLeft className="size-5" />
