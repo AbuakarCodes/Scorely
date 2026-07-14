@@ -88,7 +88,7 @@ export default function Home() {
 }
 
 function BottomNavigation({ sratMatch_handler }) {
-  return <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-background-dark/95 backdrop-blur-lg border-t px-6 py-3 flex items-center justify-between">
+  return <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-primary backdrop-blur-lg border-t px-6 py-3 flex items-center justify-between">
 
     <a className="flex flex-col items-center text-primary">
       <span className="material-symbols-outlined">home</span>

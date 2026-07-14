@@ -171,8 +171,8 @@ function Teams({ teams }) {
             </div>
 
             <div className="space-y-3 p-3">
-              <p className="text-xs font-medium text-primary">
-                {team?.players?.length || "N/A"} Players Selected
+              <p className="text-xs font-medium text-primary dark:text-white">
+                {team?.players?.length || ""} Players Selected
               </p>
             </div>
           </Card>

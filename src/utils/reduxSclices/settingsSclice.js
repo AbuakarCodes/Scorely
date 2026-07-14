@@ -19,15 +19,12 @@ export const settingSlice = createSlice({
             }
         },
 
-        // changeWicketsPerSide: (state, action) => {
-        //     if (action.payload <= 11) {
-        //         state.wicketsPerSide = action.payload
-        //     }
-        // },
+
 
         toggleLastPlayerPlayed: (state, action) => {
-            const value = action.payload || {}
-            if (typeof value != "boolean") return
+            const value = action.payload
+            console.log(value);
+            // if (typeof value != "boolean") return
             state.lastPlayerPlayed = value
         },
     },

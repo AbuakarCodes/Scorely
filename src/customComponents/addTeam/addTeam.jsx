@@ -19,7 +19,7 @@ export function AddTeams() {
   }, [])
 
   return (
-    <section className="mt-6">
+    <section className="mt-6 ">
       <div className="px-4 flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold">My Teams</h3>
 
@@ -28,12 +28,12 @@ export function AddTeams() {
         </Link>
       </div>
 
-      <div className="px-4 flex gap-x-4">
+      <div className="px-4 flex  gap-x-4">
         {/* Add Team Card */}
         <AddCard href="/RegisterTeam" text={"Add Team"} />
 
         {/* Teams List */}
-        <div className="w-full flex overflow-x-auto no-scrollbar gap-x-2">
+        <div className="w-full  flex overflow-x-auto no-scrollbar gap-x-1">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="shrink-0">
@@ -41,7 +41,7 @@ export function AddTeams() {
                 </div>
               ))
             : teams.map((team) => (
-                <div key={team._id} className="shrink-0">
+                <div key={team._id} className="shrink-0 border">
                   <TeamCard
                     name={team?.name || "###"}
                     avatar={team.avatar || defaultImage}
