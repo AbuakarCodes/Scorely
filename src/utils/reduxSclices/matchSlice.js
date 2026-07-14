@@ -825,7 +825,7 @@ function Update_UI_afterInnings({ innings, TotalOvers }) {
     score.over = 0;
     score.ballsInOver = 0;
     score.CRR = 0;
-    state.innings.score.runsInOver = 0
+    score.runsInOver = 0
 
     score.RRR = calculateRRR({
         target,
