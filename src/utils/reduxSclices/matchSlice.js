@@ -145,10 +145,6 @@ const defaultState = {
 // INITIAL STATE
 const initialState = loadMatchState() || defaultState
 
-
-
-
-
 // SLICE
 
 const matchSlice = createSlice({

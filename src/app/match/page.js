@@ -45,7 +45,7 @@ export default function LiveScoringPage() {
   const [selectedExtra, setSelectedExtra] = useState(null)
 
   useLayoutEffect(() => {
-    const NumberOfBatters = getTeam({ teams, tossWinner, tossDecision, isFirstInings }, "bat").players.length
+    const NumberOfBatters = getTeam({ teams, tossWinner, tossDecision, isFirstInings }, "bat")?.players?.length
     dispatch(update_pendingPlayersFlag({ NumberOfBatters }))
   }, [])
 

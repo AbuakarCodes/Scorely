@@ -3,6 +3,10 @@ export const persistMatchMiddleware =
       next(action);
       const state = store.getState();
 
+      if (action.type.startsWith("settings/")) {
+         localStorage.setItem("settings", JSON.stringify(state?.settings));
+      }
+
       if (action.type === "match/resetMatch") {
          localStorage.removeItem("match");
          return;

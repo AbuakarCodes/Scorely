@@ -1,11 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const initialState = {
+const defaultState = {
     darkMode: false,
     TotalOvers: 15,
-    wicketsPerSide: 11,
     lastPlayerPlayed: false
 }
+
+const initialState = loadSettingsState() || defaultState 
+
 export const settingSlice = createSlice({
     name: 'settings',
     initialState,
@@ -17,11 +19,11 @@ export const settingSlice = createSlice({
             }
         },
 
-        changeWicketsPerSide: (state, action) => {
-            if (action.payload <= 11) {
-                state.wicketsPerSide = action.payload
-            }
-        },
+        // changeWicketsPerSide: (state, action) => {
+        //     if (action.payload <= 11) {
+        //         state.wicketsPerSide = action.payload
+        //     }
+        // },
 
         toggleLastPlayerPlayed: (state, action) => {
             const value = action.payload || {}
@@ -35,3 +37,12 @@ export const settingSlice = createSlice({
 export const { changeTotaltOvers, toggleLastPlayerPlayed } = settingSlice.actions
 
 export default settingSlice.reducer
+
+function loadSettingsState() {
+    try {
+        const data = localStorage.getItem("settings");
+        return data ? JSON.parse(data) : undefined;
+    } catch {
+        return undefined;
+    }
+};
