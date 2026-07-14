@@ -21,6 +21,7 @@ export default function SelectTeamsPage() {
   const router = useRouter()
   const { teams, loading, error } = useSelector((state) => state.teams)
   const { playersError, playersLoading } = useSelector((state) => state.match.Loading)
+  const { lastPlayerPlayed } = useSelector((state) => state?.settings || {})
 
   useEffect(() => {
     if (teams.length === 0) dispatch(fetchTeams())
@@ -83,7 +84,9 @@ export default function SelectTeamsPage() {
     const eachTeamPlayers = [selectedTeamWithPlayers.payload.teamA, selectedTeamWithPlayers.payload.teamB]
     const hasAnyTeamOnePlayer = eachTeamPlayers.some((t) => t.players.length === 1)
 
-    if (hasAnyTeamOnePlayer) dispatch(toggleLastPlayerPlayed(true))
+    if (hasAnyTeamOnePlayer) {
+      if (!lastPlayerPlayed) dispatch(toggleLastPlayerPlayed(true))
+    }
 
     router.push("/matchSetup")
   }
