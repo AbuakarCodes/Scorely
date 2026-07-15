@@ -23,7 +23,7 @@ import {
 } from "@/utils/reduxSclices/matchSlice"
 import { extraButtons, runButtons } from "./utils/constants"
 import MatchDecisionPopUP from "./utils/matchDecisionPopUP"
-import RecentBalls, { BowlerCard, Header } from "./components/components"
+import RecentBalls, { BatsmenCard, BattingCard, BowlerCard, Header } from "./components/components"
 import { match_snapShot, removePrevBall_snapshot } from "./utils/snapShot"
 export default function LiveScoringPage() {
   const dispatch = useDispatch()
@@ -125,93 +125,16 @@ export default function LiveScoringPage() {
       <div className="min-h-screen bg-slate-50 pb-52">
         <Header />
 
-        {/* MAIN */}
 
         <main className="mx-auto max-w-4xl px-4 py-5 space-y-4">
           <RecentBalls balls={balls} runsInOver={runsInOver} over={over} />
 
-          {/* BATSMEN */}
-          {[batsmenA, batsmenB].map((player) => {
-            const stats = calBattingFiguers(player?.id, balls)
-            return (
-              <>
-                <section
-                  className={`overflow-hidden rounded-xl border bg-white shadow-sm ${player?.isStriker ? "border-primary shadow-2xl" : ""}`}
-                >
-                  <div className="bg-slate-50 px-4 py-2 text-[10px] uppercase tracking-wider font-bold text-slate-500 flex">
-                    <span className="flex-1">{player?.isStriker ? "Striker" : "Non striker"}</span>
-                    <span className="w-12 text-center">R</span>
-                    <span className="w-12 text-center">B</span>
-                    <span className="w-12 text-center">4</span>
-                    <span className="w-12 text-center">6</span>
-                    <span className="w-16 text-right">SR</span>
-                  </div>
-
-                  <div
-                    key={`${player?.id}`}
-                    className={`flex items-center px-4 py-4 border-t
-    ${player?.isStriker ? "bg-primary/10" : "bg-white"}`}
-                  >
-                    <div className="flex flex-1 items-center gap-3">
-                      <span className={`font-bold ${player?.isStriker ? "text-primary" : "text-slate-700"}`}>
-                        {player?.name}
-                      </span>
-                    </div>
-
-                    <span className="w-12 text-center font-black">{stats?.runs || 0}</span>
-                    <span className="w-12 text-center text-sm text-slate-500">{stats?.ballsPlayed || 0}</span>
-                    <span className="w-12 text-center text-sm text-slate-500">{stats?.fours || 0}</span>
-                    <span className="w-12 text-center text-sm text-slate-500">{stats?.sixes || 0}</span>
-                    <span className="w-16 text-right text-sm font-bold">{stats?.strikeRate || 0}</span>
-                  </div>
-                </section>
-              </>
-            )
-          })}
-
-          {/* BOWLER */}
-          {/* {[currentBowler].map((bowler) => {
-            const BowlingFiguers = calBowlingFiguers(bowler?.id, balls)
-            return (
-              <>
-                <section className="overflow-hidden rounded-xl border bg-white shadow-sm">
-                  <div className="bg-slate-50 px-4 py-2 text-[10px] uppercase tracking-wider font-bold text-slate-500 flex">
-                    <span className="flex-1">Bowler</span>
-                    <span className="w-12 text-center">O</span>
-                    <span className="w-12 text-center">M</span>
-                    <span className="w-12 text-center">R</span>
-                    <span className="w-12 text-center">W</span>
-                    <span className="w-16 text-right">Econ</span>
-                  </div>
-
-                  <div className="flex items-center px-4 py-4">
-                    <div className="flex-1">
-                      <h3 className="font-bold">{currentBowler?.name}</h3>
-
-                      <p className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">
-                        Fast • Over the wicket
-                      </p>
-                    </div>
-
-                    <span className="w-12 text-center font-bold">{BowlingFiguers?.overs || 0}</span>
-
-                    <span className="w-12 text-center">{0}</span>
-
-                    <span className="w-12 text-center">{BowlingFiguers?.runs || 0}</span>
-
-                    <span className="w-12 text-center font-black text-red-500">
-                      {BowlingFiguers?.wickets || 0}
-                    </span>
-
-                    <span className="w-16 text-right font-bold text-primary">
-                      {BowlingFiguers?.economy || 0}
-                    </span>
-                  </div>
-                </section>
-              </>
-            )
-          })} */}
-
+          <BatsmenCard
+            batsmenA={batsmenA}
+            batsmenB={batsmenB}
+            balls={balls}
+            calBattingFiguers={calBattingFiguers}
+          />
 
           <BowlerCard
             currentBowler={currentBowler}

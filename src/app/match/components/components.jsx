@@ -293,3 +293,97 @@ export function BowlerCard({ currentBowler, balls, calBowlingFiguers }) {
     </>
   )
 }
+
+export function BatsmenCard({ batsmenA, batsmenB, balls, calBattingFiguers }) {
+  const players = [batsmenA, batsmenB]
+
+  return (
+    <section className="mt-4">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-card">
+        {/* Header */}
+        <div className="border-b border-slate-100 bg-slate-50 px-4 py-2 dark:border-slate-800 dark:bg-slate-800/50">
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            Batting
+          </span>
+        </div>
+
+        {players.map((player, index) => {
+          const stats = calBattingFiguers(player?.id, balls)
+          if (player?.id === "") return
+
+          return (
+            <div
+              key={player?.id}
+              className={`p-4 ${index === 0 ? "border-b border-slate-100 dark:border-slate-800" : ""} ${
+                player?.isStriker ? "bg-emerald-50/50 dark:bg-emerald-950/20" : ""
+              }`}
+            >
+              {/* Name */}
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`font-black ${
+                      player?.isStriker
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-slate-800 dark:text-slate-200"
+                    }`}
+                  >
+                    {player?.name}
+                  </span>
+
+                  {player?.isStriker && (
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">*</span>
+                  )}
+                </div>
+
+                {player?.isStriker && (
+                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold uppercase tracking-tight text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
+                    Striker
+                  </span>
+                )}
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-5 text-center">
+                <div>
+                  <p className="text-[9px] font-bold uppercase text-slate-400">R</p>
+                  <p className={`${player?.isStriker ? "text-lg font-black" : "font-bold"}`}>
+                    {stats?.runs || 0}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[9px] font-bold uppercase text-slate-400">B</p>
+                  <p className="font-medium text-slate-500">{stats?.ballsPlayed || 0}</p>
+                </div>
+
+                <div>
+                  <p className="text-[9px] font-bold uppercase text-slate-400">4s</p>
+                  <p className="font-medium text-slate-500">{stats?.fours || 0}</p>
+                </div>
+
+                <div>
+                  <p className="text-[9px] font-bold uppercase text-slate-400">6s</p>
+                  <p className="font-medium text-slate-500">{stats?.sixes || 0}</p>
+                </div>
+
+                <div>
+                  <p className="text-[9px] font-bold uppercase  text-emerald-600 ">SR</p>
+                  <p
+                    className={`${
+                      player?.isStriker
+                        ? "font-black  text-emerald-600 dark:text-slate-200"
+                        : "font-bold text-slate-700 dark:text-slate-300"
+                    }`}
+                  >
+                    {stats?.strikeRate || 0}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
