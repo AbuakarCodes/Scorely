@@ -23,7 +23,7 @@ import {
 } from "@/utils/reduxSclices/matchSlice"
 import { extraButtons, runButtons } from "./utils/constants"
 import MatchDecisionPopUP from "./utils/matchDecisionPopUP"
-import RecentBalls, { Header } from "./components/components"
+import RecentBalls, { BowlerCard, Header } from "./components/components"
 import { match_snapShot, removePrevBall_snapshot } from "./utils/snapShot"
 export default function LiveScoringPage() {
   const dispatch = useDispatch()
@@ -123,7 +123,7 @@ export default function LiveScoringPage() {
       {showPopup.playerSelection && <PlayerSelectionModal />}
 
       <div className="min-h-screen bg-slate-50 pb-52">
-        <Header/>
+        <Header />
 
         {/* MAIN */}
 
@@ -170,7 +170,7 @@ export default function LiveScoringPage() {
           })}
 
           {/* BOWLER */}
-          {[currentBowler].map((bowler) => {
+          {/* {[currentBowler].map((bowler) => {
             const BowlingFiguers = calBowlingFiguers(bowler?.id, balls)
             return (
               <>
@@ -210,7 +210,15 @@ export default function LiveScoringPage() {
                 </section>
               </>
             )
-          })}
+          })} */}
+
+
+          <BowlerCard
+            currentBowler={currentBowler}
+            balls={balls}
+            calBowlingFiguers={calBowlingFiguers}
+          />
+
         </main>
 
         {/* SCORING PANEL */}
