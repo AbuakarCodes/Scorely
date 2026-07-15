@@ -30,13 +30,13 @@ export default function LiveScoringPage() {
 
   const matchState = useSelector((state) => state.match)
 
-  const { teams, tossWinner, tossDecision } = useSelector((state) => state?.match?.match||{})
+  const { teams, tossWinner, tossDecision } = useSelector((state) => state?.match?.match || {})
   const { teamA, teamB } = teams
 
   const { batsmen, bowler, innings, id } = useSelector((state) => state?.match || {})
   const { matchWinner } = useSelector((state) => state?.match?.match || {})
   const { batsmenA, batsmenB } = batsmen
-  const { runs, wickets, over, ballsInOver, CRR, RRR, runsLeft,target, runsInOver } = innings?.score || {}
+  const { runs, wickets, over, ballsInOver, CRR, RRR, runsLeft, target, runsInOver } = innings?.score || {}
   const { pendingNewBowler, pendingNewBatsman, balls, isFirstInings } = innings
   const { currentBowler } = bowler
 
@@ -123,19 +123,7 @@ export default function LiveScoringPage() {
       {showPopup.playerSelection && <PlayerSelectionModal />}
 
       <div className="min-h-screen bg-slate-50 pb-52">
-        <Header
-          teamA={teamA}
-          teamB={teamB}
-          innings={innings}
-          target={target}
-          CRR={CRR}
-          RRR={RRR}
-          RL={runsLeft}
-          runs={runs}
-          wickets={wickets}
-          over={over}
-          ballsInOver={ballsInOver}
-        />
+        <Header/>
 
         {/* MAIN */}
 

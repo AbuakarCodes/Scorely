@@ -186,10 +186,10 @@ export default function SelectParticipantsModal() {
             )}
             {filtered.map((player) => (
               <PlayerCard
-                key={player._id}
+                key={player?._id}
                 player={player}
                 isBowler={isBowlerTab}
-                isSelected={playerSelections[activeTab]?.id === player._id}
+                isSelected={playerSelections[activeTab]?.id === player?._id}
                 onClick={() => handleSelect(player)}
               />
             ))}
@@ -307,7 +307,7 @@ function PlayerCard({ player, isSelected, onClick, isBowler }) {
     const value = initials.split("")[0]
 
     return (
-      <div className="bg-white dark:bg-[#1c2126] dark:text-white w-14 h-14 rounded-full flex items-center justify-center text-gray-950 dark:text-white font-bold text-lg select-none">
+      <div className="bg-white dark:bg-[#1c2126] w-14 h-14 rounded-full flex items-center justify-center text-gray-950 dark:text-white font-bold text-lg select-none">
         {img ? <img className="bg-contain" src={img}></img> : value}
       </div>
     )
@@ -325,7 +325,7 @@ function PlayerCard({ player, isSelected, onClick, isBowler }) {
     >
       {/* Avatar */}
       <div
-        className={`relative w-14 h-14 rounded-full overflow-hidden border-2 transition-colors 
+        className={`relative  rounded-full overflow-hidden border-2 transition-colors 
         ${isSelected ? "border-chart-4 dark:border-emerald-400" : "border-gray-200 dark:border-white/10 group-hover:border-chart-4 dark:group-hover:border-emerald-400"}`}
       >
         <Avatar initials={player?.name} img={player?.avatar} />
