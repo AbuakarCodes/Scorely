@@ -1,5 +1,6 @@
 import axios from "axios";
 import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit";
+import { BatsmenCard } from "@/app/match/components/components";
 
 
 
@@ -254,7 +255,7 @@ const matchSlice = createSlice({
             const isWicket = ballObject?.isWicket
             const isOverEnd = ballObject?.isLegalDelivery ? ballObject.ballInOver === 5 : false
             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
-            const arePlayersLeft = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
+            const arePlayersLeft = numberOfPlayersCanComeToCrease({ team, tossDecision, tossWinner, isFirstInings, ballObject })
             if (isWicket && arePlayersLeft != 0) state.innings.pendingNewBatsman = { ...state.innings.pendingNewBatsman, striker: true }
             if (isOverEnd && !oversCompleted) state.innings.pendingNewBowler = true
 
@@ -268,7 +269,7 @@ const matchSlice = createSlice({
             const tossWinner = state?.match?.tossWinner
             const isFirstInings = state?.innings?.isFirstInings
             const isWicket = ballObject?.isWicket
-            const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
+            const canContinueBat = numberOfPlayersCanComeToCrease({ team, tossDecision, tossWinner, isFirstInings, ballObject })
             const { strikerBatsman, nonStrikerBatsman } = findStrikertNonStriker(state?.batsmen)
 
             if (lastPlayerPlayed && canContinueBat === 0 && isWicket) {
@@ -300,7 +301,7 @@ const matchSlice = createSlice({
             if (ballInOver === 5 && isLegalDelivery) {
                 state.innings.score.over++
                 state.innings.score.ballsInOver = 0
-                UpdateRunsInOver({runs:0,state})
+                UpdateRunsInOver({ runs: 0, state })
             }
         },
 
@@ -349,31 +350,26 @@ const matchSlice = createSlice({
             const { over } = state?.innings?.score || {};
             const filterCurrentOverBalls = state?.innings?.balls?.filter(ball => ball.over === over)
             const runsInOver = filterCurrentOverBalls.reduce((total, ball) => total + ball.runs + ball.extraRuns, 0);
-            UpdateRunsInOver({runs:runsInOver, state});
+            UpdateRunsInOver({ runs: runsInOver, state });
         },
 
         Update_Strike(state, action) {
             if (!action.payload) return;
+            const { ballObject } = action.payload;
+            const batsmenA = state?.batsmen?.batsmenA
+            const batsmenB = state?.batsmen?.batsmenB
 
-            const team = state?.match?.teams || []
-            const tossDecision = state?.match?.tossDecision || ""
-            const tossWinner = state.match.tossWinner
-            const isFirstInings = state.innings.isFirstInings
-            const { ballObject, lastPlayerPlayed } = action.payload;
+            const bothBatsmenAtCrease = [batsmenA, batsmenB].every(B => B?.id)
+            if (!bothBatsmenAtCrease) return
 
-            const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
-
-            // when only one player is on crease then there will be no one to switch strike with
-            if (lastPlayerPlayed && canContinueBat === 0) return
-
-            const isLastBall = ballObject.isLegalDelivery && ballObject.ballInOver === 5;
-            const isOddRuns = ballObject.runs % 2 !== 0;
+            const isLastBall = ballObject?.isLegalDelivery && ballObject?.ballInOver === 5;
+            const isOddRuns = ballObject?.runs % 2 !== 0;
 
             if (
                 (isOddRuns && !isLastBall) ||
                 (!isOddRuns && isLastBall)
             ) {
-                swapStriker(state.batsmen)
+                swapStriker(state?.batsmen || {})
             }
 
         },
@@ -384,9 +380,9 @@ const matchSlice = createSlice({
             const ballObject = action.payload;
             if (!ballObject.isWicket) return;
             const striker = [
-                ...state.match.teams.teamA.players,
-                ...state.match.teams.teamB.players,
-            ].find(p => p._id === ballObject.strikerId);
+                ...state?.match?.teams?.teamA?.players,
+                ...state?.match?.teams?.teamB?.players,
+            ]?.find(p => p?._id === ballObject?.strikerId);
             if (!striker) return;
             striker.isDismissed = true;
         },
@@ -395,9 +391,9 @@ const matchSlice = createSlice({
             if (!action.payload) return;
             const id = action.payload;
             const selectedPlayer = [
-                ...state.match.teams.teamA.players,
-                ...state.match.teams.teamB.players,
-            ].find(p => p._id === id);
+                ...state?.match?.teams?.teamA?.players,
+                ...state?.match?.teams?.teamB?.players,
+            ].find(p => p?._id === id);
             if (!selectedPlayer) return;
             striker.isSelected = true;
         },
@@ -426,7 +422,7 @@ const matchSlice = createSlice({
             const isWicket = ballObject.isWicket
 
             const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
-            const canContinueBat = numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject })
+            const canContinueBat = numberOfPlayersCanComeToCrease({ team, tossDecision, tossWinner, isFirstInings, ballObject })
 
 
             // Innings ends because allotted overs are completed
@@ -749,7 +745,7 @@ function hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver }) {
 
 }
 
-function numberOfPlayersCanBat({ team, tossDecision, tossWinner, isFirstInings, ballObject }) {
+function numberOfPlayersCanComeToCrease({ team, tossDecision, tossWinner, isFirstInings, ballObject }) {
     const { battingTeam } = batting_bowlingTeam({ team, tossDecision, tossWinner, isFirstInings })
     const remaningPlayers = battingTeam?.players?.filter(p => !p?.isDismissed && p?._id !== ballObject?.strikerId && p?._id !== ballObject?.nonStrikerId).length
     return remaningPlayers
@@ -842,7 +838,7 @@ function getDismissedBattersCount(players) {
     return players.filter(player => player.isDismissed).length;
 }
 
-function UpdateRunsInOver({runs,state}) {
+function UpdateRunsInOver({ runs, state }) {
     if (isNaN(runs)) return
     state.innings.score.runsInOver = runs
 }
