@@ -61,6 +61,7 @@ export function Header() {
   const { teams, tossWinner, tossDecision } = useSelector((state) => state?.match?.match || {})
   const { teamA, teamB } = teams
   const { runs, wickets, over, ballsInOver, runsLeft, CRR, RRR, target } = innings?.score || {}
+  const { TotalOvers } = useSelector((state) => state?.settings || {})
 
   const isFirstInnings = innings?.isFirstInings === true || innings?.isFirstInings === null
 
@@ -170,7 +171,7 @@ export function Header() {
                   Innings
                 </>
               ) : (
-                `Need ${Math.max(target - runs, 0)} off ${Math.max((20 - over) * 6 - ballsInOver, 0)}`
+                `Need ${Math.max(target - runs, 0)} off ${TotalOvers * 6}`
               )}
             </p>
           </div>
@@ -207,8 +208,8 @@ export function Header() {
           </div>
 
           <div className="text-center">
-            <p className="text-[9px] uppercase tracking-tighter opacity-60 font-bold mb-0.5">runsLeft</p>
-            <p className="text-sm font-black">{isFirstInnings ? 0 : runsLeft > 0 ? runsLeft : 0}</p>
+            <p className="text-[9px] uppercase tracking-tighter opacity-60 font-bold mb-0.5">Overs</p>
+            <p className="text-sm font-black">{TotalOvers || 0}</p>
           </div>
         </div>
       </div>

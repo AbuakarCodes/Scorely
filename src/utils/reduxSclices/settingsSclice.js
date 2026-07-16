@@ -23,8 +23,7 @@ export const settingSlice = createSlice({
 
         toggleLastPlayerPlayed: (state, action) => {
             const value = action.payload
-            console.log(value);
-            // if (typeof value != "boolean") return
+            if (typeof value != "boolean") return
             state.lastPlayerPlayed = value
         },
     },
