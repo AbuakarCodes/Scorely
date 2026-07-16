@@ -31,12 +31,10 @@ export default function LiveScoringPage() {
   const matchState = useSelector((state) => state.match)
 
   const { teams, tossWinner, tossDecision } = useSelector((state) => state?.match?.match || {})
-  const { teamA, teamB } = teams
-
   const { batsmen, bowler, innings, id } = useSelector((state) => state?.match || {})
   const { matchWinner } = useSelector((state) => state?.match?.match || {})
   const { batsmenA, batsmenB } = batsmen
-  const { runs, wickets, over, ballsInOver, CRR, RRR, runsLeft, target, runsInOver } = innings?.score || {}
+  const { over, ballsInOver, runsInOver } = innings?.score || {}
   const { pendingNewBowler, pendingNewBatsman, balls, isFirstInings } = innings
   const { currentBowler } = bowler
 

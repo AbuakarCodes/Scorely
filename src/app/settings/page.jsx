@@ -22,6 +22,9 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
 
   const { darkMode, TotalOvers, lastPlayerPlayed } = useSelector((state) => state?.settings || {})
+  const { balls } = useSelector((state) => state?.match?.innings || {})
+
+  const isMatchContinue = balls?.length > 0
 
   useEffect(() => {
     document.body.classList.toggle("dark", darkMode)
@@ -76,16 +79,18 @@ export default function SettingsPage() {
                 <CircleDot className="w-5 h-5 text-primary shrink-0" strokeWidth={1.8} />
                 <p className="font-medium text-sm">Default Overs</p>
               </div>
+
               <div className="flex items-center gap-1.5 bg-primary/5 rounded-lg p-1">
                 <button
                   onClick={() => dispatch(changeTotaltOvers(TotalOvers - 1))}
-                  // disabled={TotalOvers <= 1}
+                  disabled={TotalOvers <= 1 || isMatchContinue}
                   className="w-8 h-8 flex bg-primary items-center justify-center rounded-md  shadow-sm text-white font-bold text-base hover:bg-primary/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   −
                 </button>
                 <input
                   type="number"
+                  disabled={isMatchContinue}
                   value={TotalOvers}
                   onChange={(e) => {
                     const p = parseInt(e.target.value, 10)
@@ -97,7 +102,7 @@ export default function SettingsPage() {
                 />
                 <button
                   onClick={() => dispatch(changeTotaltOvers(TotalOvers + 1))}
-                  // disabled={TotalOvers >= 50}
+                  disabled={isMatchContinue}
                   className="w-8 h-8 flex items-center justify-center rounded-md bg-primary text-white shadow-sm font-bold text-base hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   +
@@ -115,6 +120,8 @@ export default function SettingsPage() {
                 </div>
               </div>
               <Switch
+                className="disabled:opacity-50 data-[disabled]:bg-red-500"
+                disabled={isMatchContinue}
                 checked={lastPlayerPlayed}
                 onClick={() => dispatch(toggleLastPlayerPlayed(!lastPlayerPlayed))}
               />
