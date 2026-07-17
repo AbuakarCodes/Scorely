@@ -71,7 +71,6 @@ export default function SelectTeamsPage() {
     if (has_matchIn_LS) {
       dispatch(resetMatch())
       dispatch(startInnings_fn())
-      dispatch(setMatch_id(crypto.randomUUID()))
     }
 
     const selectedTeamsData = teams.filter((team) => selectedTeams.includes(team._id))

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const BallSchema = new mongoose.Schema(
   {
@@ -34,6 +34,15 @@ const BallSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    bowlingTeamId: {
+      type: String,
+      required: true,
+    },
+
+    battingTeamId: {
+      type: String,
+      required: true,
+    },
 
     nonStrikerId: {
       type: String,
@@ -44,8 +53,6 @@ const BallSchema = new mongoose.Schema(
       required: true,
     },
 
-
-
     // SCORING CORE
     runs: {
       type: Number,
@@ -55,13 +62,7 @@ const BallSchema = new mongoose.Schema(
 
     extraType: {
       type: String,
-      enum: [
-        null,
-        "wide",
-        "noball",
-        "Bye",
-        "Legbye",
-      ],
+      enum: [null, "wide", "noball", "Bye", "Legbye"],
       default: null,
     },
 
@@ -70,19 +71,15 @@ const BallSchema = new mongoose.Schema(
       default: 0,
     },
 
-
     isWicket: {
-      type: Boolean
+      type: Boolean,
     },
+  },
+  { timestamps: true },
+)
 
+BallSchema.index({ matchId: 1, inningsNumber: 1 })
+BallSchema.index({ strikerId: 1 })
+BallSchema.index({ bowlerId: 1 })
 
-  }, { timestamps: true },
-
-
-);
-
-BallSchema.index({ matchId: 1, inningsNumber: 1 });
-BallSchema.index({ strikerId: 1 });
-BallSchema.index({ bowlerId: 1 });
-
-export default mongoose.model("Ball", BallSchema);
+export default mongoose.models.Ball || mongoose.model("Ball", BallSchema)

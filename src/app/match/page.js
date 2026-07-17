@@ -25,13 +25,14 @@ import { extraButtons, runButtons } from "./utils/constants"
 import MatchDecisionPopUP from "./utils/matchDecisionPopUP"
 import RecentBalls, { BatsmenCard, BattingCard, BowlerCard, Header } from "./components/components"
 import { match_snapShot, removePrevBall_snapshot } from "./utils/snapShot"
+import axios from "axios"
 export default function LiveScoringPage() {
   const dispatch = useDispatch()
 
-  const matchState = useSelector((state) => state.match)
+  const matchState = useSelector((state) => state?.match)
 
   const { teams, tossWinner, tossDecision } = useSelector((state) => state?.match?.match || {})
-  const { batsmen, bowler, innings, id } = useSelector((state) => state?.match || {})
+  const { batsmen, bowler, innings } = useSelector((state) => state?.match || {})
   const { matchWinner } = useSelector((state) => state?.match?.match || {})
   const { batsmenA, batsmenB } = batsmen
   const { over, ballsInOver, runsInOver } = innings?.score || {}
@@ -43,7 +44,8 @@ export default function LiveScoringPage() {
   const [selectedExtra, setSelectedExtra] = useState(null)
 
   useLayoutEffect(() => {
-    const NumberOfBatters = getTeam({ teams, tossWinner, tossDecision, isFirstInings }, "bat")?.players?.length
+    const NumberOfBatters = getTeam({ teams, tossWinner, tossDecision, isFirstInings }, "bat")?.players
+      ?.length
     dispatch(update_pendingPlayersFlag({ NumberOfBatters }))
   }, [])
 
@@ -57,16 +59,14 @@ export default function LiveScoringPage() {
   useEffect(() => {
     if (matchWinner.id) {
       setshowPopup((prev) => ({ ...prev, matchDecision: true }))
+      saveMatch({matchState, TotalOvers})
     }
   }, [matchWinner])
-
-
 
   const addBall = ({ runs = 0, type = "normal", extraType = null }) => {
     match_snapShot({ matchState })
 
     const ballObject = {
-      matchId: id,
       ballId: crypto.randomUUID(),
       battingTeam: getTeam({ teams, tossWinner, tossDecision, isFirstInings }, "bat"),
       bowlingTeam: getTeam({ teams, tossWinner, tossDecision, isFirstInings }, "bowl"),
@@ -102,7 +102,6 @@ export default function LiveScoringPage() {
     dispatch(match_Decision({ TotalOvers, ballObject, lastPlayerPlayed }))
 
     setSelectedExtra(null)
-
   }
 
   function unDo_handler() {
@@ -123,7 +122,6 @@ export default function LiveScoringPage() {
       <div className="min-h-screen bg-slate-50 pb-52">
         <Header />
 
-
         <main className="mx-auto max-w-4xl px-4 py-5 space-y-4">
           <RecentBalls balls={balls} runsInOver={runsInOver} over={over} />
 
@@ -134,12 +132,7 @@ export default function LiveScoringPage() {
             calBattingFiguers={calBattingFiguers}
           />
 
-          <BowlerCard
-            currentBowler={currentBowler}
-            balls={balls}
-            calBowlingFiguers={calBowlingFiguers}
-          />
-
+          <BowlerCard currentBowler={currentBowler} balls={balls} calBowlingFiguers={calBowlingFiguers} />
         </main>
 
         {/* SCORING PANEL */}
@@ -171,7 +164,9 @@ export default function LiveScoringPage() {
             ))}
 
             <button
-              onClick={(e) => { unDo_handler(e) }}
+              onClick={(e) => {
+                unDo_handler(e)
+              }}
               disabled={matchWinner?.id}
               className="flex h-12 disabled:opacity-50 items-center justify-center rounded-xl bg-primary text-white"
             >
@@ -214,8 +209,6 @@ export default function LiveScoringPage() {
               </button>
             </div>
           )}
-
-
         </div>
       </div>
     </>
@@ -323,11 +316,21 @@ function getTeam({ teams, tossWinner, tossDecision, isFirstInings }, forceRole) 
   return {
     id: selectedTeam?.id,
     name: selectedTeam?.name,
-    players: selectedTeam?.players || []
+    players: selectedTeam?.players || [],
   }
 }
 
 function getPrevBallMatchState() {
   const PrevBallMatchState = JSON.parse(localStorage.getItem("snapShot"))
   return PrevBallMatchState[PrevBallMatchState.length - 1]
+}
+
+export const saveMatch = async ({ matchState, TotalOvers }) => {
+  const mutateMatchState = { ...matchState, match: { ...matchState.match, TotalOvers:Number(TotalOvers) } }
+  try {
+    const response = await axios.post("/api/match/postBalls", mutateMatchState, { withCredentials: true })
+    return response.data
+  } catch (error) {
+    console.error("Save Match Error:", error)
+  }
 }

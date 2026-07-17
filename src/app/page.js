@@ -11,7 +11,7 @@ import { AddPlayers } from "@/customComponents/addPlayer/AddPlayers"
 import { AddTeams } from "@/customComponents/addTeam/addTeam"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import { useDispatch, useSelector } from "react-redux"
-import { startInnings_fn, setMatch_id } from "@/utils/reduxSclices/matchSlice"
+import { startInnings_fn } from "@/utils/reduxSclices/matchSlice"
 import { X, History, Plus, ChevronRight, Settings } from "lucide-react";
 import {
   Dialog,
@@ -59,7 +59,6 @@ export default function Home() {
       }));
     } else {
       dispatch(startInnings_fn())
-      dispatch(setMatch_id(crypto.randomUUID()))
       router.push("/selectTeamToStartMatch")
     }
 
