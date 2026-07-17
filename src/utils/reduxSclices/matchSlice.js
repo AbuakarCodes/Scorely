@@ -1,22 +1,6 @@
 import axios from "axios";
 import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit";
-import { BatsmenCard } from "@/app/match/components/components";
 
-
-
-export const fetchTeamPlayers_off = createAsyncThunk(
-    "match/fetchTeamPlayers",
-    async (teamId, { rejectWithValue }) => {
-        try {
-            const { data } = await axios.get(`/api/teams/${teamId}/players`);
-            return data;
-        } catch (err) {
-            return rejectWithValue(
-                err.response?.data?.message || "Failed to fetch team players"
-            );
-        }
-    }
-);
 
 export const fetchTeamPlayers = createAsyncThunk(
     "match/fetchTeamPlayers",

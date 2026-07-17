@@ -31,7 +31,9 @@ export default function SelectTeamsPage() {
   const [selectedTeams, setSelectedTeams] = useState([])
 
   const filteredTeams = useMemo(() => {
-    return teams.filter((team) => team.name?.toLowerCase().includes(search.toLowerCase()))
+    return teams.filter((team) =>
+      team.name?.toLowerCase().includes(search.toLowerCase() ),
+    )
   }, [teams, search])
 
   const toggleTeam = (teamId) => {
@@ -165,8 +167,8 @@ export default function SelectTeamsPage() {
               </Card>
             ) : (
               filteredTeams.map((team) => {
-                const isSelected = selectedTeams.includes(team._id)
-
+                const isSelected = selectedTeams.includes(team?._id)
+                if (team?.playersCount === 0) return
                 return (
                   <Card
                     key={team._id}

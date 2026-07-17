@@ -22,32 +22,31 @@ export async function GET(req) {
       )
     }
 
-    const userId = token.id
+    const userId = token?.id
 
     // 1. Fetch data
     const teams = await Team.find({ userId }).lean()
-    const players = await Player.find({ userId }).lean()
+    const players = (await Player.find({ userId }).lean()).filter(P => !P?.isDeleted)
 
     // 2. Build count object
     const countMap = {}
 
     players.forEach((player) => {
       if (!player.teamId) return
-
-      const teamId = player.teamId.toString()
-
+      const teamId = player?.teamId?.toString()
       countMap[teamId] = (countMap[teamId] || 0) + 1
     })
 
     // 3. Attach counts to teams
     const enrichedTeams = teams.map((team) => {
       const id = team._id.toString()
-
       return {
         ...team,
         playersCount: countMap[id] || 0,
       }
     })
+
+
 
     return NextResponse.json(
       new SuccessResponse("Teams fetched successfully", enrichedTeams),

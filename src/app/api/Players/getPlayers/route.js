@@ -20,9 +20,9 @@ export async function GET(req) {
       )
     }
 
-    const userId = token.id
+    const userId = token?.id
 
-    const players = await Player.find({ userId })
+    const players = (await Player?.find({ userId }))?.filter(P => !P?.isDeleted)
 
     return NextResponse.json(
       new SuccessResponse("Players fetched successfully", players),

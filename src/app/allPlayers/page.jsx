@@ -14,6 +14,7 @@ export default function PlayersBackground() {
   const dispatch = useDispatch()
   const { players, loading, error } = useSelector((state) => state.players)
 
+  // used that local state becuse we filtering the players
   const [localPlayers, setLocalPlayers] = useState([])
   const [activeFilter, setActiveFilter] = useState("All")
   const [searchTermInput, setSearchTermInput] = useState("")
@@ -28,7 +29,7 @@ export default function PlayersBackground() {
     setLocalPlayers(players)
   }, [players])
 
-  // console.log(players)
+
 
   // Filter + Search handler
   const applyFilters = (filter, search = searchTermInput) => {
@@ -90,6 +91,7 @@ export default function PlayersBackground() {
                   team={player?.currentTeam || "Un Caped"}
                   rank={null}
                   inSquad={Boolean(player.teamId)}
+                  playerId={player?._id}
                   onAction={() => console.log("view", player._id)}
                 />
               ))

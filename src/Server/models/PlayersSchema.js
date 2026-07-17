@@ -16,9 +16,7 @@ const playerSchema = new mongoose.Schema(
 
     jerseyNumber: {
       type: Number,
-      required: function () {
-        return !!this.teamId
-      }
+      required: true
     },
 
 
@@ -35,12 +33,14 @@ const playerSchema = new mongoose.Schema(
 
     inPlaying_XI: {
       type: Boolean,
-      default: false,
+      default: null,
     },
 
-    teamHistory: {
-      type: Array
+    isDeleted: {
+      type: Boolean,
+      default: null,
     },
+
     currentTeam: {
       type: String
     },

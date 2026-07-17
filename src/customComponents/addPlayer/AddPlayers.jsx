@@ -45,14 +45,14 @@ export function AddPlayers() {
                   >
                     <PlayerCard
                       variant="compact"
-                      name={player.name}
-                      role={player.role}
+                      name={player?.name}
+                      role={player?.role}
                       image={
-                        player.avatar ||
+                        player?.avatar ||
                         "https://res.cloudinary.com/dtrrzyutr/image/upload/fl_preserve_transparency/v1777660543/playres_default_profile_o205zq.jpg?_s=public-apps"
                       }
                       onAction={() => {
-                        console.log("add", player._id)
+                        console.log("add", player?._id)
                       }}
                     />
                   </Link>

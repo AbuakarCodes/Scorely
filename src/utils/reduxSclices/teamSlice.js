@@ -19,6 +19,25 @@ export const fetchTeams = createAsyncThunk(
     }
 )
 
+export const fetchTeamPlayers = createAsyncThunk(
+    "match/fetchTeamPlayers",
+    async ({ teamAId, teamBId }, { rejectWithValue }) => {
+        try {
+            const { data } = await axios.post("/api/Team/getPlayersInTeams", {
+                teamAId,
+                teamBId,
+            });
+            return inject_isDismissedInPlayers(data?.data);
+        } catch (err) {
+            console.error(err.message)
+            return rejectWithValue(
+                err.response?.data?.message || "Failed to fetch teams"
+            );
+        }
+    }
+);
+
+
 const initialState = {
     teams: [],
     loading: false,

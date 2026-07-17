@@ -10,7 +10,7 @@ export async function POST(req) {
     try {
         const token = await getToken({
             req,
-            secret: process.env.NEXTAUTH_SECRET,
+            secret: process.env?.NEXTAUTH_SECRET,
         });
 
         if (!token) {
@@ -30,20 +30,21 @@ export async function POST(req) {
         }
 
         // 1. fetch teams
-        const teams = await Team.find({
+        const teams = await Team?.find({
             _id: { $in: [teamAId, teamBId] },
         });
 
-        if (teams.length !== 2) {
+        if (teams?.length !== 2) {
             return Response.json(
                 new ErrorResponse("One or both teams not found"),
                 { status: 404 }
             );
         }
 
-        // 2. fetch players separately (THIS is your requirement)
-        const teamAPlayers = enrichPlayers(await Player.find({ teamId: teamAId }))
-        const teamBPlayers = enrichPlayers(await Player.find({ teamId: teamBId }))
+        // 2. fetch players separately 
+        // return  only those whor are in playing 11 and not deleted
+        const teamAPlayers = enrichPlayers(await Player.find({ teamId: teamAId }))?.filter(P => !P?.isDeleted)
+        const teamBPlayers = enrichPlayers(await Player.find({ teamId: teamBId }))?.filter(P => !P?.isDeleted)
 
         // 3. map teams
         const teamA = teams.find(t => t._id.toString() === teamAId);
@@ -79,8 +80,8 @@ function enrichPlayers(players) {
     if (!Array.isArray(players)) {
         return []
     }
-    // Mongoose returns document objects; toObject() converts t
-    // hem to plain JS objects and removes internal
+    // Mongoose returns document objects; toObject() converts 
+    // them to plain JS objects and removes internal
     //  fields like $__ and _doc
     return players.map(player => ({
         ...player.toObject(),

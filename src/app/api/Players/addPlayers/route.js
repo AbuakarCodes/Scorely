@@ -36,6 +36,7 @@ export async function POST(req) {
       role,
       avatar: avatar || "",
       isActive: false,
+      jerseyNumber: Math.floor(Math.random() * 100)
     }
 
     if (teamId) {

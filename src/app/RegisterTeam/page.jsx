@@ -17,6 +17,8 @@ import { insertTeam } from "@/utils/reduxSclices/teamSlice"
 
 export default function AddTeamForm() {
   const { players, loading: playersLoading } = useSelector((state) => state.players)
+  const z = useSelector((state) => state.players)
+  console.log({z});
   const dispatch = useDispatch()
 
   const [preview, setPreview] = useState("")
