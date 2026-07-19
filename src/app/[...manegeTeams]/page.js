@@ -89,16 +89,6 @@ export default function TeamPage() {
     closeModal()
   }
 
-  // --------------------
-  // ADDED: Handlers for Loading and Error Layout States cleanly
-  // if (loading) {
-  //   return (
-  //     <main className="min-h-screen flex items-center justify-center bg-surface font-body text-on-surface">
-  //       <p className="text-lg animate-pulse">Loading team updates...</p>
-  //     </main>
-  //   )
-  // }
-
   if (error) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface font-body text-red-500">
@@ -106,20 +96,14 @@ export default function TeamPage() {
       </main>
     )
   }
-  // --------------------
 
   return (
     <>
-    {loading&& <PageLoader></PageLoader>}
+      {loading && <PageLoader></PageLoader>}
       <main className="min-h-screen py-12 md:py-20 bg-surface font-body text-on-surface">
         <div className="max-w-6xl mx-auto px-6 md:px-12 space-y-12">
-          {/* CHANGED: Passing dynamic data down instead of static constants */}
-          {/* -------------------- */}
           <TeamHeader team={dynamicTeamInfo} onEdit={() => console.log("Edit team")} />
-
           <StatisticsGrid stats={dynamicStats} />
-          {/* -------------------- */}
-
           <SquadManagement
             players={players}
             activeTab={activeTab}
@@ -127,12 +111,6 @@ export default function TeamPage() {
             onToggleSelect={toggleSelection}
             onNewPlayer={() => console.log("New player")}
             onMore={handleMore}
-          />
-
-          <StickyActionBar
-            selectedCount={selectedCount}
-            total={11}
-            onConfirm={() => console.log("Confirm squad")}
           />
         </div>
 

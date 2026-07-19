@@ -35,43 +35,43 @@ const TABS = [
 
  function TeamHeader({ team, onEdit }) {
   return (
-    <section className="relative group" id="team-header">
+    <section className="relative group" id="team?-header">
       <div className="bg-surface-container-lowest rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 shadow-[0px_4px_24px_rgba(25,28,30,0.04)] overflow-hidden">
         <div className="flex flex-col md:flex-row items-center gap-8 z-10 w-full md:w-auto">
           <div className="relative w-32 h-32 md:w-40 md:h-40">
             <div className="w-full h-full rounded-2xl overflow-hidden bg-primary-container flex items-center justify-center border-4 border-surface shadow-xl">
               <img
                 className="w-full h-full object-cover"
-                alt={team.name}
-                src={team.logo}
+                alt={team?.name}
+                src={team?.logo}
               />
             </div>
           </div>
 
           <div className="text-center md:text-left space-y-2">
             <h2 className="text-4xl font-black text-on-surface tracking-tighter">
-              {team.name}
+              {team?.name}
             </h2>
             <p className="text-on-secondary-container font-medium">
-              {team.handle}
+              {team?.handle}
             </p>
             <div className="flex items-center justify-center md:justify-start gap-3 pt-2">
               <span className="bg-primary-fixed text-on-primary-fixed-variant px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
-                {team.division}
+                {team?.division}
               </span>
               <span className="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-semibold">
-                {team.established}
+                {team?.established}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 z-10">
+        <div className="flex items-center text-white gap-4 z-10">
           <button
             onClick={onEdit}
             className="flex items-center gap-2 px-8 py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-all active:scale-95 shadow-md"
           >
-            <Pencil className="w-[18px] h-[18px]" />
+            <Pencil className="w-[18px] h-[18px] " />
             Edit Team
           </button>
         </div>
@@ -98,13 +98,14 @@ const TABS = [
 
           return (
             <div
-              key={stat.key}
+            
+              key={stat?.key}
               className="bg-surface-container-lowest p-5 rounded-2xl flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all group border border-outline-variant/5"
             >
               <div
                 className={
                   isWinRate
-                    ? "w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center"
+                    ? "w-10 h-10 rounded-xl  text-on-primary flex items-center justify-center"
                     : isLost
                     ? "w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-error group-hover:bg-error-container transition-colors"
                     : "w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary-fixed transition-colors"
@@ -114,10 +115,10 @@ const TABS = [
               </div>
               <div className="text-center">
                 <p className="text-2xl font-black text-on-surface tracking-tight">
-                  {stat.value}
+                  {stat?.value}
                 </p>
                 <p className="text-[9px] font-bold text-on-secondary-container uppercase tracking-wider">
-                  {stat.label}
+                  {stat?.label}
                 </p>
               </div>
             </div>
@@ -157,7 +158,7 @@ const TABS = [
         </div>
         <button
           onClick={onNewPlayer}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-primary-container text-on-primary-fixed font-bold rounded-xl hover:bg-primary transition-all active:scale-95"
+          className=" flex items-center justify-center gap-2 px-6 py-3 bg-primary-container text-on-primary-fixed font-bold rounded-xl hover:bg-primary transition-all hover:text-white active:scale-95"
         >
           <UserPlus className="w-5 h-5" />
           New Player
@@ -166,7 +167,7 @@ const TABS = [
 
       {/* Tabs */}
       <div className="relative border-b border-surface-container-highest">
-        <nav className="flex gap-8 overflow-x-auto hide-scrollbar">
+        <nav className="flex gap-8 overflow-x-auto no-scrollbar">
           {TABS.map((tab) => {
             const isActive = tab.key === activeTab;
             return (
@@ -193,7 +194,7 @@ const TABS = [
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPlayers.map((player) => (
           <PlayerCard
-            key={player.id}
+            key={player?.id}
             player={player}
             onToggleSelect={onToggleSelect}
             onMore={onMore}
@@ -252,8 +253,8 @@ const TABS = [
         onClick={() => onToggleSelect(player.id)}
         className={
           selected
-            ? "w-full py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 bg-primary text-on-primary shadow-lg active:scale-[0.98]"
-            : "w-full py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border-2 border-primary text-primary hover:bg-primary hover:text-on-primary active:scale-[0.98]"
+            ? "w-full py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 bg-primary text-white shadow-lg active:scale-[0.98]"
+            : "w-full py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border-2 border-primary text-primary hover:bg-primary hover:text-white hover:text-on-primary active:scale-[0.98]"
         }
       >
         {selected ? (
@@ -273,28 +274,7 @@ const TABS = [
 
 
 
- function StickyActionBar({ selectedCount, total = 11, onConfirm }) {
-  return (
-    <div className="sticky bottom-8 z-40 max-w-xl mx-auto">
-      <div className="bg-inverse-surface text-inverse-on-surface rounded-full p-4 pl-8 pr-4 shadow-2xl flex items-center justify-between backdrop-blur-md bg-opacity-95">
-        <div className="flex flex-col">
-          <span className="text-xs font-bold uppercase tracking-widest text-on-primary-container">
-            Playing XI Status
-          </span>
-          <span className="text-sm font-medium">
-            {selectedCount} / {total} Players Selected
-          </span>
-        </div>
-        <button
-          onClick={onConfirm}
-          className="bg-primary text-on-primary px-8 py-3 rounded-full font-black tracking-tight hover:bg-primary-container transition-all active:scale-95 shadow-lg"
-        >
-          CONFIRM SQUAD
-        </button>
-      </div>
-    </div>
-  );
-}
+
 
 
  function RemovalModal({ isOpen, onClose, onConfirm }) {
@@ -339,4 +319,4 @@ const TABS = [
 }
 
 
-export {RemovalModal, StickyActionBar, SquadManagement, StatisticsGrid, TeamHeader} 
+export {RemovalModal,  SquadManagement, StatisticsGrid, TeamHeader} 
