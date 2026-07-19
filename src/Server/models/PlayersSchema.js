@@ -16,9 +16,8 @@ const playerSchema = new mongoose.Schema(
 
     jerseyNumber: {
       type: Number,
-      required: true
+      required: true,
     },
-
 
     role: {
       type: String,
@@ -33,16 +32,16 @@ const playerSchema = new mongoose.Schema(
 
     inPlaying_XI: {
       type: Boolean,
-      default: null,
+      default: false,
     },
 
     isDeleted: {
       type: Boolean,
-      default: null,
+      default: false,
     },
 
     currentTeam: {
-      type: String
+      type: String,
     },
 
     avatar: {
@@ -52,8 +51,7 @@ const playerSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 )
 
-export default mongoose.models.Player ||
-  mongoose.model("Player", playerSchema)
+export default mongoose.models.Player || mongoose.model("Player", playerSchema)

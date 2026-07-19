@@ -5,6 +5,7 @@ import mongoose from "mongoose"
 import Player from "@/Server/models/PlayersSchema"
 import { connectDB } from "@/lib/db"
 import { ErrorResponse, SuccessResponse } from "@/Server/Response/response"
+import { getToken } from "next-auth/jwt"
 
 export async function PATCH(req) {
   try {
@@ -43,7 +44,6 @@ export async function PATCH(req) {
     })
   } catch (error) {
     console.error(error)
-
     return NextResponse.json(new ErrorResponse("Internal server error."), { status: 500 })
   }
 }

@@ -43,9 +43,10 @@ export function AddTeams() {
             : teams.map((team) => (
                 <div key={team._id} className="shrink-0 border">
                   <TeamCard
-                    name={team?.name || "###"}
+                    name={team?.name }
                     avatar={team.avatar || defaultImage}
-                    playersCount={team?.playersCount || "###"}
+                    playersCount={team?.playersCount }
+                    teamId={team?._id}
                     onAction={() => console.log("view team", team._id)}
                   />
                 </div>

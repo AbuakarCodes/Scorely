@@ -1,12 +1,14 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export function TeamCard({
   name,
   avatar,
   playersCount,
   rank,
+  teamId,
   variant = "compact",
   onAction,
 }) {
@@ -16,6 +18,9 @@ export function TeamCard({
   // =========================
   if (variant === "compact") {
     return (
+    
+      <Link href={`/manegeTeams/${teamId}`}>
+      
       <div className="w-[160px] border-2 border-dashed border-black/10 aspect-square flex flex-col items-center justify-center rounded-lg bg-background p-4 text-center hover:shadow-md transition">
         
         {/* Avatar */}
@@ -52,6 +57,7 @@ export function TeamCard({
           View
         </Button>
       </div>
+     </Link>
     )
   }
 
