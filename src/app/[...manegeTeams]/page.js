@@ -7,6 +7,7 @@ import {
   SquadManagement,
   StatisticsGrid,
   TeamHeader,
+  SquadShowcase,
 } from "./components/componsnts"
 import axios from "axios"
 import { useParams } from "next/navigation"
@@ -99,11 +100,11 @@ export default function TeamPage() {
 
   return (
     <>
-      {loading && <PageLoader></PageLoader>}
       <main className="min-h-screen py-12 md:py-20 bg-surface font-body text-on-surface">
         <div className="max-w-6xl mx-auto px-6 md:px-12 space-y-12">
           <TeamHeader team={dynamicTeamInfo} onEdit={() => console.log("Edit team")} />
           <StatisticsGrid stats={dynamicStats} />
+          <SquadShowcase players={players} />
           <SquadManagement
             players={players}
             activeTab={activeTab}
