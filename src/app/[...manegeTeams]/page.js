@@ -1,17 +1,18 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 import {
   RemovalModal,
   StickyActionBar,
-  SquadManagement,
+  AddPlayersInTeam,
   StatisticsGrid,
   TeamHeader,
-  SquadShowcase,
+  TeamPlayers,
 } from "./components/componsnts"
 import axios from "axios"
 import { useParams } from "next/navigation"
-import PageLoader from "@/customComponents/loaders/pageLoader"
+import { useDispatch, useSelector } from "react-redux"
+import { fetchPlayers, updatePlayerTeam } from "@/utils/reduxSclices/playerSlice"
 
 export default function TeamPage() {
   const [players, setPlayers] = useState([])
@@ -19,9 +20,16 @@ export default function TeamPage() {
   const [activeTab, setActiveTab] = useState("all")
   const [modalOpen, setModalOpen] = useState(false)
   const [playerPendingRemoval, setPlayerPendingRemoval] = useState(null)
+  const dispatch = useDispatch()
 
   const teamID = useParams()?.manegeTeams?.[1]
   const { getTeamStats, data, loading, error } = useTeamStats()
+  const allPlayers = useSelector((state) => state?.players?.players) || []
+  const unDebutePlayers = Array.isArray(allPlayers) ? allPlayers.filter((P) => !P?.teamId) : []
+
+  useEffect(() => {
+    if (allPlayers.length === 0) dispatch(fetchPlayers())
+  }, [])
 
   useEffect(() => {
     if (teamID) getTeamStats(teamID)
@@ -40,19 +48,17 @@ export default function TeamPage() {
       }))
       setPlayers(mappedPlayers)
     }
-  }, [data])
+  }, [])
 
-  // ADDED: Dynamically map incoming API analytics payload
   const dynamicStats = useMemo(() => {
     if (!data) return []
-    const playingXICount = (data?.totalPlayers || []).filter((p) => p.inPlaying_XI).length
     return [
       { key: "matches", label: "Matches", value: data?.matchesPlayed || 0 },
       { key: "won", label: "Won", value: data?.matchesWon || 0 },
       { key: "lost", label: "Lost", value: data?.matchesLost || 0 },
       { key: "winRate", label: "Win Rate", value: `${data?.winningPercentage || 0}%` },
-      { key: "squad", label: "Squad", value: (data?.totalPlayers || []).length },
-      { key: "playingXI", label: "Playing XI", value: playingXICount },
+      { key: "squad", label: "Squad", value: (data?.totalPlayers || [])?.length },
+      { key: "ranking", label: "Rank", value: "" },
     ]
   }, [data])
 
@@ -62,15 +68,20 @@ export default function TeamPage() {
       handle: `@${data?.teamName || "team"}`,
       division: "Division I",
       established: "EST. 2026",
-      logo: data?.teamAvatar || "",
+      logo: data?.avatar || "",
     }
   }, [data])
   // --------------------
 
-  const selectedCount = useMemo(() => players.filter((p) => p.selected).length, [players])
-
-  const toggleSelection = (id) => {
-    setPlayers((prev) => prev.map((p) => (p.id === id ? { ...p, selected: !p.selected } : p)))
+  const toggleSelection = async (id) => {
+    dispatch(
+      updatePlayerTeam({
+        playerId: id,
+        teamId: teamID,
+        action: "add",
+      }),
+    )
+    setPlayers((prev) => prev.map((p) => (p._id === id ? { ...p, selected: !p.selected } : p)))
   }
 
   const handleMore = (player) => {
@@ -98,15 +109,17 @@ export default function TeamPage() {
     )
   }
 
+
+
   return (
     <>
       <main className="min-h-screen py-12 md:py-20 bg-surface font-body text-on-surface">
         <div className="max-w-6xl mx-auto px-6 md:px-12 space-y-12">
           <TeamHeader team={dynamicTeamInfo} onEdit={() => console.log("Edit team")} />
           <StatisticsGrid stats={dynamicStats} />
-          <SquadShowcase players={players} />
-          <SquadManagement
-            players={players}
+          < TeamPlayers players={data?.totalPlayers || []} />
+          <AddPlayersInTeam
+            players={unDebutePlayers}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             onToggleSelect={toggleSelection}
@@ -134,7 +147,6 @@ export function useTeamStats() {
       const response = await axios.post("/api/Team/getSpecificTeamInfo", {
         teamId,
       })
-
       setData(response.data.data)
       return response.data
     } catch (err) {
@@ -152,3 +164,4 @@ export function useTeamStats() {
     getTeamStats,
   }
 }
+

@@ -30,7 +30,13 @@ function TeamHeader({ team, onEdit }) {
         <div className="flex flex-col md:flex-row items-center gap-8 z-10 w-full md:w-auto">
           <div className="relative w-32 h-32 md:w-40 md:h-40">
             <div className="w-full h-full rounded-2xl overflow-hidden bg-primary-container flex items-center justify-center border-4 border-surface shadow-xl">
-              <img className="w-full h-full object-cover" alt={team?.name} src={team?.logo} />
+              {team?.avatar ? (
+                <img className="w-full h-full object-cover" alt={team?.name} src={team?.avatar} />
+              ) : (
+                <div className="w-full h-full  flex items-center justify-center bg-white   font-black text-4xl uppercase">
+                  {team?.name?.charAt(0)}
+                </div>
+              )}
             </div>
           </div>
 
@@ -104,7 +110,7 @@ function StatisticsGrid({ stats }) {
   )
 }
 
-export function SquadShowcase({ players }) {
+export function TeamPlayers({ players }) {
   return (
     <section className="space-y-8" id="squad-showcase">
       {/* Header text with no buttons */}
@@ -125,7 +131,7 @@ export function SquadShowcase({ players }) {
   )
 }
 
-function SquadManagement({ players, activeTab, onTabChange, onToggleSelect, onNewPlayer, onMore }) {
+function AddPlayersInTeam({ players, activeTab, onTabChange, onToggleSelect, onNewPlayer, onMore }) {
   const filteredPlayers = activeTab === "all" ? players : players.filter((p) => p.category === activeTab)
 
   return (
@@ -172,7 +178,7 @@ function SquadManagement({ players, activeTab, onTabChange, onToggleSelect, onNe
       {/* Player Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPlayers.map((player) => (
-          <PlayerCard key={player?.id} player={player} onToggleSelect={onToggleSelect} onMore={onMore} />
+          <PlayerCard key={player?.id} player={player} onToggleSelect={onToggleSelect} onMore={onMore}  />
         ))}
       </div>
     </section>
@@ -180,7 +186,8 @@ function SquadManagement({ players, activeTab, onTabChange, onToggleSelect, onNe
 }
 
 function PlayerCard({ player, onToggleSelect, onMore }) {
-  const { name, role, number, image, selected } = player
+  const { name, role, number,  selected } = player
+
 
   return (
     <div
@@ -199,8 +206,8 @@ function PlayerCard({ player, onToggleSelect, onMore }) {
                 : "relative w-20 h-20 rounded-2xl overflow-hidden bg-surface-container border-2 border-outline-variant/20 shadow-inner flex items-center justify-center"
             }
           >
-            {player?.image ? (
-              <img src={player.image} alt={player.name} className="w-full h-full object-cover" />
+            {player?.avatar ? (
+              <img src={player?.avatar} alt={player?.name} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-primary-container text-on-primary-container font-black text-xl uppercase">
                 {player?.name?.charAt(0) || "?"}
@@ -224,7 +231,7 @@ function PlayerCard({ player, onToggleSelect, onMore }) {
       </div>
 
       <button
-        onClick={() => onToggleSelect(player?.id)}
+        onClick={() => onToggleSelect(player?._id)}
         className={
           selected
             ? "w-full py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 bg-primary text-white shadow-lg active:scale-[0.98]"
@@ -309,4 +316,4 @@ export function TeamPlayerCard({ player }) {
   )
 }
 
-export { RemovalModal, SquadShowcase, SquadManagement, StatisticsGrid, TeamHeader }
+export { RemovalModal, TeamPlayers, AddPlayersInTeam, StatisticsGrid, TeamHeader }

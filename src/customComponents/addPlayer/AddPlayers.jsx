@@ -10,7 +10,7 @@ import { AddCard } from "../BasicComponents/addCardButton"
 export function AddPlayers() {
   const dispatch = useDispatch()
 
-  const { players, loading, error } = useSelector((state) => state.players)
+  const { players, loading, error } = useSelector((state) => state?.players)
 
   useEffect(() => {
     if (players.length === 0) dispatch(fetchPlayers())

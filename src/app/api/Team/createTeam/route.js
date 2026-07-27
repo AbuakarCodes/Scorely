@@ -46,7 +46,7 @@ export async function POST(req) {
         // helper: generate unique jersey numbers (1–100) within this team
         const usedNumbers = new Set()
 
-        const getUniqueJersey = () => {
+        const getUniqueJersey = (usedNumbers) => {
             let num
             do {
                 num = Math.floor(Math.random() * 100) + 1
@@ -59,11 +59,11 @@ export async function POST(req) {
         // 3. prepare updates
         const updatedPlayersData = existingPlayers.map((player) => {
             return {
-                _id: player._id,
-                teamId: team._id,
-                currentTeam: team.name,
+                _id: player?._id,
+                teamId: team?._id,
+                currentTeam: team?.name,
                 jerseyNumber: getUniqueJersey(),
-                teams: [...(player.teams || []), team.name],
+                teams: [...(player?.teams || []), team?.name],
             }
         })
 

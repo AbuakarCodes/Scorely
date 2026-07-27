@@ -42,7 +42,6 @@ export async function POST(req) {
       isDeleted: false,
     })
 
-    console.log(totalPlayers);
 
     const matchesPlayed = await Match.countDocuments({
       $or: [{ teamA: teamId }, { teamB: teamId }],
