@@ -84,7 +84,7 @@ export default function TeamPage() {
     setPlayers((prev) => prev.map((p) => (p._id === id ? { ...p, selected: !p.selected } : p)))
   }
 
-  const removePlayer_handeler = ({id}) => {
+  const removePlayer_handeler = ({ id }) => {
     setRemovedPlayerIds(id)
     setModalOpen(true)
   }
@@ -96,6 +96,13 @@ export default function TeamPage() {
 
   const confirmRemoval = () => {
     if (removedPlayerId) {
+      dispatch(
+        updatePlayerTeam({
+          playerId: removedPlayerId,
+          teamId: teamID,
+          action: "remove",
+        }),
+      )
       setPlayers((prev) => prev.filter((p) => p?.id !== removedPlayerId))
     }
     closeModal()
@@ -115,7 +122,7 @@ export default function TeamPage() {
         <div className="max-w-6xl mx-auto px-6 md:px-12 space-y-12">
           <TeamHeader team={dynamicTeamInfo} onEdit={() => console.log("Edit team")} />
           <StatisticsGrid stats={dynamicStats} />
-          <TeamPlayers players={players || []} removePlayer_handeler={removePlayer_handeler} />
+          <TeamPlayers players={players || []} removePlayer_handeler={removePlayer_handeler}  />
           <AddPlayersInTeam
             players={unDebutePlayers}
             activeTab={activeTab}
