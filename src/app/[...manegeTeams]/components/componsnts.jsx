@@ -110,7 +110,7 @@ function StatisticsGrid({ stats }) {
   )
 }
 
-export function TeamPlayers({ players }) {
+export function TeamPlayers({ players , removePlayer_handeler}) {
   return (
     <section className="space-y-8" id="squad-showcase">
       {/* Header text with no buttons */}
@@ -124,14 +124,14 @@ export function TeamPlayers({ players }) {
       {/* Player Grid matching original styles */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {players.map((player) => (
-          <TeamPlayerCard key={player?.id} player={player} />
+          <TeamPlayerCard key={player?.id} player={player} removePlayer_handeler={removePlayer_handeler} />
         ))}
       </div>
     </section>
   )
 }
 
-function AddPlayersInTeam({ players, activeTab, onTabChange, onToggleSelect, onNewPlayer, onMore }) {
+function AddPlayersInTeam({ players, activeTab, onTabChange, onToggleSelect, onNewPlayer }) {
   const filteredPlayers = activeTab === "all" ? players : players.filter((p) => p.category === activeTab)
 
   return (
@@ -178,16 +178,15 @@ function AddPlayersInTeam({ players, activeTab, onTabChange, onToggleSelect, onN
       {/* Player Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPlayers.map((player) => (
-          <PlayerCard key={player?.id} player={player} onToggleSelect={onToggleSelect} onMore={onMore}  />
+          <PlayerCard key={player?.id} player={player} onToggleSelect={onToggleSelect} />
         ))}
       </div>
     </section>
   )
 }
 
-function PlayerCard({ player, onToggleSelect, onMore }) {
-  const { name, role, number,  selected } = player
-
+function PlayerCard({ player, onToggleSelect }) {
+  const { name, role, number, selected } = player
 
   return (
     <div
@@ -222,12 +221,6 @@ function PlayerCard({ player, onToggleSelect, onMore }) {
             </div>
           </div>
         </div>
-        <button
-          onClick={() => onMore?.(player)}
-          className="p-2 hover:bg-surface-container text-on-secondary-container rounded-full transition-colors"
-        >
-          <MoreVertical className="w-5 h-5" />
-        </button>
       </div>
 
       <button
@@ -284,7 +277,7 @@ function RemovalModal({ isOpen, onClose, onConfirm }) {
   )
 }
 
-export function TeamPlayerCard({ player }) {
+export function TeamPlayerCard({ player, removePlayer_handeler }) {
   return (
     <div className="flex items-center gap-4 p-4 bg-surface-container rounded-2xl border border-surface-container-highest transition-all hover:shadow-md">
       {/* Avatar Image container */}
@@ -312,6 +305,13 @@ export function TeamPlayerCard({ player }) {
           {player?.role || "Player"}
         </p>
       </div>
+
+      <button
+        onClick={() => removePlayer_handeler({id:player?.id})}
+        className="p-2 hover:bg-surface-container text-on-secondary-container rounded-full transition-colors"
+      >
+        <MoreVertical className="w-5 h-5" />
+      </button>
     </div>
   )
 }
