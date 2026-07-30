@@ -39,8 +39,8 @@ export function AddPlayers() {
                 ))
               : players.map((player) => (
                   <Link
-                    key={player._id}
-                    href={`/players/${player._id}`}
+                    key={player?._id}
+                    href={`/player/${player?._id}`}
                     className="flex overflow-x-auto gap-x-1 shrink-0 border"
                   >
                     <PlayerCard
