@@ -12,7 +12,7 @@ import { defaultImage } from "@/utils/Basic/constant"
 
 export default function PlayersBackground() {
   const dispatch = useDispatch()
-  const { players, loading, error } = useSelector((state) => state.players)
+  const { players, loading, error } = useSelector((state) => state?.players)
 
   // used that local state becuse we filtering the players
   const [localPlayers, setLocalPlayers] = useState([])
@@ -83,14 +83,14 @@ export default function PlayersBackground() {
             ) : localPlayers.length > 0 || !loading ? (
               localPlayers.map((player) => (
                 <PlayerCard
-                  key={player._id}
+                  key={player?._id}
                   variant="detailed"
-                  name={player.name}
-                  role={player.role}
-                  image={player.avatar || defaultImage}
+                  name={player?.name}
+                  role={player?.role}
+                  image={player?.avatar || defaultImage}
                   team={player?.currentTeam || "Un Caped"}
                   rank={null}
-                  inSquad={Boolean(player.teamId)}
+                  inSquad={Boolean(player?.teamId)}
                   playerId={player?._id}
                   onAction={() => console.log("view", player._id)}
                 />

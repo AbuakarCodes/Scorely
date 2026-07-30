@@ -45,56 +45,47 @@ export function PlayerHero({ player, onImageChange, onNameChange }) {
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
         <div className="flex flex-col items-start gap-10 lg:flex-row lg:items-end">
           {/* Profile Image */}
-      <div className="relative shrink-0">
-  <div className="h-[360px] w-[280px] overflow-hidden rounded-2xl bg-[#e0e3e5] shadow-2xl sm:h-[420px] sm:w-[320px]">
-    {player?.avatar ? (
-      <img
-        src={player.avatar}
-        alt={player.name}
-        className="h-full w-full object-cover"
-      />
-    ) : (
-      <div className="flex h-full w-full items-center justify-center bg-primary-container text-on-primary-container font-black text-6xl uppercase">
-        {player?.name?.charAt(0) || "?"}
-      </div>
-    )}
-  </div>
+          <div className="relative shrink-0">
+            <div className="h-[360px] w-[280px] overflow-hidden rounded-2xl bg-[#e0e3e5] shadow-2xl sm:h-[420px] sm:w-[320px]">
+              {player?.avatar ? (
+                <img src={player.avatar} alt={player.name} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-primary-container text-on-primary-container font-black text-6xl uppercase">
+                  {player?.name?.charAt(0) || "?"}
+                </div>
+              )}
+            </div>
 
-  {/* Actions */}
-  <div className="absolute -bottom-5 -right-5 flex flex-col gap-2">
-    <label
-      className="
+            {/* Actions */}
+            <div className="absolute -bottom-5 -right-5 flex flex-col gap-2">
+              <label
+                className="
         flex h-12 w-12 cursor-pointer items-center
         justify-center rounded-full
         bg-[#003527] text-white shadow-lg
         transition hover:bg-[#064e3b]
       "
-      title="Change photo"
-    >
-      <Camera size={19} />
+                title="Change photo"
+              >
+                <Camera size={19} />
 
-      <input
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={onImageChange}
-      />
-    </label>
+                <input type="file" accept="image/*" className="hidden" onChange={onImageChange} />
+              </label>
 
-    <button
-      onClick={onNameChange}
-      className="
+              <button
+                onClick={onNameChange}
+                className="
         flex h-12 w-12 items-center justify-center
         rounded-full bg-white text-[#003527]
         shadow-lg transition hover:bg-[#003527]
         hover:text-white
       "
-      title="Change name"
-    >
-      <Edit3 size={18} />
-    </button>
-  </div>
-</div>
+                title="Change name"
+              >
+                <Edit3 size={18} />
+              </button>
+            </div>
+          </div>
 
           {/* Identity */}
           <div className="pb-3">
@@ -282,14 +273,20 @@ export function PlayerSearchResult({ player, onSelect }) {
       "
     >
       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-[#e0e3e5]">
-        <img src={player.avatar} alt={player.name} className="h-full w-full object-cover" />
+        {player?.avatar ? (
+          <img src={player?.avatar} alt={player?.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-primary-container text-on-primary-container font-black text-xl uppercase">
+            {player?.name?.charAt(0) || "?"}
+          </div>
+        )}{" "}
       </div>
 
       <div>
         <p className="font-bold text-[#191c1e]">{player.name}</p>
 
         <p className="text-[10px] uppercase tracking-wider text-[#586377]">
-          {player.role} • {player.team}
+          {player?.role} • {player?.team}
         </p>
       </div>
     </button>
@@ -321,13 +318,26 @@ export function H2HStat({ label, value, emphasis = false }) {
 // Head To Head
 // -----------------------------------------------------
 
-export function HeadToHead({ player, opponent, search, results, headToHead, onSearch, onSelect, onClear }) {
+export function HeadToHead({
+  player,
+  opponent,
+  search,
+  results,
+  headToHead,
+  H2Hloading,
+  H2Herror,
+  onSearch,
+  onSelect,
+  onClear,
+}) {
   const [open, setOpen] = useState(false)
+
+  const batting = headToHead?.batting
+  const bowling = headToHead?.bowling
 
   return (
     <section className="mb-20">
       <div className="rounded-3xl bg-[#f2f4f6] p-6 sm:p-8 lg:p-12">
-        {/* Heading */}
         <div className="mb-10 flex flex-col justify-between gap-7 lg:flex-row lg:items-center">
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-[#191c1e] sm:text-3xl">
@@ -335,11 +345,10 @@ export function HeadToHead({ player, opponent, search, results, headToHead, onSe
             </h2>
 
             <p className="mt-1 text-sm text-[#586377]">
-              Compare {player.name}'s performance against another player
+              Compare {player?.name}'s performance against another player
             </p>
           </div>
 
-          {/* Search */}
           <div className="relative w-full lg:w-96">
             <div className="relative">
               <Search size={19} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#586377]" />
@@ -376,12 +385,11 @@ export function HeadToHead({ player, opponent, search, results, headToHead, onSe
               )}
             </div>
 
-            {/* Dropdown */}
-            {open && results.length > 0 && !opponent && (
-              <div className="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-xl border border-[#e0e3e5] bg-white shadow-xl">
+            {open && results?.length > 0 && !opponent && (
+              <div className="absolute top-full z-50 mt-2 w-full max-h-[30rem] scroll-smooth overflow-y-scroll no-scrollbar rounded-xl border border-[#e0e3e5] bg-white shadow-xl">
                 {results.map((item) => (
                   <PlayerSearchResult
-                    key={item.id}
+                    key={item._id}
                     player={item}
                     onSelect={(selected) => {
                       onSelect(selected)
@@ -394,7 +402,6 @@ export function HeadToHead({ player, opponent, search, results, headToHead, onSe
           </div>
         </div>
 
-        {/* Selected Players */}
         {opponent && (
           <>
             <div className="mb-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -407,84 +414,96 @@ export function HeadToHead({ player, opponent, search, results, headToHead, onSe
               <PlayerBadge player={opponent} />
             </div>
 
-            {/* H2H */}
-            <div className="grid gap-10 lg:grid-cols-2">
-              {/* Batting */}
-              <div>
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="rounded-xl bg-[#003527] p-3 text-white">
-                    <UserRound size={19} />
+            {H2Hloading && (
+              <div className="rounded-2xl bg-white py-16 text-center">
+                <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-[#003527]/20 border-t-[#003527]" />
+
+                <p className="text-sm font-medium text-[#586377]">Loading head-to-head statistics...</p>
+              </div>
+            )}
+
+            {!H2Hloading && H2Herror && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+                <p className="text-sm font-medium text-red-600">{H2Herror}</p>
+              </div>
+            )}
+
+            {!H2Hloading && !H2Herror && batting && bowling && (
+              <div className="grid gap-10 lg:grid-cols-2">
+                <div>
+                  <div className="mb-6 flex items-center gap-3">
+                    <div className="rounded-xl bg-[#003527] p-3 text-white">
+                      <UserRound size={19} />
+                    </div>
+
+                    <h3 className="text-lg font-bold uppercase tracking-tight">Batting vs {opponent.name}</h3>
                   </div>
 
-                  <h3 className="text-lg font-bold uppercase tracking-tight">Batting vs {opponent.name}</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <H2HStat label="Runs" value={batting.runs} emphasis />
+
+                    <H2HStat label="Balls Faced" value={batting.ballsFaced} />
+
+                    <H2HStat label="Strike Rate" value={batting.strikeRate} />
+
+                    <H2HStat label="Average" value={batting.average} />
+
+                    <H2HStat label="4s" value={batting.fours} />
+
+                    <H2HStat label="6s" value={batting.sixes} />
+
+                    <H2HStat label="Dismissals" value={batting.dismissals} />
+
+                    <H2HStat label="Dot Balls" value={batting.dotBalls} />
+
+                    <H2HStat label="Boundary %" value={`${batting.boundaryPercentage}%`} />
+
+                    <H2HStat label="Highest Score" value={batting.highestScore} />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <H2HStat label="Runs" value={headToHead.batting.runs} emphasis />
+                <div>
+                  <div className="mb-6 flex items-center gap-3">
+                    <div className="rounded-xl bg-[#545f73] p-3 text-white">
+                      <Swords size={19} />
+                    </div>
 
-                  <H2HStat label="Balls Faced" value={headToHead.batting.ballsFaced} />
-
-                  <H2HStat label="Strike Rate" value={headToHead.batting.strikeRate} />
-
-                  <H2HStat label="Average" value={headToHead.batting.average} />
-
-                  <H2HStat label="4s" value={headToHead.batting.fours} />
-
-                  <H2HStat label="6s" value={headToHead.batting.sixes} />
-
-                  <H2HStat label="Dismissals" value={headToHead.batting.dismissals} />
-
-                  <H2HStat label="Dot Balls" value={headToHead.batting.dotBalls} />
-
-                  <H2HStat label="Boundary %" value={`${headToHead.batting.boundaryPercentage}%`} />
-
-                  <H2HStat label="Highest Score" value={headToHead.batting.highestScore} />
-                </div>
-              </div>
-
-              {/* Bowling */}
-              <div>
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="rounded-xl bg-[#545f73] p-3 text-white">
-                    <Swords size={19} />
+                    <h3 className="text-lg font-bold uppercase tracking-tight">Bowling vs {opponent.name}</h3>
                   </div>
 
-                  <h3 className="text-lg font-bold uppercase tracking-tight">Bowling vs {opponent.name}</h3>
-                </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <H2HStat label="Overs" value={bowling.overs} emphasis />
 
-                <div className="grid grid-cols-2 gap-3">
-                  <H2HStat label="Overs" value={headToHead.bowling.overs} emphasis />
+                    <H2HStat label="Balls" value={bowling.balls} />
 
-                  <H2HStat label="Balls" value={headToHead.bowling.balls} />
+                    <H2HStat label="Runs Conceded" value={bowling.runsConceded} />
 
-                  <H2HStat label="Runs Conceded" value={headToHead.bowling.runsConceded} />
+                    <H2HStat label="Wickets" value={bowling.wickets} emphasis />
 
-                  <H2HStat label="Wickets" value={headToHead.bowling.wickets} emphasis />
+                    <H2HStat label="Economy" value={bowling.economy} />
 
-                  <H2HStat label="Economy" value={headToHead.bowling.economy} />
+                    <H2HStat label="Bowling SR" value={bowling.strikeRate} />
 
-                  <H2HStat label="Bowling SR" value={headToHead.bowling.strikeRate} />
+                    <H2HStat label="Average" value={bowling.average} />
 
-                  <H2HStat label="Average" value={headToHead.bowling.average} />
+                    <H2HStat label="Dot Balls" value={bowling.dotBalls} />
 
-                  <H2HStat label="Dot Balls" value={headToHead.bowling.dotBalls} />
+                    <H2HStat label="4s Conceded" value={bowling.foursConceded} />
 
-                  <H2HStat label="4s Conceded" value={headToHead.bowling.foursConceded} />
+                    <H2HStat label="6s Conceded" value={bowling.sixesConceded} />
 
-                  <H2HStat label="6s Conceded" value={headToHead.bowling.sixesConceded} />
+                    <H2HStat label="Wides" value={bowling.wides} />
 
-                  <H2HStat label="Wides" value={headToHead.bowling.wides} />
+                    <H2HStat label="No Balls" value={bowling.noBalls} />
 
-                  <H2HStat label="No Balls" value={headToHead.bowling.noBalls} />
-
-                  <H2HStat label="Best Figures" value={headToHead.bowling.bestFigures} />
+                    <H2HStat label="Best Figures" value={bowling.bestFigures} />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </>
         )}
 
-        {/* Empty state */}
         {!opponent && (
           <div className="rounded-2xl border-2 border-dashed border-[#bfc9c3]/50 py-14 text-center">
             <ChevronDown className="mx-auto mb-3 text-[#586377]/40" />
@@ -507,7 +526,13 @@ export function PlayerBadge({ player }) {
   return (
     <div className="flex items-center gap-3 rounded-full bg-white py-2 pl-2 pr-5 shadow-sm">
       <div className="h-10 w-10 overflow-hidden rounded-full bg-[#e0e3e5]">
-        <img src={player.avatar} alt={player.name} className="h-full w-full object-cover" />
+        {player?.avatar ? (
+          <img src={player?.avatar} alt={player?.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-primary-container text-on-primary-container font-black text-xl uppercase">
+            {player?.name?.charAt(0) || "?"}
+          </div>
+        )}
       </div>
 
       <span className="font-bold text-[#191c1e]">{player.name}</span>

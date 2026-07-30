@@ -132,7 +132,7 @@ export function TeamPlayers({ players , removePlayer_handeler}) {
 }
 
 function AddPlayersInTeam({ players, activeTab, onTabChange, onToggleSelect, onNewPlayer }) {
-  const filteredPlayers = activeTab === "all" ? players : players.filter((p) => p.category === activeTab)
+  const filteredPlayers = activeTab === "all" ? players : players.filter((p) => p?.category === activeTab)
 
   return (
     <section className="space-y-8" id="squad-management">

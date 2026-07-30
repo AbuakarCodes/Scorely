@@ -16,6 +16,8 @@ export default function PlayerProfile() {
     search,
     filteredPlayers,
     headToHead,
+    H2Hloading,
+    H2Herror,
 
     setSearch,
     selectOpponent,
@@ -39,11 +41,13 @@ export default function PlayerProfile() {
             <BowlingStats stats={data?.bowling} />
 
             <HeadToHead
-              player={player}
+              player={data?.player}
               opponent={selectedOpponent}
               search={search}
               results={filteredPlayers}
               headToHead={headToHead}
+              H2Hloading={H2Hloading}
+              H2Herror={H2Herror}
               onSearch={setSearch}
               onSelect={selectOpponent}
               onClear={clearComparison}
