@@ -25,19 +25,16 @@ export default function PlayerProfile() {
   } = usePlayerStats(playerId)
 
   const { data, loading, error } = usePlayerStatsAPI(playerId)
-
-  console.log(data?.batting);
-//   console.log({ batting: data.batting, bowling: data.bowling })
+  console.log(data.player)
 
   return (
     <main className="min-h-screen bg-[#f7f9fb] text-[#191c1e]">
-      <PlayerHero player={player} onImageChange={handleImageChange} onNameChange={handleNameChange} />
+      <PlayerHero player={data?.player} onImageChange={handleImageChange} onNameChange={handleNameChange} />
 
       <div className="relative z-20 mx-auto max-w-7xl px-6 lg:px-12">
         <div className="-mt-12 rounded-t-3xl bg-[#f7f9fb] pt-12">
-          <BattingStats stats={data?.batting || {}} />
-
-          <BowlingStats stats={player.bowling} />
+          <BattingStats stats={data?.batting} />
+          <BowlingStats stats={data?.bowling} />
 
           <HeadToHead
             player={player}

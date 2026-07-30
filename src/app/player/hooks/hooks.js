@@ -307,7 +307,7 @@ export default function usePlayerStatsAPI(userId) {
         const response = await axios.post("/api/Players/playerStats", {
           playerId: userId,
         })
-        setData(response.data)
+        setData(response?.data?.data)
       } catch (err) {
         setError(err?.response?.data?.message || err?.message || "Something went wrong")
       } finally {

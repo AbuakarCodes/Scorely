@@ -5,40 +5,26 @@ import { connectDB } from "@/lib/db"
 
 import Match from "@/Server/models/matchSchema.js"
 import Ball from "@/Server/models/BallScheme.js"
+import Player from "@/Server/models/PlayersSchema.js"
+import { SuccessResponse, ErrorResponse } from "@/Server/Response/response"
 
-import { ErrorResponse } from "@/Server/Response/response"
 import { getPlayerBattingStats, getPlayerBowlingStats } from "./utils/functions"
- 
+
 export async function POST(req) {
   try {
-    // CONNECT DATABASE
-
     await connectDB()
-
-    // AUTHENTICATION
 
     const token = await getToken({
       req,
       secret: process.env.NEXTAUTH_SECRET,
     })
 
-    if (!token) {
-      return NextResponse.json(new ErrorResponse("Unauthorized"), {
-        status: 401,
-      })
-    }
+    if (!token) return NextResponse.json(new ErrorResponse("Unauthorized"), { status: 401 })
 
-    // USER ID
 
-    const UserId = token.id
-
-    // REQUEST BODY
-
+    const userId = token.id    
     const body = await req.json()
-
     const { playerId } = body
-
-    // BASIC VALIDATION
 
     if (!playerId) {
       return NextResponse.json(new ErrorResponse("Player ID is required"), {
@@ -46,10 +32,35 @@ export async function POST(req) {
       })
     }
 
-    // FIND USER'S MATCHES
+    // FIND PLAYER
+    // Make sure:
+    // 1. Player exists
+    // 2. Player belongs to authenticated user
+    // 3. Player is not deleted
 
+    const player = await Player.findOne({
+      _id: playerId,
+      userId,
+      isDeleted: false,
+    })
+      .select({
+        _id: 1,
+        name: 1,
+        avatar: 1,
+      })
+      .lean()
+
+
+
+    if (!player) {
+      return NextResponse.json(new ErrorResponse("Player not found"), {
+        status: 404,
+      })
+    }
+
+    // FIND USER'S MATCHES
     const matches = await Match.find({
-      UserId,
+      UserId: userId,
     })
       .select({
         matchId: 1,
@@ -60,24 +71,21 @@ export async function POST(req) {
     const matchIds = matches.map((match) => match.matchId)
 
     // NO MATCHES
-
     if (matchIds.length === 0) {
-      return NextResponse.json(
-        {
-          success: true,
-
-          message: "No matches found",
-
-          playerId,
-
-          batting: getPlayerBattingStats([], playerId),
-
-          bowling: getPlayerBowlingStats([], playerId),
+      const response = new SuccessResponse("Player stats fetched successfully", {
+        player: {
+          id: player._id,
+          name: player.name,
+          avatar: player.avatar,
         },
-        {
-          status: 200,
-        },
-      )
+
+        batting: getPlayerBattingStats([], playerId),
+        bowling: getPlayerBowlingStats([], playerId),
+      })
+
+      return NextResponse.json(response, {
+        status: 200,
+      })
     }
 
     // GET PLAYER BALLS
@@ -102,43 +110,32 @@ export async function POST(req) {
     }).lean()
 
     // CALCULATE BATTING STATS
-
     const battingStats = getPlayerBattingStats(balls, playerId)
 
     // CALCULATE BOWLING STATS
-
     const bowlingStats = getPlayerBowlingStats(balls, playerId)
 
     // RESPONSE
-
-    return NextResponse.json(
-      {
-        success: true,
-
-        message: "Player stats fetched successfully",
-
-        playerId,
-
-        batting: battingStats,
-
-        bowling: bowlingStats,
+    const response = new SuccessResponse("Player stats fetched successfully", {
+      player: {
+        id: player._id,
+        name: player.name,
+        avatar: player.avatar,
       },
-      {
-        status: 200,
-      },
-    )
+
+      batting: battingStats,
+
+      bowling: bowlingStats,
+    })
+
+    return NextResponse.json(response, {
+      status: 200,
+    })
   } catch (error) {
-    console.log("GET PLAYER STATS ERROR:", error)
+    console.error("GET PLAYER STATS ERROR:", error)
 
-    return NextResponse.json(
-      {
-        success: false,
-
-        message: error?.message || "Failed to fetch player stats",
-      },
-      {
-        status: 500,
-      },
-    )
+    return NextResponse.json(new ErrorResponse(error?.message || "Failed to fetch player stats"), {
+      status: 500,
+    })
   }
 }
