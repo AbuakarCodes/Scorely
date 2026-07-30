@@ -45,41 +45,56 @@ export function PlayerHero({ player, onImageChange, onNameChange }) {
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
         <div className="flex flex-col items-start gap-10 lg:flex-row lg:items-end">
           {/* Profile Image */}
-          <div className="relative shrink-0">
-            <div className="h-[360px] w-[280px] overflow-hidden rounded-2xl bg-[#e0e3e5] shadow-2xl sm:h-[420px] sm:w-[320px]">
-              <img src={player?.avatar} alt={player?.name} className="h-full w-full object-cover" />
-            </div>
+      <div className="relative shrink-0">
+  <div className="h-[360px] w-[280px] overflow-hidden rounded-2xl bg-[#e0e3e5] shadow-2xl sm:h-[420px] sm:w-[320px]">
+    {player?.avatar ? (
+      <img
+        src={player.avatar}
+        alt={player.name}
+        className="h-full w-full object-cover"
+      />
+    ) : (
+      <div className="flex h-full w-full items-center justify-center bg-primary-container text-on-primary-container font-black text-6xl uppercase">
+        {player?.name?.charAt(0) || "?"}
+      </div>
+    )}
+  </div>
 
-            {/* Actions */}
-            <div className="absolute -bottom-5 -right-5 flex flex-col gap-2">
-              <label
-                className="
-                  flex h-12 w-12 cursor-pointer items-center
-                  justify-center rounded-full
-                  bg-[#003527] text-white shadow-lg
-                  transition hover:bg-[#064e3b]
-                "
-                title="Change photo"
-              >
-                <Camera size={19} />
+  {/* Actions */}
+  <div className="absolute -bottom-5 -right-5 flex flex-col gap-2">
+    <label
+      className="
+        flex h-12 w-12 cursor-pointer items-center
+        justify-center rounded-full
+        bg-[#003527] text-white shadow-lg
+        transition hover:bg-[#064e3b]
+      "
+      title="Change photo"
+    >
+      <Camera size={19} />
 
-                <input type="file" accept="image/*" className="hidden" onChange={onImageChange} />
-              </label>
+      <input
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={onImageChange}
+      />
+    </label>
 
-              <button
-                onClick={onNameChange}
-                className="
-                  flex h-12 w-12 items-center justify-center
-                  rounded-full bg-white text-[#003527]
-                  shadow-lg transition hover:bg-[#003527]
-                  hover:text-white
-                "
-                title="Change name"
-              >
-                <Edit3 size={18} />
-              </button>
-            </div>
-          </div>
+    <button
+      onClick={onNameChange}
+      className="
+        flex h-12 w-12 items-center justify-center
+        rounded-full bg-white text-[#003527]
+        shadow-lg transition hover:bg-[#003527]
+        hover:text-white
+      "
+      title="Change name"
+    >
+      <Edit3 size={18} />
+    </button>
+  </div>
+</div>
 
           {/* Identity */}
           <div className="pb-3">
@@ -88,7 +103,9 @@ export function PlayerHero({ player, onImageChange, onNameChange }) {
                 Player Profile
               </span>
 
-              <span className="text-xs uppercase tracking-[0.16em] text-[#586377]">{player?.team}</span>
+              <span className="text-xs uppercase tracking-[0.16em] text-[#586377]">
+                {player?.currentTeam}
+              </span>
             </div>
 
             <h1 className="text-6xl font-black uppercase leading-none tracking-[-0.06em] text-[#191c1e] sm:text-8xl lg:text-9xl">
@@ -99,7 +116,6 @@ export function PlayerHero({ player, onImageChange, onNameChange }) {
             <div className="mt-7 flex flex-wrap items-center gap-7">
               <div>
                 <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-[#586377]">Primary Role</p>
-
                 <p className="text-xl font-bold italic text-[#003527]">{player?.role}</p>
               </div>
 
@@ -107,8 +123,14 @@ export function PlayerHero({ player, onImageChange, onNameChange }) {
 
               <div>
                 <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-[#586377]">Team</p>
+                <p className="text-xl font-bold text-[#191c1e]">{player?.currentTeam}</p>
+              </div>
 
-                <p className="text-xl font-bold text-[#191c1e]">{player?.team}</p>
+              <div className="hidden h-10 w-px bg-[#bfc9c3] md:block" />
+
+              <div>
+                <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-[#586377]">Jersey Num</p>
+                <p className="text-xl font-bold text-[#191c1e]">{player?.jerseyNumber}</p>
               </div>
             </div>
           </div>

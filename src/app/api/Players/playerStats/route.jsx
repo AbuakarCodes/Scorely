@@ -21,8 +21,7 @@ export async function POST(req) {
 
     if (!token) return NextResponse.json(new ErrorResponse("Unauthorized"), { status: 401 })
 
-
-    const userId = token.id    
+    const userId = token.id
     const body = await req.json()
     const { playerId } = body
 
@@ -42,14 +41,7 @@ export async function POST(req) {
       _id: playerId,
       userId,
       isDeleted: false,
-    })
-      .select({
-        _id: 1,
-        name: 1,
-        avatar: 1,
-      })
-      .lean()
-
+    }).select("-_id -userId -teamId -isDeleted: -updatedAt -createdAt")
 
 
     if (!player) {
@@ -117,14 +109,8 @@ export async function POST(req) {
 
     // RESPONSE
     const response = new SuccessResponse("Player stats fetched successfully", {
-      player: {
-        id: player._id,
-        name: player.name,
-        avatar: player.avatar,
-      },
-
+      player,
       batting: battingStats,
-
       bowling: bowlingStats,
     })
 
