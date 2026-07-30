@@ -47,7 +47,7 @@ export function PlayerHero({ player, onImageChange, onNameChange }) {
           {/* Profile Image */}
           <div className="relative shrink-0">
             <div className="h-[360px] w-[280px] overflow-hidden rounded-2xl bg-[#e0e3e5] shadow-2xl sm:h-[420px] sm:w-[320px]">
-              <img src={player.avatar} alt={player.name} className="h-full w-full object-cover" />
+              <img src={player?.avatar} alt={player?.name} className="h-full w-full object-cover" />
             </div>
 
             {/* Actions */}
@@ -88,11 +88,11 @@ export function PlayerHero({ player, onImageChange, onNameChange }) {
                 Player Profile
               </span>
 
-              <span className="text-xs uppercase tracking-[0.16em] text-[#586377]">{player.team}</span>
+              <span className="text-xs uppercase tracking-[0.16em] text-[#586377]">{player?.team}</span>
             </div>
 
             <h1 className="text-6xl font-black uppercase leading-none tracking-[-0.06em] text-[#191c1e] sm:text-8xl lg:text-9xl">
-              {player.name}
+              {player?.name}
               <span className="text-[#003527]">.</span>
             </h1>
 
@@ -100,7 +100,7 @@ export function PlayerHero({ player, onImageChange, onNameChange }) {
               <div>
                 <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-[#586377]">Primary Role</p>
 
-                <p className="text-xl font-bold italic text-[#003527]">{player.role}</p>
+                <p className="text-xl font-bold italic text-[#003527]">{player?.role}</p>
               </div>
 
               <div className="hidden h-10 w-px bg-[#bfc9c3] md:block" />
@@ -108,7 +108,7 @@ export function PlayerHero({ player, onImageChange, onNameChange }) {
               <div>
                 <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-[#586377]">Team</p>
 
-                <p className="text-xl font-bold text-[#191c1e]">{player.team}</p>
+                <p className="text-xl font-bold text-[#191c1e]">{player?.team}</p>
               </div>
             </div>
           </div>

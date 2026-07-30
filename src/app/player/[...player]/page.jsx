@@ -25,7 +25,7 @@ export default function PlayerProfile() {
   } = usePlayerStats(playerId)
 
   const { data, loading, error } = usePlayerStatsAPI(playerId)
-  console.log(data.player)
+  console.log(data?.player)
 
   return (
     <main className="min-h-screen bg-[#f7f9fb] text-[#191c1e]">
