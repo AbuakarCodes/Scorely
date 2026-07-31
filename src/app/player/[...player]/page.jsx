@@ -31,13 +31,13 @@ export default function PlayerProfile() {
 
   return (
     <>
-      {loading && <PageLoader />}
+      
       <main className="min-h-screen bg-[#f7f9fb] text-[#191c1e]">
         <PlayerHero player={data?.player} onImageChange={handleImageChange} onNameChange={handleNameChange} />
 
         <div className="relative z-20 mx-auto max-w-7xl px-6 lg:px-12">
           <div className="-mt-12 rounded-t-3xl bg-[#f7f9fb] pt-12">
-            <BattingStats stats={data?.batting} />
+            <BattingStats stats={data?.batting} /> 
             <BowlingStats stats={data?.bowling} />
 
             <HeadToHead
