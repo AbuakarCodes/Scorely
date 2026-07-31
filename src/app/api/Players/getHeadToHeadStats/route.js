@@ -145,8 +145,6 @@ export async function POST(req) {
 
 export function getPlayerHeadToHeadStats(balls, playerId, opponentId) {
 
-    console.log({balls, playerId, opponentId});
-
   const defaultStats = {
     batting: {
       runs: 0,

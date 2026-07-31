@@ -138,11 +138,38 @@ export function getPlayerBowlingStats(balls, playerId) {
     // ----------------------------------------------
     // Maidens
     //
-    // A maiden = 6 legal balls and 0 runs conceded
+    // A maiden is a single OVER (6 consecutive legal
+    // deliveries bowled by this player within this
+    // innings) that conceded 0 runs. We must walk the
+    // over-by-over sequence rather than looking at the
+    // innings totals, since a bowler can bowl multiple
+    // overs in one innings.
     // ----------------------------------------------
 
-    if (innings.legalBalls >= 6 && innings.runsConceded === 0) {
-      maidens++
+    let legalInCurrentOver = 0
+    let runsInCurrentOver = 0
+
+    for (const ball of innings.balls) {
+      if (ball.isLegalDelivery) {
+        const isByeForRuns = ball.extraType === "bye" || ball.extraType === "legbye"
+        const ballRuns = isByeForRuns ? 0 : (ball.runs || 0) + (ball.extraRuns || 0)
+
+        legalInCurrentOver++
+        runsInCurrentOver += ballRuns
+
+        if (legalInCurrentOver === 6) {
+          if (runsInCurrentOver === 0) {
+            maidens++
+          }
+          legalInCurrentOver = 0
+          runsInCurrentOver = 0
+        }
+      } else {
+        // Wides/no-balls extend the over but still count
+        // toward runs conceded for maiden purposes.
+        const runsOnIllegalBall = (ball.runs || 0) + (ball.extraRuns || 0)
+        runsInCurrentOver += runsOnIllegalBall
+      }
     }
 
     // ----------------------------------------------
@@ -286,7 +313,7 @@ export function getPlayerBattingStats(balls, playerId) {
   }
 
   // Only balls where this player was batting
-  const playerBalls = balls.filter((ball) => ball.strikerId === playerId)
+  const playerBalls = balls.filter((ball) => ball?.strikerId === playerId)
 
   // -----------------------------------------
   // Group balls by MATCH + INNINGS
@@ -356,8 +383,7 @@ export function getPlayerBattingStats(balls, playerId) {
     // -----------------------------------------
     // Wicket
     //
-    // You said isWicket === true means striker
-    // got out.
+    // isWicket === true means striker got out.
     // -----------------------------------------
 
     if (ball.isWicket) {
@@ -404,8 +430,20 @@ export function getPlayerBattingStats(balls, playerId) {
       totalDismissals++
     }
 
+    // -----------------------------------------
     // Best score
-    if (innings.runs > bestScore) {
+    //
+    // Prefer a strictly higher score. On a TIE in
+    // runs, prefer the NOT OUT innings over the OUT
+    // one (standard cricket convention: 75* ranks
+    // above 75).
+    // -----------------------------------------
+
+    const isBetterScore =
+      innings.runs > bestScore ||
+      (innings.runs === bestScore && !innings.dismissed && !bestScoreNotOut)
+
+    if (isBetterScore) {
       bestScore = innings.runs
       bestScoreNotOut = !innings.dismissed
     }

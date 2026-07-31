@@ -43,7 +43,6 @@ export async function POST(req) {
       isDeleted: false,
     }).select("-_id -userId -teamId -isDeleted: -updatedAt -createdAt")
 
-
     if (!player) {
       return NextResponse.json(new ErrorResponse("Player not found"), {
         status: 404,
@@ -65,12 +64,7 @@ export async function POST(req) {
     // NO MATCHES
     if (matchIds.length === 0) {
       const response = new SuccessResponse("Player stats fetched successfully", {
-        player: {
-          id: player._id,
-          name: player.name,
-          avatar: player.avatar,
-        },
-
+        player,
         batting: getPlayerBattingStats([], playerId),
         bowling: getPlayerBowlingStats([], playerId),
       })
