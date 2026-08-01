@@ -1,3 +1,22 @@
+// How these functions work
+// "I have raw ball-by-ball data. I need to transform it into player statistics by looking
+//  at only that player's actions, grouping them correctly, and then calculating
+//  cricket formulas."
+
+// -----------------------------------
+// Raw Balls
+//     ↓
+// Filter player's balls
+//     ↓
+// Group balls into innings
+//     ↓
+// Calculate innings statistics
+//     ↓
+// Combine all innings
+//     ↓
+// Calculate final career statistics
+// -----------------------------------
+
 export function getPlayerBowlingStats(balls, playerId) {
   if (!Array.isArray(balls) || !playerId) {
     return {
@@ -17,17 +36,15 @@ export function getPlayerBowlingStats(balls, playerId) {
     }
   }
 
-  // --------------------------------------------------
   // Only balls bowled by this player
-  // --------------------------------------------------
 
   const playerBalls = balls.filter((ball) => ball.bowlerId === playerId)
 
-  // --------------------------------------------------
   // Group by MATCH + INNINGS
-  // --------------------------------------------------
 
   const inningsMap = new Map()
+
+  let consecutiveWicketTracker = 0
 
   for (const ball of playerBalls) {
     const key = `${ball.matchId}-${ball.inningsNumber}`
@@ -40,6 +57,7 @@ export function getPlayerBowlingStats(balls, playerId) {
         dotBalls: 0,
         boundariesConceded: 0,
         balls: [],
+        hatTrick: 0,
       })
     }
 
@@ -47,74 +65,37 @@ export function getPlayerBowlingStats(balls, playerId) {
 
     innings.balls.push(ball)
 
-    // --------------------------------------------------
-    // Legal delivery
-    // --------------------------------------------------
-
     if (ball.isLegalDelivery) {
       innings.legalBalls++
     }
 
-    // --------------------------------------------------
-    // Runs conceded
-    //
-    // Bye / leg-bye are NOT charged to bowler.
-    //
-    // Wide = extraRuns charged to bowler
-    // No-ball = extraRuns charged to bowler
-    // Normal runs = ball.runs
-    // --------------------------------------------------
-
     const isBye = ball.extraType === "bye" || ball.extraType === "legbye"
 
-    if (!isBye) {
-      innings.runsConceded += (ball.runs || 0) + (ball.extraRuns || 0)
-    }
-
-    // --------------------------------------------------
-    // Wickets
-    // --------------------------------------------------
+    if (!isBye) innings.runsConceded += (ball.runs || 0) + (ball.extraRuns || 0)
 
     if (ball.isWicket) {
+      consecutiveWicketTracker++
       innings.wickets++
+      if (consecutiveWicketTracker === 3) {
+        innings.hatTrick++
+        consecutiveWicketTracker = 0
+      }
     }
 
-    // --------------------------------------------------
-    // Dot balls
-    //
-    // No runs conceded by bowler.
-    // --------------------------------------------------
+    if ((ball.runs || 0) === 0 && (ball.extraRuns || 0) === 0) innings.dotBalls++
 
-    if ((ball.runs || 0) === 0 && (ball.extraRuns || 0) === 0) {
-      innings.dotBalls++
-    }
-
-    // --------------------------------------------------
-    // Boundaries conceded
-    //
-    // Count 4s and 6s hit by batsman.
-    // --------------------------------------------------
-
-    if (ball.runs === 4) {
-      innings.boundariesConceded++
-    }
-
-    if (ball.runs === 6) {
-      innings.boundariesConceded++
-    }
+    if (ball.runs === 4) innings.boundariesConceded++
+    if (ball.runs === 6) innings.boundariesConceded++
   }
 
   const inningsList = Array.from(inningsMap.values())
-
-  // --------------------------------------------------
-  // Aggregate values
-  // --------------------------------------------------
 
   let totalWickets = 0
   let totalLegalBalls = 0
   let totalRunsConceded = 0
   let totalDotBalls = 0
   let totalBoundaries = 0
+  let totalHatTriks_W = 0
 
   let totalWides = 0
   let totalNoBalls = 0
@@ -124,28 +105,16 @@ export function getPlayerBowlingStats(balls, playerId) {
   let bestWickets = 0
   let bestRuns = Infinity
 
-  // --------------------------------------------------
   // Process each innings
-  // --------------------------------------------------
-
   for (const innings of inningsList) {
     totalWickets += innings.wickets
     totalLegalBalls += innings.legalBalls
     totalRunsConceded += innings.runsConceded
     totalDotBalls += innings.dotBalls
     totalBoundaries += innings.boundariesConceded
+    totalHatTriks_W += innings.hatTrick
 
-    // ----------------------------------------------
     // Maidens
-    //
-    // A maiden is a single OVER (6 consecutive legal
-    // deliveries bowled by this player within this
-    // innings) that conceded 0 runs. We must walk the
-    // over-by-over sequence rather than looking at the
-    // innings totals, since a bowler can bowl multiple
-    // overs in one innings.
-    // ----------------------------------------------
-
     let legalInCurrentOver = 0
     let runsInCurrentOver = 0
 
@@ -172,13 +141,6 @@ export function getPlayerBowlingStats(balls, playerId) {
       }
     }
 
-    // ----------------------------------------------
-    // Best figures
-    //
-    // First prioritize wickets.
-    // If wickets are equal, lower runs is better.
-    // ----------------------------------------------
-
     if (
       innings.wickets > bestWickets ||
       (innings.wickets === bestWickets && innings.wickets > 0 && innings.runsConceded < bestRuns)
@@ -187,9 +149,7 @@ export function getPlayerBowlingStats(balls, playerId) {
       bestRuns = innings.runsConceded
     }
 
-    // ----------------------------------------------
     // Wides / No-balls
-    // ----------------------------------------------
 
     for (const ball of innings.balls) {
       if (ball.extraType === "wide") {
@@ -202,15 +162,7 @@ export function getPlayerBowlingStats(balls, playerId) {
     }
   }
 
-  // --------------------------------------------------
   // Overs
-  //
-  // Cricket overs are NOT decimal.
-  //
-  // 142 balls = 23.4 overs
-  // 143 balls = 23.5 overs
-  // 144 balls = 24.0 overs
-  // --------------------------------------------------
 
   const completeOvers = Math.floor(totalLegalBalls / 6)
 
@@ -218,99 +170,52 @@ export function getPlayerBowlingStats(balls, playerId) {
 
   const oversBowled = `${completeOvers}.${remainingBalls}`
 
-  // --------------------------------------------------
   // Decimal overs for calculations
-  // --------------------------------------------------
-
   const decimalOvers = totalLegalBalls / 6
 
-  // --------------------------------------------------
   // Economy
-  // --------------------------------------------------
-
   const economy = decimalOvers > 0 ? totalRunsConceded / decimalOvers : 0
 
-  // --------------------------------------------------
   // Bowling Average
   //
   // Runs conceded / wickets
-  // --------------------------------------------------
-
   const bowlingAverage = totalWickets > 0 ? totalRunsConceded / totalWickets : 0
 
-  // --------------------------------------------------
   // Bowling Strike Rate
   //
   // Legal balls / wickets
-  // --------------------------------------------------
-
   const bowlingStrikeRate = totalWickets > 0 ? totalLegalBalls / totalWickets : 0
 
-  // --------------------------------------------------
   // Matches
-  // --------------------------------------------------
 
   const matches = new Set(playerBalls.map((ball) => ball.matchId)).size
 
-  // --------------------------------------------------
   // Best Figures
-  // --------------------------------------------------
 
   const bestFigures = bestWickets > 0 ? `${bestWickets}/${bestRuns}` : "0/0"
 
-  // --------------------------------------------------
   // Return
-  // --------------------------------------------------
+
+  console.log({ totalHatTriks_W })
 
   return {
     totalWickets,
-
     oversBowled,
-
     economy: Number(economy.toFixed(2)),
-
     bowlingAverage: Number(bowlingAverage.toFixed(2)),
-
     bowlingStrikeRate: Number(bowlingStrikeRate.toFixed(2)),
-
     bestFigures,
-
     matches,
-
+    totalHatTriks_W,
     overs: oversBowled,
-
     runsConceded: totalRunsConceded,
-
     maidens,
-
     dotBalls: totalDotBalls,
-
     wides: totalWides,
-
     noBalls: totalNoBalls,
-
     boundariesConceded: totalBoundaries,
   }
 }
-
-// How these functions work
-// "I have raw ball-by-ball data. I need to transform it into player statistics by looking
-//  at only that player's actions, grouping them correctly, and then calculating
-//  cricket formulas."
-
-// -----------------------------------------
-// Raw Balls
-//     ↓
-// Filter player's balls
-//     ↓
-// Group balls into innings
-//     ↓
-// Calculate innings statistics
-//     ↓
-// Combine all innings
-//     ↓
-// Calculate final career statistics
-// -----------------------------------------
 
 export function getPlayerBattingStats(balls, playerId) {
   if (!Array.isArray(balls) || !playerId) {
@@ -378,7 +283,6 @@ export function getPlayerBattingStats(balls, playerId) {
     if (ball.isWicket) innings.dismissed = true
   }
 
-
   const inningsList = Array.from(inningsMap.values())
 
   const numberOfmatchesPlayed = new Set(playerBalls.map((ball) => ball.matchId)).size
@@ -389,7 +293,7 @@ export function getPlayerBattingStats(balls, playerId) {
   let totalSixes = 0
   let totalDismissals = 0
   let totalDotBalls = 0
-  let totalHatTriks_4s = 0 
+  let totalHatTriks_4s = 0
   let bestScore = 0
   let bestScoreNotOut = false
 
@@ -431,7 +335,6 @@ export function getPlayerBattingStats(balls, playerId) {
   const boundaryPercentage = totalRuns > 0 ? (boundaryRuns / totalRuns) * 100 : 0
 
   const runsPerMatch = numberOfmatchesPlayed > 0 ? totalRuns / numberOfmatchesPlayed : 0
-
 
   return {
     totalRuns,

@@ -231,7 +231,7 @@ export function BowlingStats({ stats }) {
 
         <StatCard label="Economy" value={stats?.economy ?? 0} highlight />
 
-        <StatCard label="Bowling Average" value={stats?.bowlingAverage ?? 0} />
+        <StatCard label="hat trick" value={stats?.totalHatTriks_W ?? 0} />
 
         <StatCard label="Bowling SR" value={stats?.bowlingStrikeRate ?? 0} />
 
