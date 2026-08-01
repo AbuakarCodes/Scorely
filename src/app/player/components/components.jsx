@@ -181,7 +181,7 @@ export function BattingStats({ stats }) {
           </div>
         </div>
 
-        <StatCard label="Average" value={stats?.average ?? 0} />
+        <StatCard label="hat Trick 4s" value={stats?.totalHatTriks_4s ?? 0} />
 
         <StatCard label="Strike Rate" value={stats?.strikeRate ?? 0} highlight />
 

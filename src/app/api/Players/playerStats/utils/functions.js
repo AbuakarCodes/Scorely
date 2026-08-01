@@ -293,11 +293,30 @@ export function getPlayerBowlingStats(balls, playerId) {
   }
 }
 
+// How these functions work
+// "I have raw ball-by-ball data. I need to transform it into player statistics by looking
+//  at only that player's actions, grouping them correctly, and then calculating
+//  cricket formulas."
+
+// -----------------------------------------
+// Raw Balls
+//     ↓
+// Filter player's balls
+//     ↓
+// Group balls into innings
+//     ↓
+// Calculate innings statistics
+//     ↓
+// Combine all innings
+//     ↓
+// Calculate final career statistics
+// -----------------------------------------
+
 export function getPlayerBattingStats(balls, playerId) {
   if (!Array.isArray(balls) || !playerId) {
     return {
       totalRuns: 0,
-      matchesPlayed: 0,
+      numberOfmatchesPlayed: 0,
       average: 0,
       strikeRate: 0,
       bestScore: "0",
@@ -315,14 +334,14 @@ export function getPlayerBattingStats(balls, playerId) {
   // Only balls where this player was batting
   const playerBalls = balls.filter((ball) => ball?.strikerId === playerId)
 
-  // -----------------------------------------
   // Group balls by MATCH + INNINGS
-  // -----------------------------------------
-
   const inningsMap = new Map()
 
+  // helping variable
+  let consecutiveFours = 0
+
   for (const ball of playerBalls) {
-    const key = `${ball.matchId}-${ball.inningsNumber}`
+    const key = `${ball?.matchId}-${ball?.inningsNumber}`
 
     if (!inningsMap.has(key)) {
       inningsMap.set(key, {
@@ -332,76 +351,37 @@ export function getPlayerBattingStats(balls, playerId) {
         sixes: 0,
         dismissed: false,
         dotBalls: 0,
+        hatTrick: 0,
       })
     }
 
     const innings = inningsMap.get(key)
 
+    // variables
+    const isBallFaced = ball.isLegalDelivery && ball.extraType !== "Bye" && ball.extraType !== "Legbye"
     const runs = ball.runs || 0
 
-    // -----------------------------------------
-    // Runs
-    // -----------------------------------------
-
     innings.runs += runs
-
-    // -----------------------------------------
-    // Balls faced
-    //
-    // Wide = not a ball faced
-    // No-ball = not a ball faced
-    // Bye/legbye = ball happened but batsman
-    // did not face it for batting stats
-    // -----------------------------------------
-
-    const isBallFaced = ball.isLegalDelivery && ball.extraType !== "bye" && ball.extraType !== "legbye"
-
-    if (isBallFaced) {
-      innings.ballsFaced++
-    }
-
-    // -----------------------------------------
-    // Dot ball
-    // -----------------------------------------
-
-    if (isBallFaced && runs === 0) {
-      innings.dotBalls++
-    }
-
-    // -----------------------------------------
-    // Boundaries
-    // -----------------------------------------
+    if (isBallFaced) innings.ballsFaced++
+    if (isBallFaced && runs === 0) innings.dotBalls++
 
     if (runs === 4) {
+      consecutiveFours++
       innings.fours++
+      if (consecutiveFours === 3) {
+        innings.hatTrick++
+        consecutiveFours = 0
+      }
     }
-
-    if (runs === 6) {
-      innings.sixes++
-    }
-
-    // -----------------------------------------
-    // Wicket
-    //
-    // isWicket === true means striker got out.
-    // -----------------------------------------
-
-    if (ball.isWicket) {
-      innings.dismissed = true
-    }
+    if (runs != 4) consecutiveFours = 0
+    if (runs === 6) innings.sixes++
+    if (ball.isWicket) innings.dismissed = true
   }
+
 
   const inningsList = Array.from(inningsMap.values())
 
-  // -----------------------------------------
-  // Matches played
-  // -----------------------------------------
-
-  const matchesPlayed = new Set(playerBalls.map((ball) => ball.matchId)).size
-
-  // -----------------------------------------
-  // Aggregate stats
-  // -----------------------------------------
+  const numberOfmatchesPlayed = new Set(playerBalls.map((ball) => ball.matchId)).size
 
   let totalRuns = 0
   let totalBallsFaced = 0
@@ -409,7 +389,7 @@ export function getPlayerBattingStats(balls, playerId) {
   let totalSixes = 0
   let totalDismissals = 0
   let totalDotBalls = 0
-
+  let totalHatTriks_4s = 0 
   let bestScore = 0
   let bestScoreNotOut = false
 
@@ -424,108 +404,50 @@ export function getPlayerBattingStats(balls, playerId) {
     totalFours += innings.fours
     totalSixes += innings.sixes
     totalDotBalls += innings.dotBalls
+    totalHatTriks_4s += innings.hatTrick
 
-    // Dismissals
-    if (innings.dismissed) {
-      totalDismissals++
-    }
+    if (innings.dismissed) totalDismissals++
 
-    // -----------------------------------------
     // Best score
-    //
-    // Prefer a strictly higher score. On a TIE in
-    // runs, prefer the NOT OUT innings over the OUT
-    // one (standard cricket convention: 75* ranks
-    // above 75).
-    // -----------------------------------------
-
     const isBetterScore =
-      innings.runs > bestScore ||
-      (innings.runs === bestScore && !innings.dismissed && !bestScoreNotOut)
+      innings.runs > bestScore || (innings.runs === bestScore && !innings.dismissed && !bestScoreNotOut)
 
     if (isBetterScore) {
       bestScore = innings.runs
       bestScoreNotOut = !innings.dismissed
     }
 
-    // 50
-    if (innings.runs >= 50 && innings.runs < 100) {
-      fifties++
-    }
-
-    // 100
-    if (innings.runs >= 100) {
-      hundreds++
-    }
-
-    // Duck = 0 runs + dismissed
-    if (innings.runs === 0 && innings.dismissed) {
-      ducks++
-    }
+    if (innings.runs >= 50 && innings.runs < 100) fifties++
+    if (innings.runs >= 100) hundreds++
+    if (innings.runs === 0 && innings.dismissed) ducks++
   }
-
-  // -----------------------------------------
-  // Strike Rate
-  // -----------------------------------------
 
   const strikeRate = totalBallsFaced > 0 ? (totalRuns / totalBallsFaced) * 100 : 0
 
-  // -----------------------------------------
-  // Batting Average
-  //
-  // Runs / times dismissed
-  // -----------------------------------------
-
   const average = totalDismissals > 0 ? totalRuns / totalDismissals : totalRuns
-
-  // -----------------------------------------
-  // Boundary %
-  //
-  // How much of player's runs came from
-  // fours + sixes
-  // -----------------------------------------
 
   const boundaryRuns = totalFours * 4 + totalSixes * 6
 
   const boundaryPercentage = totalRuns > 0 ? (boundaryRuns / totalRuns) * 100 : 0
 
-  // -----------------------------------------
-  // Runs / Match
-  // -----------------------------------------
+  const runsPerMatch = numberOfmatchesPlayed > 0 ? totalRuns / numberOfmatchesPlayed : 0
 
-  const runsPerMatch = matchesPlayed > 0 ? totalRuns / matchesPlayed : 0
-
-  // -----------------------------------------
-  // Return
-  // -----------------------------------------
 
   return {
     totalRuns,
-
-    matchesPlayed,
-
+    numberOfmatchesPlayed,
     average: Number(average.toFixed(2)),
-
     strikeRate: Number(strikeRate.toFixed(2)),
-
     bestScore: `${bestScore}${bestScoreNotOut ? "*" : ""}`,
-
     boundaryPercentage: Number(boundaryPercentage.toFixed(2)),
-
-    matches: matchesPlayed,
-
+    matches: numberOfmatchesPlayed,
     fours: totalFours,
-
     sixes: totalSixes,
-
     fifties,
-
     hundreds,
-
+    totalHatTriks_4s,
     ducks,
-
     dotBalls: totalDotBalls,
-
     runsPerMatch: Number(runsPerMatch.toFixed(2)),
   }
 }
