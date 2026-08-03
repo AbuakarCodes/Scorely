@@ -53,7 +53,6 @@ export const updatePlayerTeam = createAsyncThunk(
 export const fetchPlayerRankings = createAsyncThunk(
   "players/fetchPlayerRankings",
   async (type, { rejectWithValue }) => {
-    console.log("FFFFF")
     try {
       const { data } = await axios.post("/api/Players/rankings", { type }, { withCredentials: true })
       console.log(data.data)

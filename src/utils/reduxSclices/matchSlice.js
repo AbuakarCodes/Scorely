@@ -458,8 +458,8 @@ const matchSlice = createSlice({
 
       const oversCompleted = hasOversCompleted({ over, TotalOvers, isLegalDelivery, ballInOver })
       const teamAllWicketsDown = lastPlayerPlayed
-        ? battingTeamPlayers.length - secondInningsWickets === 0
-        : battingTeamPlayers.length - secondInningsWickets === secondInningsWickets - 1
+        ? battingTeamPlayers.length === secondInningsWickets
+        : battingTeamPlayers.length - 1 === secondInningsWickets
 
       if (!isSecondInningsStarted) return
 
