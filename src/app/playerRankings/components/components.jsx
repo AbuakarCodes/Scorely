@@ -1,38 +1,25 @@
-"use client";
+"use client"
 
-import {
-  ArrowDown,
-  ArrowUp,
-  Minus,
-  Search,
-  Shield,
-  TrendingUp,
-} from "lucide-react";
+import { ArrowDown, ArrowUp, Minus, Search, Shield, TrendingUp } from "lucide-react"
 
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import { usePlayerRankings } from "../hooks/hooks"; 
-function PageHeader() {
+import { usePlayerRankings } from "../hooks/hooks"
+import { useGetPlayerIds } from "../page"
+import { useEffect } from "react"
+export function PageHeader() {
   return (
     <div className="mb-12">
-      <h1 className="mt-2 text-5xl font-bold tracking-tight text-on-surface">
-        Player Rankings
-      </h1>
+      <h1 className="mt-2 text-5xl font-bold tracking-tight text-on-surface">Player Rankings</h1>
       <p className="mt-3 text-sm text-on-surface-variant">
         Compare the best performers across batting and bowling.
       </p>
     </div>
-  );
+  )
 }
 
-function ModeSwitcher({ mode, onChange }) {
+export function ModeSwitcher({ mode, onChange }) {
   return (
     <div className="flex w-fit gap-1 rounded-full bg-surface-container-low p-1.5">
       <Button
@@ -59,15 +46,10 @@ function ModeSwitcher({ mode, onChange }) {
         Bowling
       </Button>
     </div>
-  );
+  )
 }
 
-function FilterBar({
-  filters,
-  rankBy,
-  setRankBy,
-  mode,
-}) {
+export function FilterBar({ filters, rankBy, setRankBy, mode }) {
   return (
     <div className="grid grid-cols-1 gap-6 rounded-2xl bg-surface-container-low p-6 md:grid-cols-5">
       <div className="space-y-2">
@@ -97,10 +79,10 @@ function FilterBar({
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-function HeroPlayer({ hero, mode }) {
+export function HeroPlayer({ hero, mode }) {
   return (
     <div className="mb-16">
       <div className="group relative overflow-hidden rounded-[2rem] border border-on-primary/5 bg-primary p-8 shadow-xl transition-all duration-500 hover:shadow-2xl md:p-12">
@@ -115,20 +97,14 @@ function HeroPlayer({ hero, mode }) {
         </div>
 
         <div className="absolute right-0 top-0 p-8 opacity-10 transition-opacity group-hover:opacity-20">
-          <span className="select-none text-[16rem] font-black italic leading-none text-on-primary">
-            1
-          </span>
+          <span className="select-none text-[16rem] font-black italic leading-none text-on-primary">1</span>
         </div>
 
         <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:gap-16">
           <div className="relative shrink-0">
             <div className="h-48 w-48 overflow-hidden rounded-full border-8 border-on-primary/10 bg-primary-container shadow-2xl transition-transform duration-500 group-hover:scale-105 md:h-64 md:w-64">
               {hero.image ? (
-                <img
-                  src={hero.image}
-                  alt={hero.name}
-                  className="h-full w-full object-cover"
-                />
+                <img src={hero.image} alt={hero.name} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
                   <Shield className="h-20 w-20 text-on-primary/50" />
@@ -150,19 +126,13 @@ function HeroPlayer({ hero, mode }) {
               </span>
             </div>
 
-            <h2 className="text-5xl font-black tracking-tight md:text-7xl">
-              {hero.name}
-            </h2>
+            <h2 className="text-5xl font-black tracking-tight md:text-7xl">{hero.name}</h2>
 
-            <p className="mb-8 mt-2 text-xl font-medium text-on-primary-container md:text-2xl">
-              {hero.team}
-            </p>
+            <p className="mb-8 mt-2 text-xl font-medium text-on-primary-container md:text-2xl">{hero.team}</p>
 
             <div className="grid grid-cols-2 gap-8 md:gap-12">
               <div className="flex flex-col">
-                <span className="text-4xl font-black tracking-tighter md:text-6xl">
-                  {hero.stat}
-                </span>
+                <span className="text-4xl font-black tracking-tighter md:text-6xl">{hero.stat}</span>
 
                 <span className="mt-1 text-xs font-bold uppercase tracking-widest text-on-primary/50">
                   {hero.label}
@@ -184,17 +154,17 @@ function HeroPlayer({ hero, mode }) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-function Trend({ type, value }) {
+export function Trend({ type, value }) {
   if (type === "up") {
     return (
       <span className="flex items-center justify-end gap-1 text-xs font-bold text-primary">
         <ArrowUp className="h-4 w-4" />
         {value}
       </span>
-    );
+    )
   }
 
   if (type === "down") {
@@ -203,7 +173,7 @@ function Trend({ type, value }) {
         <ArrowDown className="h-4 w-4" />
         {value}
       </span>
-    );
+    )
   }
 
   return (
@@ -211,17 +181,12 @@ function Trend({ type, value }) {
       <Minus className="h-4 w-4" />
       {value}
     </span>
-  );
+  )
 }
 
-function PlayerTable({
-  players,
-  headers,
-  getStats,
-  mode,
-}) {
+export function PlayerTable({ players, headers, getStats, mode }) {
   if (!players.length) {
-    return <EmptyState />;
+    return <EmptyState />
   }
 
   return (
@@ -259,13 +224,10 @@ function PlayerTable({
 
           <tbody className="divide-y divide-surface-container-high/50">
             {players.map((player) => {
-              const stats = getStats(player);
+              const stats = getStats(player)
 
               return (
-                <tr
-                  key={player.name}
-                  className="group transition-colors hover:bg-surface-container-low"
-                >
+                <tr key={player.name} className="group transition-colors hover:bg-surface-container-low">
                   <td className="px-8 py-6">
                     <span className="text-xl font-black text-on-surface-variant transition-colors group-hover:text-primary">
                       {String(player.rank).padStart(2, "0")}
@@ -276,11 +238,7 @@ function PlayerTable({
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-surface-container-high">
                         {player.image ? (
-                          <img
-                            src={player.image}
-                            alt={player.name}
-                            className="h-full w-full object-cover"
-                          />
+                          <img src={player.image} alt={player.name} className="h-full w-full object-cover" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
                             <Shield className="h-5 w-5 text-on-surface-variant" />
@@ -289,9 +247,7 @@ function PlayerTable({
                       </div>
 
                       <div>
-                        <p className="font-bold leading-none text-on-surface">
-                          {player.name}
-                        </p>
+                        <p className="font-bold leading-none text-on-surface">{player.name}</p>
 
                         <p className="mt-1 text-xs text-on-surface-variant">
                           {mode === "batting" ? "Batsman" : "Bowler"}
@@ -300,9 +256,7 @@ function PlayerTable({
                     </div>
                   </td>
 
-                  <td className="px-8 py-6 text-sm font-medium text-on-surface">
-                    {player.team}
-                  </td>
+                  <td className="px-8 py-6 text-sm font-medium text-on-surface">{player.team}</td>
 
                   {stats.map((stat, index) => (
                     <td
@@ -316,31 +270,26 @@ function PlayerTable({
                   ))}
 
                   <td className="px-8 py-6 text-right">
-                    <Trend
-                      type={player.trend}
-                      value={player.trendValue}
-                    />
+                    <Trend type={player.trend} value={player.trendValue} />
                   </td>
                 </tr>
-              );
+              )
             })}
           </tbody>
         </table>
       </div>
     </div>
-  );
+  )
 }
 
-function EmptyState({ onReset }) {
+export function EmptyState({ onReset }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-3xl bg-surface-container-lowest py-24 text-center">
       <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-surface-container-low">
         <Search className="h-10 w-10 text-on-surface-variant" />
       </div>
 
-      <h3 className="text-2xl font-bold text-on-surface">
-        No players found
-      </h3>
+      <h3 className="text-2xl font-bold text-on-surface">No players found</h3>
 
       <p className="mt-2 max-w-sm text-on-surface-variant">
         We couldn't find any players matching your current filters.
@@ -355,56 +304,6 @@ function EmptyState({ onReset }) {
         </Button>
       )}
     </div>
-  );
+  )
 }
 
-export default function PlayerRankings() {
-  const {
-    mode,
-    rankBy,
-    filters,
-    headers,
-    players,
-    hero,
-    getStats,
-    setRankBy,
-    handleModeChange,
-    resetFilters,
-  } = usePlayerRankings();
-
-  return (
-    <main className="min-h-screen bg-surface px-6 pb-12 pt-12 text-on-surface md:px-12">
-      <div className="mx-auto w-full max-w-7xl">
-        <PageHeader />
-
-        <section className="mb-12 space-y-6">
-          <div className="flex items-center justify-between">
-            <ModeSwitcher
-              mode={mode}
-              onChange={handleModeChange}
-            />
-          </div>
-
-          <FilterBar
-            mode={mode}
-            filters={filters}
-            rankBy={rankBy}
-            setRankBy={setRankBy}
-          />
-        </section>
-
-        <HeroPlayer
-          hero={hero}
-          mode={mode}
-        />
-
-        <PlayerTable
-          players={players}
-          headers={headers}
-          getStats={getStats}
-          mode={mode}
-        />
-      </div>
-    </main>
-  );
-}

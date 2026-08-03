@@ -5,10 +5,11 @@ import { connectDB } from "@/lib/db"
 
 import Match from "@/Server/models/matchSchema.js"
 import Ball from "@/Server/models/BallScheme.js"
+import Player from "@/Server/models/PlayersSchema"
 
 import { ErrorResponse, SuccessResponse } from "@/Server/Response/response"
+import { getplayesStats } from "./utils/utils"
 
-import { getBattingRankings, getBowlingRankings } from "./utils/utils"
 export async function POST(req) {
   try {
     await connectDB()
@@ -36,7 +37,7 @@ export async function POST(req) {
     const matches = await Match.find({ UserId }).lean()
 
     if (matches.length === 0) {
-      return NextResponse.json(ErrorResponse("No matches found"), { status: 404 })
+      return NextResponse.json(new ErrorResponse("No matches found"), { status: 404 })
     }
 
     const matchIds = matches.map((match) => match?.matchId)
@@ -47,49 +48,44 @@ export async function POST(req) {
       },
     }).lean()
 
-    const playersMap = new Map()
+    // Get all the participents id
+    const [strikerIds, nonStrikerIds, bowlerIds] = await Promise.all([
+      Ball.distinct("strikerId", { matchId: { $in: matchIds } }),
+      Ball.distinct("nonStrikerId", { matchId: { $in: matchIds } }),
+      Ball.distinct("bowlerId", { matchId: { $in: matchIds } }),
+    ])
 
-    matches.forEach((match) => {
-      match.teams?.forEach((team) => {
-        team.players?.forEach((player) => {
-          const id = String(player.playerId || player._id || player.id)
+    // Remove Dublications
+    const playerIds = [...new Set([...strikerIds, ...nonStrikerIds, ...bowlerIds])]
 
-          if (!playersMap.has(id)) {
-            playersMap.set(id, {
-              ...player,
-              _id: id,
-            })
-          }
-        })
-      })
+    // filtering deleted players id's
+    const validPlayers = (
+      await Player.find(
+        {
+          _id: {
+            $in: playerIds.filter(Boolean),
+          },
+          isDeleted: false,
+        },
+        {
+          _id: 1,
+          name: 1,
+          avatar:1,
+          role:1
+        },
+      ).lean()
+    ).map((P) => {
+      return { ...P, _id: P._id.toString() }
     })
 
-    const players = Array.from(playersMap.values())
+    const stats = getplayesStats(balls, validPlayers, type)
 
-    const data = type === "batting" ? getBattingRankings(balls, players) : getBowlingRankings(balls, players)
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: `${type} rankings fetched successfully`,
-        type,
-        data,
-      },
-      {
-        status: 200,
-      },
-    )
+    return NextResponse.json(new SuccessResponse("All Players Stats", stats), { status: 200 })
   } catch (error) {
-    console.log("PLAYER RANKINGS ERROR:", error)
-
-    return NextResponse.json(
-      {
-        success: false,
-        message: error?.message || "Failed to fetch player rankings",
-      },
-      {
-        status: 500,
-      },
-    )
+    console.log(error)
+    return NextResponse.json(new ErrorResponse("internal Server Error"), { status: 500 })
   }
 }
+
+
+

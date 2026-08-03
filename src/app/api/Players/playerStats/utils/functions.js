@@ -218,6 +218,8 @@ export function getPlayerBowlingStats(balls, playerId) {
 }
 
 export function getPlayerBattingStats(balls, playerId) {
+
+
   if (!Array.isArray(balls) || !playerId) {
     return {
       totalRuns: 0,

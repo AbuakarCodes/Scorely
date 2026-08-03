@@ -50,10 +50,31 @@ export const updatePlayerTeam = createAsyncThunk(
   },
 )
 
+export const fetchPlayerRankings = createAsyncThunk(
+  "players/fetchPlayerRankings",
+  async (type, { rejectWithValue }) => {
+    console.log("FFFFF")
+    try {
+      const { data } = await axios.post("/api/Players/rankings", { type }, { withCredentials: true })
+      console.log(data.data)
+      return {
+        type,
+        rankings: data?.data || [],
+      }
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Something went wrong")
+    }
+  },
+)
+
 const initialState = {
   players: [],
   loading: false,
   error: null,
+  battingRanks: [],
+  BowlingRanks: [],
+  Rank_Loading: false,
+  Rank_error: null,
   deletePlayer_Loading: false,
   deletePlayer_error: null,
   updatePlayerTeam_Loading: false,
@@ -131,6 +152,26 @@ const playerSlice = createSlice({
       .addCase(updatePlayerTeam.rejected, (state, action) => {
         state.updatePlayerTeam_Loading = false
         state.updatePlayerTeam_Error = action.payload
+      })
+
+    // get Rankings
+    builder
+      .addCase(fetchPlayerRankings.pending, (state) => {
+        state.Rank_Loading = true
+        state.Rank_error = null
+      })
+      .addCase(fetchPlayerRankings.fulfilled, (state, action) => {
+        state.Rank_Loading = false
+
+        if (action.payload.type === "batting") {
+          state.battingRanks = action.payload.rankings
+        } else {
+          state.BowlingRanks = action.payload.rankings
+        }
+      })
+      .addCase(fetchPlayerRankings.rejected, (state, action) => {
+        state.Rank_Loading = false
+        state.Rank_error = action.payload
       })
   },
 })

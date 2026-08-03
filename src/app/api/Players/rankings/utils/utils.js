@@ -1,147 +1,119 @@
-export function getBowlingRankings(balls, players) {
-  const stats = {}
-
-  players.forEach((player) => {
-    stats[String(player._id)] = {
-      playerId: player._id,
-      name: player.name,
-      role: player.role,
-      country: player.country,
+export function getPlayerBowlingRankingStats(balls, player) {
+  if (!Array.isArray(balls) || typeof player !== "object") {
+    return {
+      nmae: player?.name,
       wickets: 0,
-      runsConceded: 0,
-      balls: 0,
-      overs: 0,
       economy: 0,
-      average: 0,
       strikeRate: 0,
+      overs: "0.0",
+      avatar: "",
+      role: "",
     }
-  })
+  }
 
-  balls.forEach((ball) => {
-    const playerId = String(ball.bowlerId)
-    const player = stats[playerId]
+  const playerId = player?._id
 
-    if (!player) return
+  const playerBalls = balls.filter((ball) => ball.bowlerId === playerId)
 
-    const runs = Number(ball.runs || 0)
-    const extraRuns = Number(ball.extraRuns || 0)
+  let wickets = 0
+  let legalBalls = 0
+  let runsConceded = 0
 
+  for (const ball of playerBalls) {
     if (ball.isLegalDelivery) {
-      player.balls += 1
+      legalBalls++
     }
 
-    if (
-      ball.extraType !== "Bye" &&
-      ball.extraType !== "Legbye"
-    ) {
-      player.runsConceded += runs + extraRuns
-    }
+    const isBye = ball.extraType === "bye" || ball.extraType === "legbye"
 
-    if (
-      ball.isWicket &&
-      ball.extraType !== "Run Out" &&
-      ball.extraType !== "Retired Hurt"
-    ) {
-      player.wickets += 1
-    }
-  })
-
-  Object.values(stats).forEach((player) => {
-    player.overs = Number(
-      `${Math.floor(player.balls / 6)}.${player.balls % 6}`
-    )
-
-    player.economy = player.balls
-      ? Number(
-          ((player.runsConceded / player.balls) * 6).toFixed(2)
-        )
-      : 0
-
-    player.average = player.wickets
-      ? Number(
-          (player.runsConceded / player.wickets).toFixed(2)
-        )
-      : 0
-
-    player.strikeRate = player.wickets
-      ? Number(
-          (player.balls / player.wickets).toFixed(2)
-        )
-      : 0
-  })
-
-  return Object.values(stats)
-}
-
-export function getBattingRankings(balls, players) {
-  const stats = {}
-
-  players.forEach((player) => {
-    stats[String(player._id)] = {
-      playerId: player._id,
-      name: player.name,
-      role: player.role,
-      country: player.country,
-      runs: 0,
-      balls: 0,
-      average: 0,
-      strikeRate: 0,
-      best: 0,
-      fours: 0,
-      sixes: 0,
-      dismissals: 0,
-    }
-  })
-
-  balls.forEach((ball) => {
-    const playerId = String(ball.strikerId)
-    const player = stats[playerId]
-
-    if (!player) return
-
-    const runs = Number(ball.runs || 0)
-    const extraRuns = Number(ball.extraRuns || 0)
-
-    if (ball.extraType !== "Wide") {
-      player.runs += runs
-    }
-
-    if (ball.isLegalDelivery) {
-      player.balls += 1
-    }
-
-    if (runs === 4) {
-      player.fours += 1
-    }
-
-    if (runs === 6) {
-      player.sixes += 1
+    if (!isBye) {
+      runsConceded += (ball.runs || 0) + (ball.extraRuns || 0)
     }
 
     if (ball.isWicket) {
-      player.dismissals += 1
+      wickets++
     }
-  })
+  }
 
-  Object.values(stats).forEach((player) => {
-    player.average = player.dismissals
-      ? Number((player.runs / player.dismissals).toFixed(2))
-      : player.runs
+  const overs = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`
 
-    player.strikeRate = player.balls
-      ? Number(((player.runs / player.balls) * 100).toFixed(2))
-      : 0
+  const decimalOvers = legalBalls / 6
 
-    player.best = Math.max(
-      player.best,
-      ...balls
-        .filter(
-          (ball) =>
-            String(ball.strikerId) === String(player.playerId)
-        )
-        .map((ball) => Number(ball.runs || 0))
-    )
-  })
+  const economy = decimalOvers > 0 ? runsConceded / decimalOvers : 0
 
-  return Object.values(stats)
+  const strikeRate = wickets > 0 ? legalBalls / wickets : 0
+
+  return {
+    player: player?.name,
+    wickets,
+    economy: Number(economy.toFixed(2)),
+    strikeRate: Number(strikeRate.toFixed(2)),
+    overs,
+    avtar: player?.avatar,
+    role: player?.role,
+  }
+}
+
+export function getPlayerBattingRankingStats(balls, player) {
+  if (!Array.isArray(balls) || typeof player !== "object") {
+    return {
+      name: player.name,
+      runs: 0,
+      average: 0,
+      strikeRate: 0,
+      fours: 0,
+      avatar: "",
+      role: "",
+    }
+  }
+
+  const playerId = player?._id
+
+  const playerBalls = balls.filter((ball) => ball.strikerId === playerId)
+
+  let runs = 0
+  let ballsFaced = 0
+  let fours = 0
+  let dismissals = 0
+
+  for (const ball of playerBalls) {
+    const faced = ball.isLegalDelivery && ball.extraType !== "bye" && ball.extraType !== "legbye"
+
+    if (faced) ballsFaced++
+
+    runs += ball.runs || 0
+
+    if (ball.runs === 4) fours++
+
+    if (ball.isWicket) dismissals++
+  }
+
+  const average = dismissals > 0 ? runs / dismissals : runs
+
+  const strikeRate = ballsFaced > 0 ? (runs / ballsFaced) * 100 : 0
+
+  return {
+    name: player.name,
+    runs,
+    average: Number(average.toFixed(2)),
+    strikeRate: Number(strikeRate.toFixed(2)),
+    fours,
+    avtar: player?.avatar,
+    role: player?.role,
+  }
+}
+
+export function getplayesStats(balls, validPlayers, type) {
+  if (!Array.isArray(balls) || !Array.isArray(validPlayers) || type == undefined) return
+
+  if (type == "batting") {
+    return validPlayers.map((_, idx) => {
+      return getPlayerBattingRankingStats(balls, validPlayers[idx])
+    })
+  }
+  if (type === "bowling") {
+    return validPlayers.map((_, idx) => {
+      return getPlayerBowlingRankingStats(balls, validPlayers[idx])
+    })
+  }
 }

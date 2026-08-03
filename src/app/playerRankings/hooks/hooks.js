@@ -1,6 +1,8 @@
-"use client";
+"use client"
 
-import { useMemo, useState } from "react";
+import { fetchPlayerRankings } from "@/utils/reduxSclices/playerSlice"
+import { useEffect, useMemo, useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
 
 const battingData = {
   hero: {
@@ -70,7 +72,7 @@ const battingData = {
       trendValue: 3,
     },
   ],
-};
+}
 
 const bowlingData = {
   hero: {
@@ -138,7 +140,7 @@ const bowlingData = {
       trendValue: 1,
     },
   ],
-};
+}
 
 const battingFilters = [
   { value: "average", label: "Batting Average" },
@@ -146,7 +148,7 @@ const battingFilters = [
   { value: "runs", label: "Total Runs" },
   { value: "fours", label: "Most 4s" },
   { value: "sixes", label: "Most 6s" },
-];
+]
 
 const bowlingFilters = [
   { value: "wickets", label: "Most Wickets" },
@@ -154,35 +156,44 @@ const bowlingFilters = [
   { value: "average", label: "Bowling Average" },
   { value: "strikeRate", label: "Bowling Strike Rate" },
   { value: "overs", label: "Most Overs" },
-];
+]
 
 export function usePlayerRankings() {
-  const [mode, setMode] = useState("batting");
-  const [rankBy, setRankBy] = useState("average");
+  const [mode, setMode] = useState("batting")
+  const [rankBy, setRankBy] = useState("average")
 
-  const data = mode === "batting" ? battingData : bowlingData;
+  const dispatch = useDispatch()
+  const { battingRanks } = useSelector((state) => state?.players)
+  console.log({ battingRanks })
 
-  const filters = mode === "batting" ? battingFilters : bowlingFilters;
+  const data = mode === "batting" ? battingData : bowlingData
 
+  const filters = mode === "batting" ? battingFilters : bowlingFilters
+
+  useEffect( () => {
+    console.log("DDD");
+    fetchPlayerRankings(mode)
+    
+  }, [battingRanks])
+
+  // Player sorting
   const players = useMemo(() => {
     const sorted = [...data.players].sort((a, b) => {
       if (rankBy === "economy" || rankBy === "average") {
-        return a[rankBy] - b[rankBy];
+        return a[rankBy] - b[rankBy]
       }
 
-      return b[rankBy] - a[rankBy];
-    });
+      return b[rankBy] - a[rankBy]
+    })
 
     return sorted.map((player, index) => ({
       ...player,
       rank: index + 1,
-    }));
-  }, [data.players, rankBy]);
+    }))
+  }, [data.players, rankBy])
 
   const headers =
-    mode === "batting"
-      ? ["Runs", "Avg", "SR", "4s", "6s"]
-      : ["Wickets", "Econ", "Avg", "SR", "Overs"];
+    mode === "batting" ? ["Runs", "Avg", "SR", "4s", "6s"] : ["Wickets", "Econ", "Avg", "SR", "Overs"]
 
   const getStats = (player) => {
     if (mode === "batting") {
@@ -192,7 +203,7 @@ export function usePlayerRankings() {
         player.strikeRate.toFixed(1),
         player.fours,
         player.sixes,
-      ];
+      ]
     }
 
     return [
@@ -201,18 +212,18 @@ export function usePlayerRankings() {
       player.average.toFixed(1),
       player.strikeRate.toFixed(1),
       player.overs,
-    ];
-  };
+    ]
+  }
 
   const handleModeChange = (newMode) => {
-    setMode(newMode);
-    setRankBy(newMode === "batting" ? "average" : "wickets");
-  };
+    setMode(newMode)
+    setRankBy(newMode === "batting" ? "average" : "wickets")
+  }
 
   const resetFilters = () => {
-    setMode("batting");
-    setRankBy("average");
-  };
+    setMode("batting")
+    setRankBy("average")
+  }
 
   return {
     mode,
@@ -225,5 +236,5 @@ export function usePlayerRankings() {
     setRankBy,
     handleModeChange,
     resetFilters,
-  };
+  }
 }

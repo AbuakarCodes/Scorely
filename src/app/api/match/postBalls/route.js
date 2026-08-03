@@ -7,9 +7,9 @@ import { ErrorResponse } from "@/Server/Response/response"
 import { getToken } from "next-auth/jwt"
 
 export async function POST(req) {
-  const dbSession = await mongoose.startSession()
   try {
     await connectDB()
+    const dbSession = await mongoose.startSession()
 
     const token = await getToken({
       req,
@@ -82,7 +82,6 @@ export async function POST(req) {
       }
     })
 
-    console.log(balls)
 
     // BALL VALIDATION
 
@@ -93,7 +92,6 @@ export async function POST(req) {
       if (typeof ball.runs !== "number") throw new Error("Invalid runs value")
       if (typeof ball.isLegalDelivery !== "boolean") throw new Error("Invalid delivery type")
     }
-
 
     // DATABASE TRANSACTION
     dbSession.startTransaction()
@@ -130,14 +128,6 @@ export async function POST(req) {
 
     console.log(error)
 
-    return NextResponse.json(
-      {
-        success: false,
-        message: error.message,
-      },
-      {
-        status: 500,
-      },
-    )
+    return NextResponse.json(new ErrorResponse("Internal Server Error"), { status: 500 })
   }
 }
