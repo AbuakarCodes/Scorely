@@ -7,9 +7,10 @@ import { ErrorResponse, SuccessResponse } from "@/Server/Response/response"
 import { getToken } from "next-auth/jwt"
 
 export async function POST(req) {
+  let dbSession
   try {
     await connectDB()
-    const dbSession = await mongoose.startSession()
+     dbSession = await mongoose.startSession()
 
     const token = await getToken({
       req,
