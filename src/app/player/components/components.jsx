@@ -436,29 +436,29 @@ export function HeadToHead({
                       <UserRound size={19} />
                     </div>
 
-                    <h3 className="text-lg font-bold uppercase tracking-tight">Batting vs {opponent.name}</h3>
+                    <h3 className="text-lg font-bold uppercase tracking-tight">Batting vs {opponent?.name}</h3>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <H2HStat label="Runs" value={batting.runs} emphasis />
+                    <H2HStat label="Runs" value={batting?.runs} emphasis />
 
-                    <H2HStat label="Balls Faced" value={batting.ballsFaced} />
+                    <H2HStat label="Balls Faced" value={batting?.ballsFaced} />
 
-                    <H2HStat label="Strike Rate" value={batting.strikeRate} />
+                    <H2HStat label="Strike Rate" value={batting?.strikeRate} />
 
-                    <H2HStat label="Average" value={batting.average} />
+                    <H2HStat label="runs / over" value={batting?.average} />
 
-                    <H2HStat label="4s" value={batting.fours} />
+                    <H2HStat label="4s" value={batting?.fours} />
 
-                    <H2HStat label="6s" value={batting.sixes} />
+                    <H2HStat label="6s" value={batting?.sixes} />
 
-                    <H2HStat label="Dismissals" value={batting.dismissals} />
+                    <H2HStat label="Dismissals" value={batting?.dismissals} />
 
-                    <H2HStat label="Dot Balls" value={batting.dotBalls} />
+                    <H2HStat label="Dot Balls" value={batting?.dotBalls} />
 
-                    <H2HStat label="Boundary %" value={`${batting.boundaryPercentage}%`} />
+                    <H2HStat label="Boundary %" value={`${batting?.boundaryPercentage}%`} />
 
-                    <H2HStat label="Highest Score" value={batting.highestScore} />
+                    <H2HStat label="Highest Score" value={batting?.highestScore} />
                   </div>
                 </div>
 
@@ -468,35 +468,35 @@ export function HeadToHead({
                       <Swords size={19} />
                     </div>
 
-                    <h3 className="text-lg font-bold uppercase tracking-tight">Bowling vs {opponent.name}</h3>
+                    <h3 className="text-lg font-bold uppercase tracking-tight">Bowling vs {opponent?.name}</h3>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <H2HStat label="Overs" value={bowling.overs} emphasis />
+                    <H2HStat label="Overs" value={bowling?.overs} emphasis />
 
-                    <H2HStat label="Balls" value={bowling.balls} />
+                    <H2HStat label="Balls" value={bowling?.balls} />
 
-                    <H2HStat label="Runs Conceded" value={bowling.runsConceded} />
+                    <H2HStat label="Runs Conceded" value={bowling?.runsConceded} />
 
-                    <H2HStat label="Wickets" value={bowling.wickets} emphasis />
+                    <H2HStat label="Wickets" value={bowling?.wickets} emphasis />
 
-                    <H2HStat label="Economy" value={bowling.economy} />
+                    <H2HStat label="Economy" value={bowling?.economy} />
 
-                    <H2HStat label="Bowling SR" value={bowling.strikeRate} />
+                    <H2HStat label="Bowling SR" value={bowling?.bowlingStrikeRate} />
 
-                    <H2HStat label="Average" value={bowling.average} />
+                    <H2HStat label="Runs / wicket" value={bowling?.average} />
 
-                    <H2HStat label="Dot Balls" value={bowling.dotBalls} />
+                    <H2HStat label="Dot Balls" value={bowling?.dotBalls} />
 
-                    <H2HStat label="4s Conceded" value={bowling.foursConceded} />
+                    <H2HStat label="4s Conceded" value={bowling?.foursConceded} />
 
-                    <H2HStat label="6s Conceded" value={bowling.sixesConceded} />
+                    <H2HStat label="6s Conceded" value={bowling?.sixesConceded} />
 
-                    <H2HStat label="Wides" value={bowling.wides} />
+                    <H2HStat label="Wides" value={bowling?.wides} />
 
-                    <H2HStat label="No Balls" value={bowling.noBalls} />
+                    <H2HStat label="No Balls" value={bowling?.noBalls} />
 
-                    <H2HStat label="Best Figures" value={bowling.bestFigures} />
+                    <H2HStat label="Best Figures" value={bowling?.bestFigures} />
                   </div>
                 </div>
               </div>
