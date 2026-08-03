@@ -3,7 +3,7 @@ import mongoose from "mongoose"
 import { connectDB } from "@/lib/db"
 import Match from "@/Server/models/matchSchema.js"
 import Ball from "@/Server/models/BallScheme.js"
-import { ErrorResponse } from "@/Server/Response/response"
+import { ErrorResponse, SuccessResponse } from "@/Server/Response/response"
 import { getToken } from "next-auth/jwt"
 
 export async function POST(req) {
@@ -29,14 +29,9 @@ export async function POST(req) {
     }
 
     if (!match.tossWinner?.id || !match.tossDecision) {
-      return NextResponse.json(
-        {
-          message: "Toss information missing",
-        },
-        {
-          status: 400,
-        },
-      )
+      return NextResponse.json(new ErrorResponse("Toss information missing"), {
+        status: 400,
+      })
     }
 
     // CREATE MATCH ID
@@ -82,7 +77,6 @@ export async function POST(req) {
       }
     })
 
-
     // BALL VALIDATION
 
     for (const ball of ballsObject) {
@@ -108,18 +102,9 @@ export async function POST(req) {
 
     dbSession.endSession()
 
-    return NextResponse.json(
-      {
-        success: true,
-
-        message: "Match created successfully",
-
-        matchId,
-      },
-      {
-        status: 201,
-      },
-    )
+    return NextResponse.json(new SuccessResponse("Match created successfully", { matchId }), {
+      status: 200,
+    })
   } catch (error) {
     if (dbSession.inTransaction()) {
       await dbSession.abortTransaction()
