@@ -71,7 +71,8 @@ export async function POST(req) {
           _id: 1,
           name: 1,
           avatar:1,
-          role:1
+          role:1,
+          currentTeam:1,
         },
       ).lean()
     ).map((P) => {

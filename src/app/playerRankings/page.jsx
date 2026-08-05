@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { usePlayerRankings } from "./hooks/hooks"
-import { FilterBar, HeroPlayer, ModeSwitcher, PageHeader, PlayerTable } from "./components/components"
-
-
+import { FilterBar, HeroPlayer, ModeSwitcher, PageHeader, PlayersShowcase } from "./components/components"
 
 export default function page() {
   const {
@@ -14,17 +12,13 @@ export default function page() {
     filters,
     headers,
     players,
-    hero,
+    Rank_Loading,
+    rankOne,
     getStats,
     setRankBy,
     handleModeChange,
     resetFilters,
   } = usePlayerRankings()
-  
-
-
-
-  
 
   return (
     <main className="min-h-screen bg-surface px-6 pb-12 pt-12 text-on-surface md:px-12">
@@ -39,14 +33,14 @@ export default function page() {
           <FilterBar mode={mode} filters={filters} rankBy={rankBy} setRankBy={setRankBy} />
         </section>
 
-        <HeroPlayer hero={hero} mode={mode} />
 
-        <PlayerTable players={players} headers={headers} getStats={getStats} mode={mode} />
+        <HeroPlayer hero={rankOne} mode={mode} />
+
+        <PlayersShowcase players={players} headers={headers} getStats={getStats} mode={mode} isloading={Rank_Loading} />
       </div>
     </main>
   )
 }
-
 
 export function useGetPlayerIds() {
   const [data, setData] = useState([])
@@ -63,7 +57,7 @@ export function useGetPlayerIds() {
         {
           type: "bowling",
         },
-        { withCredentials:true },
+        { withCredentials: true },
       )
 
       setData(res.data.data)

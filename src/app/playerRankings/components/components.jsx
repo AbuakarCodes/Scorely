@@ -5,9 +5,14 @@ import { ArrowDown, ArrowUp, Minus, Search, Shield, TrendingUp } from "lucide-re
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+import Skeleton from "react-loading-skeleton"
+import "react-loading-skeleton/dist/skeleton.css"
+
 import { usePlayerRankings } from "../hooks/hooks"
 import { useGetPlayerIds } from "../page"
 import { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { sortRankings } from "@/utils/reduxSclices/playerSlice"
 export function PageHeader() {
   return (
     <div className="mb-12">
@@ -50,6 +55,17 @@ export function ModeSwitcher({ mode, onChange }) {
 }
 
 export function FilterBar({ filters, rankBy, setRankBy, mode }) {
+
+  const dispatch = useDispatch()
+
+
+
+  useEffect(() => {
+  dispatch(sortRankings({ filters, rankBy, mode }))
+  }, [rankBy])
+  
+
+  
   return (
     <div className="grid grid-cols-1 gap-6 rounded-2xl bg-surface-container-low p-6 md:grid-cols-5">
       <div className="space-y-2">
@@ -103,8 +119,8 @@ export function HeroPlayer({ hero, mode }) {
         <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:gap-16">
           <div className="relative shrink-0">
             <div className="h-48 w-48 overflow-hidden rounded-full border-8 border-on-primary/10 bg-primary-container shadow-2xl transition-transform duration-500 group-hover:scale-105 md:h-64 md:w-64">
-              {hero.image ? (
-                <img src={hero.image} alt={hero.name} className="h-full w-full object-cover" />
+              {hero?.avatar ? (
+                <img src={hero?.avatar} alt={hero?.name} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
                   <Shield className="h-20 w-20 text-on-primary/50" />
@@ -126,9 +142,11 @@ export function HeroPlayer({ hero, mode }) {
               </span>
             </div>
 
-            <h2 className="text-5xl font-black tracking-tight md:text-7xl">{hero.name}</h2>
+            <h2 className="text-5xl font-black tracking-tight md:text-7xl">{hero?.name}</h2>
 
-            <p className="mb-8 mt-2 text-xl font-medium text-on-primary-container md:text-2xl">{hero.team}</p>
+            <p className="mb-8 mt-2 text-xl font-medium text-on-primary-container md:text-2xl">
+              {hero?.team}
+            </p>
 
             <div className="grid grid-cols-2 gap-8 md:gap-12">
               <div className="flex flex-col">
@@ -142,7 +160,6 @@ export function HeroPlayer({ hero, mode }) {
               <div className="flex flex-col justify-end pb-1">
                 <div className="flex items-center gap-2 text-primary-fixed">
                   <TrendingUp className="h-5 w-5" />
-                  <span className="text-lg font-bold">+2.4</span>
                 </div>
 
                 <span className="mt-1 text-xs font-bold uppercase tracking-widest text-on-primary/50">
@@ -184,99 +201,92 @@ export function Trend({ type, value }) {
   )
 }
 
-export function PlayerTable({ players, headers, getStats, mode }) {
-  if (!players.length) {
+export function PlayersShowcase({ players, headers, getStats, mode, isloading }) {
+  if (!players.length && isloading === false) {
     return <EmptyState />
   }
 
   return (
     <div className="overflow-hidden rounded-3xl border border-surface-container-high/50 bg-surface-container-lowest shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] border-collapse text-left">
-          <thead>
-            <tr className="bg-surface-container-low">
-              <th className="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
-                Rank
-              </th>
-
-              <th className="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
-                Player
-              </th>
-
-              <th className="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
-                Team
-              </th>
-
-              {headers.map((header, index) => (
-                <th
-                  key={header}
-                  className="px-6 py-5 text-center text-[11px] font-bold uppercase tracking-widest text-on-surface-variant"
-                >
-                  {header}
+        {isloading ? (
+          <PlayerTableSkeleton />
+        ) : (
+          <table className="w-full min-w-[900px] border-collapse text-left">
+            <thead>
+              <tr className="bg-surface-container-low">
+                <th className="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
+                  Rank
                 </th>
-              ))}
 
-              <th className="px-8 py-5 text-right text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
-                Trend
-              </th>
-            </tr>
-          </thead>
+                <th className="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
+                  Player
+                </th>
 
-          <tbody className="divide-y divide-surface-container-high/50">
-            {players.map((player) => {
-              const stats = getStats(player)
+                {headers.map((header, index) => (
+                  <th
+                    key={header}
+                    className="px-6 py-5 text-center text-[11px] font-bold uppercase tracking-widest text-on-surface-variant"
+                  >
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
 
-              return (
-                <tr key={player.name} className="group transition-colors hover:bg-surface-container-low">
-                  <td className="px-8 py-6">
-                    <span className="text-xl font-black text-on-surface-variant transition-colors group-hover:text-primary">
-                      {String(player.rank).padStart(2, "0")}
-                    </span>
-                  </td>
+            <tbody className="divide-y divide-surface-container-high/50">
+              {players.map((player, idx) => {
+                if (idx === 0) return
+                const stats = getStats(player)
 
-                  <td className="px-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-surface-container-high">
-                        {player.image ? (
-                          <img src={player.image} alt={player.name} className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center">
-                            <Shield className="h-5 w-5 text-on-surface-variant" />
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <p className="font-bold leading-none text-on-surface">{player.name}</p>
-
-                        <p className="mt-1 text-xs text-on-surface-variant">
-                          {mode === "batting" ? "Batsman" : "Bowler"}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="px-8 py-6 text-sm font-medium text-on-surface">{player.team}</td>
-
-                  {stats.map((stat, index) => (
-                    <td
-                      key={`${player.name}-${index}`}
-                      className={`px-6 py-6 text-center text-sm font-bold text-on-surface ${
-                        index === 1 ? "bg-primary-container/5" : ""
-                      }`}
-                    >
-                      {stat}
+                return (
+                  <tr key={player?.name} className="group transition-colors hover:bg-surface-container-low">
+                    <td className="px-8 py-6">
+                      <span className="text-xl font-black text-on-surface-variant transition-colors group-hover:text-primary">
+                        {String(idx + 1)}
+                      </span>
                     </td>
-                  ))}
 
-                  <td className="px-8 py-6 text-right">
-                    <Trend type={player.trend} value={player.trendValue} />
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-surface-container-high">
+                          {player.avatar ? (
+                            <img src={player?.avatar} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center">
+                              <Shield className="h-5 w-5 text-on-surface-variant" />
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <p className="font-bold leading-none text-on-surface">{player?.name}</p>
+
+                          <p className="mt-1 text-xs text-on-surface-variant">
+                            {mode === "batting" ? "Batsman" : "Bowler"}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {stats.map((stat, index) => {
+                      return (
+                        <td
+                          key={`${player?.name}-${index}`}
+                          className={`px-6 py-6 text-center text-sm font-bold text-on-surface ${
+                            index === 1 ? "bg-primary-container/5" : ""
+                          }`}
+                        >
+                          {stat}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   )
@@ -307,3 +317,61 @@ export function EmptyState({ onReset }) {
   )
 }
 
+export default function PlayerTableSkeleton({ columns = 6, rows = 8 }) {
+  return (
+    <table className="w-full min-w-[900px] border-collapse text-left">
+      <thead>
+        <tr className="bg-surface-container-low">
+          <th className="px-8 py-5">
+            <Skeleton width={40} height={12} />
+          </th>
+
+          <th className="px-8 py-5">
+            <Skeleton width={60} height={12} />
+          </th>
+
+          {Array.from({ length: columns }).map((_, index) => (
+            <th key={index} className="px-6 py-5 text-center">
+              <Skeleton width={50} height={12} className="mx-auto" />
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody className="divide-y divide-surface-container-high/50">
+        {Array.from({ length: rows }).map((_, rowIndex) => (
+          <tr key={rowIndex}>
+            {/* Rank */}
+            <td className="px-8 py-6">
+              <Skeleton width={24} height={28} />
+            </td>
+
+            {/* Player */}
+            <td className="px-8 py-6">
+              <div className="flex items-center gap-4">
+                <Skeleton circle width={40} height={40} />
+
+                <div>
+                  <Skeleton width={120} height={16} />
+                  <div className="mt-2">
+                    <Skeleton width={70} height={12} />
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            {/* Stats */}
+            {Array.from({ length: columns }).map((_, colIndex) => (
+              <td
+                key={colIndex}
+                className={`px-6 py-6 text-center ${colIndex === 1 ? "bg-primary-container/5" : ""}`}
+              >
+                <Skeleton width={40} height={18} className="mx-auto" />
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}

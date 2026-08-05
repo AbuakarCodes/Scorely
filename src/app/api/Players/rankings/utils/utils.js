@@ -2,6 +2,7 @@ export function getPlayerBowlingRankingStats(balls, player) {
   if (!Array.isArray(balls) || typeof player !== "object") {
     return {
       nmae: player?.name,
+      team:player?.currentTeam,
       wickets: 0,
       economy: 0,
       strikeRate: 0,
@@ -44,7 +45,8 @@ export function getPlayerBowlingRankingStats(balls, player) {
   const strikeRate = wickets > 0 ? legalBalls / wickets : 0
 
   return {
-    player: player?.name,
+    name: player?.name,
+    team:player?.currentTeam,
     wickets,
     economy: Number(economy.toFixed(2)),
     strikeRate: Number(strikeRate.toFixed(2)),
@@ -57,7 +59,8 @@ export function getPlayerBowlingRankingStats(balls, player) {
 export function getPlayerBattingRankingStats(balls, player) {
   if (!Array.isArray(balls) || typeof player !== "object") {
     return {
-      name: player.name,
+      name: player?.name,
+      team:player?.currentTeam,
       runs: 0,
       average: 0,
       strikeRate: 0,
@@ -94,6 +97,7 @@ export function getPlayerBattingRankingStats(balls, player) {
 
   return {
     name: player.name,
+    team:player?.currentTeam,
     runs,
     average: Number(average.toFixed(2)),
     strikeRate: Number(strikeRate.toFixed(2)),

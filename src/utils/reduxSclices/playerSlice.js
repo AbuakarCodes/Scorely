@@ -1,5 +1,6 @@
 // features/players/playerSlice.js
 
+import { sortByField } from "@/app/playerRankings/utils/functions"
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axios from "axios"
 import { Satellite } from "lucide-react"
@@ -55,7 +56,6 @@ export const fetchPlayerRankings = createAsyncThunk(
   async (type, { rejectWithValue }) => {
     try {
       const { data } = await axios.post("/api/Players/rankings", { type }, { withCredentials: true })
-      console.log(data.data)
       return {
         type,
         rankings: data?.data || [],
@@ -72,7 +72,7 @@ const initialState = {
   error: null,
   battingRanks: [],
   BowlingRanks: [],
-  Rank_Loading: false,
+  Rank_Loading: null,
   Rank_error: null,
   deletePlayer_Loading: false,
   deletePlayer_error: null,
@@ -96,6 +96,16 @@ const playerSlice = createSlice({
         })
       } else if (typeof action.payload === "object") {
         state.players.push(action.payload)
+      }
+    },
+
+    sortRankings: (state, action) => {
+      const { filters, rankBy, mode } = action.payload
+      // console.log({ filters, rankBy, setRankBy, mode })
+      if (mode == "batting") {
+        console.log(sortByField(state.battingRanks, rankBy))
+      } else {
+        console.log(sortByField(state.BowlingRanks, rankBy))
       }
     },
   },
@@ -175,5 +185,5 @@ const playerSlice = createSlice({
   },
 })
 
-export const { insertPlayer } = playerSlice.actions
+export const { insertPlayer, sortRankings } = playerSlice.actions
 export default playerSlice.reducer
