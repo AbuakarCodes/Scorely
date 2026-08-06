@@ -397,7 +397,7 @@ const matchSlice = createSlice({
 
       // Innings ends because allotted overs are completed
       if (oversCompleted) {
-        chnageInnings_State(state.innings, false)
+        chnageInnings_State(state?.innings, false)
         chnagePendingBatsman_Bowler_flag(state, {
           striker: true,
           nonstriker: batingTeamPlayersWraper().length == 1 ? false : true,

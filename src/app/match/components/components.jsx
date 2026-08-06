@@ -1,9 +1,8 @@
 import { batting_bowlingTeam } from "@/utils/reduxSclices/matchSlice"
 import { ArrowLeft } from "lucide-react"
-import React from "react"
 import { useSelector } from "react-redux"
 
-export default function RecentBalls({ balls = [], runsInOver = 0, over }) {
+export default function RecentBalls({ balls = [], runsInOver = 0, over, isFirstInings }) {
   return (
     <section className="rounded-2xl border bg-white p-4 shadow-sm">
       {/* Header Info */}
@@ -17,7 +16,10 @@ export default function RecentBalls({ balls = [], runsInOver = 0, over }) {
 
       <div className="flex no-scrollbar gap-2 overflow-x-auto justify-center">
         {balls
-          .filter((b) => b.over === over)
+          .filter(
+            (b) =>
+              b?.over === over && (isFirstInings === true ? b?.inningsNumber === 1 : b?.inningsNumber === 2),
+          )
           .map((ball, index) => {
             const display = ball.isWicket
               ? "W"

@@ -116,14 +116,14 @@ export default function LiveScoringPage() {
 
   return (
     <>
-      {showPopup.matchDecision && <MatchDecisionPopUP setshowPopup={setshowPopup} />}
-      {showPopup.playerSelection && <PlayerSelectionModal />}
+      {showPopup?.matchDecision && <MatchDecisionPopUP setshowPopup={setshowPopup} />}
+      {showPopup?.playerSelection && <PlayerSelectionModal />}
 
       <div className="min-h-screen bg-slate-50 pb-52">
         <Header />
 
         <main className="mx-auto max-w-4xl px-4 py-5 space-y-4">
-          <RecentBalls balls={balls} runsInOver={runsInOver} over={over} />
+          <RecentBalls balls={balls} isFirstInings={isFirstInings} runsInOver={runsInOver} over={over} />
 
           <BatsmenCard
             batsmenA={batsmenA}
