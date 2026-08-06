@@ -101,9 +101,11 @@ const playerSlice = createSlice({
     },
 
     sortRankings: (state, action) => {
-      const { filters, rankBy, mode } = action.payload
-      // console.log({ filters, rankBy, setRankBy, mode })
-    
+      const { mode, sortedPlayers } = action.payload
+      if (!mode || typeof mode != "string" || !Array.isArray(sortedPlayers)) return
+      
+      if (mode === "batting") state.battingRanks = sortedPlayers
+      else state.BowlingRanks = sortedPlayers
     },
   },
 
@@ -173,10 +175,9 @@ const playerSlice = createSlice({
         const players = action.payload.rankings
 
         if (type === "batting") {
-          const sortedPlayers = sortByField(players, "runs")
-          state.battingRanks = sortedPlayers
+          state.battingRanks = sortByField(players, "runs")
         } else {
-          state.BowlingRanks = action.payload.rankings
+          state.BowlingRanks = sortByField(players, "wickets")
         }
       })
       .addCase(fetchPlayerRankings.rejected, (state, action) => {

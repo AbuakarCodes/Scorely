@@ -34,7 +34,7 @@ export default function page() {
         </section>
 
 
-        <HeroPlayer hero={rankOne} mode={mode} />
+        <HeroPlayer hero={rankOne} mode={mode} rankBy={rankBy} />
 
         <PlayersShowcase players={players} headers={headers} getStats={getStats} mode={mode} isloading={Rank_Loading} />
       </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowDown, ArrowUp, Minus, Search, Shield, TrendingUp } from "lucide-react"
+import { ArrowDown, ArrowUp, Crown, Minus, Search, Shield, TrendingUp } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -13,6 +13,7 @@ import { useGetPlayerIds } from "../page"
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { sortRankings } from "@/utils/reduxSclices/playerSlice"
+import { sortByField } from "../utils/functions"
 export function PageHeader() {
   return (
     <div className="mb-12">
@@ -32,7 +33,7 @@ export function ModeSwitcher({ mode, onChange }) {
         variant="ghost"
         className={`rounded-full px-8 py-2.5 text-sm font-medium ${
           mode === "batting"
-            ? "bg-primary text-on-primary shadow-sm hover:bg-primary"
+            ? "bg-primary text-white shadow-sm hover:bg-primary"
             : "text-on-surface-variant hover:bg-transparent hover:text-on-surface"
         }`}
       >
@@ -44,7 +45,7 @@ export function ModeSwitcher({ mode, onChange }) {
         variant="ghost"
         className={`rounded-full px-8 py-2.5 text-sm font-medium ${
           mode === "bowling"
-            ? "bg-primary text-on-primary shadow-sm hover:bg-primary"
+            ? "bg-primary text-white shadow-sm hover:bg-primary"
             : "text-on-surface-variant hover:bg-transparent hover:text-on-surface"
         }`}
       >
@@ -55,17 +56,20 @@ export function ModeSwitcher({ mode, onChange }) {
 }
 
 export function FilterBar({ filters, rankBy, setRankBy, mode }) {
-
+  const { battingRanks, BowlingRanks } = useSelector((state) => state?.players)
   const dispatch = useDispatch()
 
+  function onChangeFilter(filterBy) {
+    if (mode === "batting") {
+      const sortedBatters = sortByField(battingRanks, filterBy)
+      dispatch(sortRankings({ mode, sortedPlayers: sortedBatters }))
+    } else {
+      const sortedBowlers = sortByField(BowlingRanks, filterBy)
+      dispatch(sortRankings({ mode, sortedPlayers: sortedBowlers }))
+    }
+    setRankBy(filterBy)
+  }
 
-
-  useEffect(() => {
-  dispatch(sortRankings({ filters, rankBy, mode }))
-  }, [rankBy])
-  
-
-  
   return (
     <div className="grid grid-cols-1 gap-6 rounded-2xl bg-surface-container-low p-6 md:grid-cols-5">
       <div className="space-y-2">
@@ -73,7 +77,7 @@ export function FilterBar({ filters, rankBy, setRankBy, mode }) {
           Rank By
         </label>
 
-        <Select value={rankBy} onValueChange={setRankBy}>
+        <Select value={rankBy} onValueChange={onChangeFilter}>
           <SelectTrigger className="h-12 rounded-xl border-none bg-surface-container-lowest px-4 text-sm shadow-none focus:ring-2 focus:ring-primary/20">
             <SelectValue />
           </SelectTrigger>
@@ -98,9 +102,9 @@ export function FilterBar({ filters, rankBy, setRankBy, mode }) {
   )
 }
 
-export function HeroPlayer({ hero, mode }) {
+export function HeroPlayer({ hero, rankBy, mode }) {
   return (
-    <div className="mb-16">
+    <div className="mb-16 text-white">
       <div className="group relative overflow-hidden rounded-[2rem] border border-on-primary/5 bg-primary p-8 shadow-xl transition-all duration-500 hover:shadow-2xl md:p-12">
         <div className="pointer-events-none absolute inset-0 opacity-10">
           <svg
@@ -123,13 +127,9 @@ export function HeroPlayer({ hero, mode }) {
                 <img src={hero?.avatar} alt={hero?.name} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
-                  <Shield className="h-20 w-20 text-on-primary/50" />
+                  <Crown className="h-20 w-20 text-on-primary/50" />
                 </div>
               )}
-            </div>
-
-            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary-fixed px-6 py-2 text-sm font-bold uppercase tracking-widest text-on-primary-fixed-variant shadow-xl">
-              World Number One
             </div>
           </div>
 
@@ -150,7 +150,7 @@ export function HeroPlayer({ hero, mode }) {
 
             <div className="grid grid-cols-2 gap-8 md:gap-12">
               <div className="flex flex-col">
-                <span className="text-4xl font-black tracking-tighter md:text-6xl">{hero.stat}</span>
+                <span className="text-4xl font-black tracking-tighter md:text-6xl">{rankBy}</span>
 
                 <span className="mt-1 text-xs font-bold uppercase tracking-widest text-on-primary/50">
                   {hero.label}

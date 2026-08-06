@@ -50,7 +50,7 @@ export function getPlayerBowlingRankingStats(balls, player) {
     wickets,
     economy: Number(economy.toFixed(2)),
     strikeRate: Number(strikeRate.toFixed(2)),
-    overs,
+    overs: Number(overs),
     avtar: player?.avatar,
     role: player?.role,
   }
