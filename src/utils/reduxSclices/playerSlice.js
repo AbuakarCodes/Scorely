@@ -56,6 +56,7 @@ export const fetchPlayerRankings = createAsyncThunk(
   async (type, { rejectWithValue }) => {
     try {
       const { data } = await axios.post("/api/Players/rankings", { type }, { withCredentials: true })
+
       return {
         type,
         rankings: data?.data || [],
@@ -102,11 +103,7 @@ const playerSlice = createSlice({
     sortRankings: (state, action) => {
       const { filters, rankBy, mode } = action.payload
       // console.log({ filters, rankBy, setRankBy, mode })
-      if (mode == "batting") {
-        console.log(sortByField(state.battingRanks, rankBy))
-      } else {
-        console.log(sortByField(state.BowlingRanks, rankBy))
-      }
+    
     },
   },
 
@@ -172,8 +169,12 @@ const playerSlice = createSlice({
       .addCase(fetchPlayerRankings.fulfilled, (state, action) => {
         state.Rank_Loading = false
 
-        if (action.payload.type === "batting") {
-          state.battingRanks = action.payload.rankings
+        const type = action.payload.type
+        const players = action.payload.rankings
+
+        if (type === "batting") {
+          const sortedPlayers = sortByField(players, "runs")
+          state.battingRanks = sortedPlayers
         } else {
           state.BowlingRanks = action.payload.rankings
         }

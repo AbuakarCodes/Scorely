@@ -1,29 +1,16 @@
-export function sortByField(array, field, order = "asc") {
+export function sortByField(array, field) {
+  if (!Array.isArray(array) || typeof field !== "string" || !field) {
+    return []
+  }
 
-    if (!Array.isArray(array)  || typeof field != "string" || !field) {
-        return
-    }
-let result = []
-  
-  
-  result = [...array].sort((a, b) => {
-    const valueA = a[field];
-    const valueB = b[field];
+  return [...array].sort((a, b) => {
+    const valueA = a[field]
+    const valueB = b[field]
 
-    // Handle strings
     if (typeof valueA === "string" && typeof valueB === "string") {
-      return order === "asc"
-        ? valueA.localeCompare(valueB)
-        : valueB.localeCompare(valueA);
+      return valueA.localeCompare(valueB)
     }
 
-    // Handle numbers, booleans, dates, etc.
-    if (valueA < valueB) return order === "asc" ? -1 : 1;
-    if (valueA > valueB) return order === "asc" ? 1 : -1;
-
-    return 0;
-  });
-
-  console.log({result});
-  return result
+    return valueB - valueA
+  })
 }
