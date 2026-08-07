@@ -11,7 +11,8 @@ import { AddTeams } from "@/customComponents/addTeam/addTeam"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import { useDispatch, useSelector } from "react-redux"
 import { startInnings_fn } from "@/utils/reduxSclices/matchSlice"
-import { X, History, Plus, ChevronRight, Settings, PlusCircle } from "lucide-react"
+import { RiTeamLine } from "react-icons/ri";
+import { X, History, Plus, ChevronRight, Settings, PlusCircle, Users, CalendarDays, BarChart3 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 import { resetMatch } from "@/utils/reduxSclices/matchSlice"
@@ -74,40 +75,75 @@ export default function Home() {
   )
 }
 
-function BottomNavigation({ sratMatch_handler }) {
+
+
+function BottomNavigation({ startMatch_handler }) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-primary backdrop-blur-lg border-t px-6 py-3 flex items-center justify-between">
-      <a className="flex flex-col items-center text-primary">
-        <span className="material-symbols-outlined">home</span>
-        <span className="text-[10px] font-bold">Home</span>
-      </a>
+    <nav className="fixed bottom-0 left-0 right-0 z-50 h-16 md:h-20 border-t bg-white shadow-md">
+      <div className="relative flex h-full items-center justify-between px-4 md:px-8">
 
-      <a className="flex flex-col items-center text-slate-400 hover:text-primary">
-        <span className="material-symbols-outlined">schedule</span>
-        <span className="text-[10px]">Matches</span>
-      </a>
+        {/* Left */}
+        <div className="flex items-center md:justify-around  gap-6 md:w-[40%]">
+          <Link
+            href="/allPlayers"
+            className="hidden md:flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
+          >
+            <Users size={22} />
+            <span className="text-[10px] font-medium">Players</span>
+          </Link>
 
-      <div className="relative -top-8">
-        <Button
-          onClick={sratMatch_handler}
-          className=" flex  items-center justify-center  rounded-full bg-primary text-white shadow-lg shadow-primary/40"
-        >
-          
-          <Link href={"/selectTeamToStartMatch"} className=""><PlusCircle className="text-3xl"/></Link>
-        </Button>
+          {/* Settings — always visible */}
+          <Link
+            href="/settings"
+            className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
+          >
+            <Settings size={22} />
+            <span className="text-[10px] font-medium">Settings</span>
+          </Link>
+        </div>
+
+        {/* Center Start Match Button — always centered, own layer */}
+        <div className="absolute left-1/2 -top-7 -translate-x-1/2">
+          <Link
+            href="/selectTeamToStartMatch"
+            onClick={startMatch_handler}
+            className="
+              flex items-center justify-center
+              h-12 w-12 md:h-16 md:w-16
+              rounded-full
+              bg-primary text-white
+              shadow-lg shadow-primary/40
+              ring-4 ring-white
+              active:scale-95 transition-transform
+            "
+            aria-label="Start Match"
+          >
+            <Plus size={23} strokeWidth={3} className="md:w-9 md:h-9" />
+          </Link>
+        </div>
+
+        {/* Right */}
+        <div className="flex items-center md:justify-around  gap-6 md:w-[40%] ">
+          <Link
+            href="/allTeams"
+            className="hidden md:flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
+          >
+            <RiTeamLine  size={22} />
+            <span className="text-[10px] font-medium">Team</span>
+          </Link>
+
+          <Link
+            href="/playerRankings"
+            className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
+          >
+            <BarChart3 size={22} />
+            <span className="text-[10px] font-medium">Rankings</span>
+          </Link>
+        </div>
+
       </div>
-
-      <a className="flex flex-col items-center text-slate-400 hover:text-primary">
-        <span className="material-symbols-outlined">groups</span>
-        <span className="text-[10px]">Players</span>
-      </a>
-
-      <a className="flex flex-col items-center text-slate-400 hover:text-primary">
-        <Link href={"/playerRankings"} className="material-symbols-outlined text-3xl"> R </Link>
-        <span className="text-[10px]">Stats</span>
-      </a>
     </nav>
-  )
+  );
 }
 
 function StartScoringModal({ popup, setPopup }) {
