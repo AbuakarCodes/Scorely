@@ -42,6 +42,7 @@ const playerSchema = new mongoose.Schema(
 
     currentTeam: {
       type: String,
+      default:""
     },
 
     avatar: {

@@ -62,6 +62,7 @@ export function FilterBar({ filters, rankBy, setRankBy, mode }) {
   function onChangeFilter(filterBy) {
     if (mode === "batting") {
       const sortedBatters = sortByField(battingRanks, filterBy)
+      console.log({sortedBatters});
       dispatch(sortRankings({ mode, sortedPlayers: sortedBatters }))
     } else {
       const sortedBowlers = sortByField(BowlingRanks, filterBy)
@@ -103,6 +104,7 @@ export function FilterBar({ filters, rankBy, setRankBy, mode }) {
 }
 
 export function HeroPlayer({ hero, rankBy, mode }) {
+ 
   return (
     <div className="mb-16 text-white">
       <div className="group relative overflow-hidden rounded-[2rem] border border-on-primary/5 bg-primary p-8 shadow-xl transition-all duration-500 hover:shadow-2xl md:p-12">
@@ -150,10 +152,10 @@ export function HeroPlayer({ hero, rankBy, mode }) {
 
             <div className="grid grid-cols-2 gap-8 md:gap-12">
               <div className="flex flex-col">
-                <span className="text-4xl font-black tracking-tighter md:text-6xl">{rankBy}</span>
+                <span className="text-4xl font-black tracking-tighter md:text-6xl">{hero[rankBy]}</span>
 
                 <span className="mt-1 text-xs font-bold uppercase tracking-widest text-on-primary/50">
-                  {hero.label}
+                  {rankBy}
                 </span>
               </div>
 
@@ -206,6 +208,7 @@ export function PlayersShowcase({ players, headers, getStats, mode, isloading })
     return <EmptyState />
   }
 
+
   return (
     <div className="overflow-hidden rounded-3xl border border-surface-container-high/50 bg-surface-container-lowest shadow-sm">
       <div className="overflow-x-auto">
@@ -235,22 +238,22 @@ export function PlayersShowcase({ players, headers, getStats, mode, isloading })
             </thead>
 
             <tbody className="divide-y divide-surface-container-high/50">
-              {players.map((player, idx) => {
-                if (idx === 0) return
+              {players.slice(1).map((player, idx) => {
+               
                 const stats = getStats(player)
 
                 return (
-                  <tr key={player?.name} className="group transition-colors hover:bg-surface-container-low">
+                  <tr key={`${player?.name}-${idx}`}className="group transition-colors hover:bg-surface-container-low">
                     <td className="px-8 py-6">
                       <span className="text-xl font-black text-on-surface-variant transition-colors group-hover:text-primary">
-                        {String(idx + 1)}
+                        {String(idx + 2)}
                       </span>
                     </td>
 
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
                         <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-surface-container-high">
-                          {player.avatar ? (
+                          {player?.avatar ? (
                             <img src={player?.avatar} className="h-full w-full object-cover" />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center">

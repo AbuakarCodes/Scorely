@@ -79,6 +79,8 @@ export async function POST(req) {
       return { ...P, _id: P._id.toString() }
     })
 
+
+
     const stats = getplayesStats(balls, validPlayers, type)
 
     return NextResponse.json(new SuccessResponse("All Players Stats", stats), { status: 200 })

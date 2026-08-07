@@ -103,7 +103,7 @@ const playerSlice = createSlice({
     sortRankings: (state, action) => {
       const { mode, sortedPlayers } = action.payload
       if (!mode || typeof mode != "string" || !Array.isArray(sortedPlayers)) return
-      
+      console.log({R:sortedPlayers});
       if (mode === "batting") state.battingRanks = sortedPlayers
       else state.BowlingRanks = sortedPlayers
     },
