@@ -11,8 +11,8 @@ import { AddTeams } from "@/customComponents/addTeam/addTeam"
 import PageLoader from "@/customComponents/loaders/pageLoader"
 import { useDispatch, useSelector } from "react-redux"
 import { startInnings_fn } from "@/utils/reduxSclices/matchSlice"
-import { RiTeamLine } from "react-icons/ri";
-import { X, History, Plus, ChevronRight, Settings, PlusCircle, Users, CalendarDays, BarChart3 } from "lucide-react"
+import { RiTeamLine } from "react-icons/ri"
+import { X, History, Plus, ChevronRight, Settings, Users, BarChart3, HistoryIcon } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 import { resetMatch } from "@/utils/reduxSclices/matchSlice"
@@ -75,15 +75,12 @@ export default function Home() {
   )
 }
 
-
-
 function BottomNavigation({ startMatch_handler }) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 h-16 md:h-20 border-t bg-white shadow-md">
       <div className="relative flex h-full items-center justify-between px-4 md:px-8">
-
         {/* Left */}
-        <div className="flex items-center md:justify-around  gap-6 md:w-[40%]">
+        <div className="flex justify-around  gap-6 w-[40%] ">
           <Link
             href="/allPlayers"
             className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
@@ -123,12 +120,12 @@ function BottomNavigation({ startMatch_handler }) {
         </div>
 
         {/* Right */}
-        <div className="flex items-center md:justify-around  gap-6 md:w-[40%] ">
+        <div className="flex justify-around  gap-6 w-[40%] ">
           <Link
             href="/allTeams"
             className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
           >
-            <RiTeamLine  size={22} />
+            <RiTeamLine size={22} />
             <span className=" hidden md:block text-[10px] font-medium">Team</span>
           </Link>
 
@@ -140,13 +137,10 @@ function BottomNavigation({ startMatch_handler }) {
             <span className=" hidden md:block text-[10px] font-medium">Rankings</span>
           </Link>
         </div>
-
       </div>
     </nav>
-  );
+  )
 }
-
-
 
 function StartScoringModal({ popup, setPopup }) {
   const handleClose = () => {
@@ -250,16 +244,14 @@ function MatchesHistory() {
     <section className="mt-8 px-4">
       <Card className="flex flex-col items-center text-center p-8">
         <div className="size-20 bg-primary/5 rounded-full flex items-center justify-center mb-4">
-          <span className="material-symbols-outlined text-5xl text-slate-300">history</span>
+          <HistoryIcon />
         </div>
 
-        <h4 className="text-lg font-bold">No Recent Matches</h4>
+        <h4 className="text-lg font-bold">No Continued Match</h4>
 
         <p className="text-slate-500 text-sm mt-2 max-w-[220px]">
-          Matches you score will appear here once they're completed.
+          You don't have any matches in progress right now.
         </p>
-
-        <Button className="mt-6 bg-primary text-white">Start a match</Button>
       </Card>
     </section>
   )

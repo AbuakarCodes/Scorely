@@ -24,20 +24,18 @@ export default function page() {
     <main className="min-h-screen bg-surface px-6 pb-12 pt-12 text-on-surface md:px-12">
       <div className="mx-auto w-full max-w-7xl">
         <PageHeader />
+
         <section className="mb-12 space-y-6">
           <div className="flex items-center justify-between">
             <ModeSwitcher mode={mode} onChange={handleModeChange} />
           </div>
+
           <FilterBar mode={mode} filters={filters} rankBy={rankBy} setRankBy={setRankBy} />
         </section>
+
+
         <HeroPlayer hero={rankOne} mode={mode} rankBy={rankBy} />
-        <PlayersShowcase
-          players={players}
-          headers={headers}
-          getStats={getStats}
-          mode={mode}
-          isloading={Rank_Loading}
-        />
+        <PlayersShowcase players={players} headers={headers} getStats={getStats} mode={mode} isloading={Rank_Loading} />
       </div>
     </main>
   )
