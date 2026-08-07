@@ -86,10 +86,10 @@ function BottomNavigation({ startMatch_handler }) {
         <div className="flex items-center md:justify-around  gap-6 md:w-[40%]">
           <Link
             href="/allPlayers"
-            className="hidden md:flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
+            className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
           >
             <Users size={22} />
-            <span className="text-[10px] font-medium">Players</span>
+            <span className=" hidden md:block text-[10px] font-medium">Players</span>
           </Link>
 
           {/* Settings — always visible */}
@@ -98,7 +98,7 @@ function BottomNavigation({ startMatch_handler }) {
             className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
           >
             <Settings size={22} />
-            <span className="text-[10px] font-medium">Settings</span>
+            <span className=" hidden md:block text-[10px] font-medium">Settings</span>
           </Link>
         </div>
 
@@ -126,10 +126,10 @@ function BottomNavigation({ startMatch_handler }) {
         <div className="flex items-center md:justify-around  gap-6 md:w-[40%] ">
           <Link
             href="/allTeams"
-            className="hidden md:flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
+            className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
           >
             <RiTeamLine  size={22} />
-            <span className="text-[10px] font-medium">Team</span>
+            <span className=" hidden md:block text-[10px] font-medium">Team</span>
           </Link>
 
           <Link
@@ -137,7 +137,7 @@ function BottomNavigation({ startMatch_handler }) {
             className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
           >
             <BarChart3 size={22} />
-            <span className="text-[10px] font-medium">Rankings</span>
+            <span className=" hidden md:block text-[10px] font-medium">Rankings</span>
           </Link>
         </div>
 
@@ -145,6 +145,8 @@ function BottomNavigation({ startMatch_handler }) {
     </nav>
   );
 }
+
+
 
 function StartScoringModal({ popup, setPopup }) {
   const handleClose = () => {
